@@ -14,7 +14,7 @@ def main(dataset_name: str, batch_size: int) -> None:
 
     # Loading test questions for the dataset
     dataset = load_dataset("json", data_files=str(base_path / "test.json"))["train"]
-    all_questions = dataset["questions"]
+    all_questions = dataset["question"]
 
     # Loading embedding model
     model = SentenceTransformer("Qwen/Qwen3-Embedding-8B")
