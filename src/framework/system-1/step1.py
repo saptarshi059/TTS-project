@@ -42,7 +42,7 @@ class System1Dataset(Dataset):
 def main(model_name:str, dataset:str, batch_size: int) -> None:
     set_seed(42)
 
-    base_path = Path(f"../../../data/")
+    base_path = Path("../../../data/")
 
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_name, padding_side='left')
     model = AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path=model_name,
@@ -50,7 +50,7 @@ def main(model_name:str, dataset:str, batch_size: int) -> None:
                                                  attn_implementation="flash_attention_2",
                                                  device_map="auto")
 
-    main_dataset = load_dataset("json", data_files=str(base_path / "test.json"))
+    main_dataset = load_dataset("json", data_files=str(base_path / f"{dataset}/test.json"))
     torch_dataset = System1Dataset(tokenizer=tokenizer, dataset=main_dataset, device=model.device)
     torch_dataset_dataloader = DataLoader(torch_dataset, batch_size=batch_size, shuffle=False)
 
@@ -62,7 +62,7 @@ def main(model_name:str, dataset:str, batch_size: int) -> None:
             raw_responses.extend(tokenizer.batch_decode(generated_ids, skip_special_tokens=True))
 
     main_dataset = main_dataset.add_column("raw_responses", raw_responses)
-    main_dataset.save_to_disk(base_path / f"{dataset}/{dataset}_with_raw_responses_from_system_1_phase")
+    main_dataset.save_to_disk(base_path / f"{dataset}/raw_responses_from_system_1_phase")
 
 
 if __name__ == "__main__":
