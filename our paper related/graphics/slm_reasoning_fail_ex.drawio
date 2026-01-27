@@ -1,0 +1,40 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:147.0) Gecko/20100101 Firefox/147.0" version="29.3.4">
+  <diagram name="Page-1" id="_VCGn0yGGIxmo78nxd_U">
+    <mxGraphModel dx="1140" dy="643" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="RdmEUeUCx2XvI4Xg6RIF-1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;fontSize=10;" value="" vertex="1">
+          <mxGeometry height="159" width="200" x="160" y="91" as="geometry" />
+        </mxCell>
+        <mxCell id="RdmEUeUCx2XvI4Xg6RIF-2" parent="1" style="text;whiteSpace=wrap;fontFamily=Comic Sans MS;fontSize=10;" value="As of August 3, 2024, what is the hometown of the captain of the team that won the Stanley Cup three years before 2017?" vertex="1">
+          <mxGeometry height="60" width="178" x="171" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="RdmEUeUCx2XvI4Xg6RIF-3" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;exitX=0;exitY=0.24;exitDx=0;exitDy=0;exitPerimeter=0;dashed=1;dashPattern=8 8;fontSize=10;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="160" y="154.80000000000007" as="sourcePoint" />
+            <mxPoint x="360" y="155" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RdmEUeUCx2XvI4Xg6RIF-11" parent="1" style="text;whiteSpace=wrap;fontColor=#000000;fontFamily=Comic Sans MS;html=1;strokeColor=none;textShadow=0;fontStyle=2;fontSize=10;" value="&lt;span style=&quot;color: rgb(153, 0, 77);&quot;&gt;1. What year is three years before 2017?&lt;/span&gt;&lt;br&gt;2. Which team won the Stanley Cup in that year?&lt;br&gt;3. Who is the captain of that team?&lt;br&gt;4. What is the hometown of that captain?" vertex="1">
+          <mxGeometry height="93" width="180" x="169" y="152" as="geometry" />
+        </mxCell>
+        <mxCell id="RdmEUeUCx2XvI4Xg6RIF-15" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;" value="" vertex="1">
+          <mxGeometry height="210" width="280" x="370" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="RdmEUeUCx2XvI4Xg6RIF-13" parent="1" style="text;whiteSpace=wrap;fontFamily=Comic Sans MS;fontSize=10;" value="Imagine there is a building called Bronte tower whose height in feet is the same number as the dewey decimal classification for the Charlotte Bronte book that was published in 1847. Where would this building rank among tallest buildings in New York City, as of August 2024?" vertex="1">
+          <mxGeometry height="74" width="280" x="380" y="82" as="geometry" />
+        </mxCell>
+        <mxCell id="RdmEUeUCx2XvI4Xg6RIF-14" parent="1" style="text;whiteSpace=wrap;fontStyle=2;fontFamily=Comic Sans MS;html=1;fontSize=10;" value="&lt;span style=&quot;color: rgb(153, 0, 77);&quot;&gt;&lt;span style=&quot;color: rgb(153, 0, 77);&quot;&gt;1. What is the Dewey Decimal classification for the Charlotte Bronte book published in 1847?&lt;/span&gt;&lt;/span&gt;&lt;br&gt;2. What is the height of the Bronte Tower in feet, based on the Dewey Decimal classification from the previous question?&lt;br&gt;3. What is the list of the tallest buildings in New York City as of August 2024?&lt;br&gt;4. How does the height of the Bronte Tower compare to the heights of the tallest buildings in New York City as of August 2024?" vertex="1">
+          <mxGeometry height="124" width="270" x="377" y="152" as="geometry" />
+        </mxCell>
+        <mxCell id="RdmEUeUCx2XvI4Xg6RIF-16" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;exitX=0.001;exitY=0.375;exitDx=0;exitDy=0;exitPerimeter=0;dashed=1;dashPattern=8 8;entryX=1.006;entryY=0.375;entryDx=0;entryDy=0;entryPerimeter=0;fontSize=10;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="370.28" y="154.75" as="sourcePoint" />
+            <mxPoint x="651.6800000000001" y="154.75" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
