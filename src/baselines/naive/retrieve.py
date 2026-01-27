@@ -5,6 +5,9 @@ from argparse import ArgumentParser
 from pathlib import Path
 from tqdm import tqdm
 import torch
+import os
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 def main(dataset_name: str, batch_size: int) -> None:
     base_path = Path(f"../../../data/{dataset_name}")
