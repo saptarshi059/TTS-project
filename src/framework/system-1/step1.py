@@ -1,17 +1,17 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer, set_seed
 from torch.utils.data import Dataset, DataLoader
-from datasets import tqdm, load_from_disk
+from datasets import tqdm, load_dataset
 from argparse import ArgumentParser
 from pathlib import Path
 import os, torch
 import sys
 sys.path.append("../../utils/")
 
-from all_system_prompts import NAIVE_BASELINE
+from all_system_prompts import SYSTEM_1
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
-class NaiveDataset(Dataset):
+class System1Dataset(Dataset):
     def __init__(self, tokenizer, dataset, device):
         self.tokenizer = tokenizer
         self.dataset = dataset
@@ -19,16 +19,13 @@ class NaiveDataset(Dataset):
 
         self.samples = []
         for row in tqdm(dataset):
-            supporting_facts = "\n".join(triple for triple in row['retrieved_triples'])
-            self.samples.append([{"role": "system", "content": NAIVE_BASELINE},
-                                 {"role": "user", "content": f"SUPPORTING FACTS:\n{supporting_facts}\n\nQUESTION: {row['question']}"}])
+            self.samples.append([{"role": "system", "content": SYSTEM_1},
+                                 {"role": "user", "content": f"QUESTION: {row['question']}"}])
 
-        self.tokenized_samples = tokenizer.apply_chat_template(
-            self.samples,
-            tokenize=False,
-            add_generation_prompt=True,
-            enable_thinking=False  # Switches between thinking and non-thinking modes. Default is True.
-        )
+        self.tokenized_samples = tokenizer.apply_chat_template(self.samples,
+                                                               tokenize=False,
+                                                               add_generation_prompt=True,
+                                                               enable_thinking=False)
 
         self.model_inputs = self.tokenizer(self.tokenized_samples, padding=True, return_tensors="pt")
 
@@ -53,19 +50,19 @@ def main(model_name:str, dataset:str, batch_size: int) -> None:
                                                  attn_implementation="flash_attention_2",
                                                  device_map="auto")
 
-    main_dataset = load_from_disk(base_path / f"{dataset}/{dataset}_with_retrieved_triples_from_naive_baseline")
-    torch_dataset = NaiveDataset(tokenizer=tokenizer, dataset=main_dataset, device=model.device)
+    main_dataset = load_dataset("json", data_files=str(base_path / "test.json"))
+    torch_dataset = System1Dataset(tokenizer=tokenizer, dataset=main_dataset, device=model.device)
     torch_dataset_dataloader = DataLoader(torch_dataset, batch_size=batch_size, shuffle=False)
 
     raw_responses = []
 
     for batch in tqdm(torch_dataset_dataloader):
         with torch.no_grad():
-            generated_ids = model.generate(**batch, max_new_tokens=300, do_sample=False)
+            generated_ids = model.generate(**batch, max_new_tokens=20, do_sample=False)
             raw_responses.extend(tokenizer.batch_decode(generated_ids, skip_special_tokens=True))
 
     main_dataset = main_dataset.add_column("raw_responses", raw_responses)
-    main_dataset.save_to_disk(base_path / f"{dataset}/{dataset}_with_raw_responses_from_naive_baseline")
+    main_dataset.save_to_disk(base_path / f"{dataset}/{dataset}_with_raw_responses_from_system_1_phase")
 
 
 if __name__ == "__main__":
