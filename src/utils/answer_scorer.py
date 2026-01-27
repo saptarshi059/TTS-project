@@ -1,7 +1,6 @@
 from datasets import load_from_disk, tqdm
 from argparse import ArgumentParser
-from evaluate import load_metric
-from pathlib import Path
+from evaluate import load
 import re
 
 def main(prediction_dataset_path: str) -> None:
@@ -10,7 +9,7 @@ def main(prediction_dataset_path: str) -> None:
         answer = match.group(1) if match else None
         return answer.split('Answer:')[1].strip()
 
-    squad_metric = load_metric("squad")
+    squad_metric = load("squad")
     prediction_dataset = load_from_disk(prediction_dataset_path)
     predictions, references = [], []
     for row in tqdm(prediction_dataset):
