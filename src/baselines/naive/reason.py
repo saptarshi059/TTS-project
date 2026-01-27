@@ -49,6 +49,8 @@ def main(model_name:str, dataset_path:str, batch_size: int) -> None:
     torch_dataset = NaiveDataset(tokenizer=tokenizer, dataset=main_dataset, device=model.device)
     torch_dataset_dataloader = DataLoader(torch_dataset, batch_size=batch_size, shuffle=False)
 
+    print(torch_dataset[0])
+
     generated_answers = []
 
     for batch in tqdm(torch_dataset_dataloader):
