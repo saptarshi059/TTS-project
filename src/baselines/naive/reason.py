@@ -7,9 +7,10 @@ from torch.utils.data import Dataset, DataLoader
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 class NaiveDataset(Dataset):
-    def __init__(self, tokenizer, dataset):
+    def __init__(self, tokenizer, dataset, device):
         self.tokenizer = tokenizer
         self.dataset = dataset
+        self.device = device
 
         self.samples = []
         for row in tqdm(dataset):
@@ -30,7 +31,10 @@ class NaiveDataset(Dataset):
         return len(self.model_inputs)
 
     def __getitem__(self, idx):
-        return self.model_inputs[idx]
+        sample = self.model_inputs[idx]
+        input_ids = sample["input_ids"].to(self.device)
+        attention_mask = sample["attention_mask"].to(self.device)
+        return input_ids, attention_mask
 
 
 def main(model_name:str, dataset_path:str, batch_size: int) -> None:
@@ -42,14 +46,14 @@ def main(model_name:str, dataset_path:str, batch_size: int) -> None:
                                                  device_map="auto")
 
     main_dataset = load_from_disk(dataset_path)
-    torch_dataset = NaiveDataset(tokenizer, main_dataset)
+    torch_dataset = NaiveDataset(tokenizer=tokenizer, dataset=main_dataset, device=model.device)
     torch_dataset_dataloader = DataLoader(torch_dataset, batch_size=batch_size, shuffle=False)
 
     generated_answers = []
 
     for batch in tqdm(torch_dataset_dataloader):
         with torch.no_grad():
-            generated_ids = model.generate(batch, max_new_tokens=50)
+            generated_ids = model.generate(input_ids=batch[0], attention_mask=batch[1], max_new_tokens=50)
             break
 
 
