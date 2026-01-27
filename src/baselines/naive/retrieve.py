@@ -35,7 +35,7 @@ def main(dataset_name: str, batch_size: int) -> None:
     for hit_list in tqdm(hits):
         retrieved_triples.append([kg[x['corpus_id']] for x in hit_list])
 
-    dataset.add_column("retrieved_triples", retrieved_triples)
+    dataset = dataset.add_column("retrieved_triples", retrieved_triples)
 
     print("Saving dataset with retrieved triples...")
     dataset.save_to_disk(base_path / f"{dataset_name}_with_retrieved_triples_from_naive_baseline")
