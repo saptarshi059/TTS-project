@@ -1,35 +1,63 @@
+from datasets import tqdm, load_from_disk
 from transformers import AutoModelForCausalLM, AutoTokenizer
+from argparse import ArgumentParser
 import os, torch
+from torch.utils.data import Dataset, DataLoader
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
-def main():
-    model_name = "Qwen/Qwen3-8B"
+class NaiveDataset(Dataset):
+    def __init__(self, tokenizer, dataset):
+        self.tokenizer = tokenizer
+        self.dataset = dataset
 
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForCausalLM.from_pretrained(
-        model_name,
-        dtype="auto",
-        attn_implementation="flash_attention_2",
-        device_map="auto",
-    #    quantization_config=bnb
-    )
+        self.samples = []
+        for row in tqdm(dataset):
+            supporting_facts = "\n".join(triple for triple in row['retrieved_triples'])
+            self.samples.append([{"role": "system", "content": "Answer the given question using the provided knowledge graph triples. Format your response as\nAnswer: <answer text>"},
+                                 {"role": "user", "content": f"SUPPORTING FACTS:\n{supporting_facts}\n\nQUESTION: {row['question']}"}])
 
-    prompt = "Dambar Shah was a King of the Gorkha Kingdom, present-day Gorkha District, Nepal who reigned from 1636 until his death in 1645. He was the father of Krishna Shah. Krishna Shah was King of the Gorkha Kingdom in the Indian subcontinent, present-day Nepal, who succeeded his father Dambar Shah and reigned from 1645 till his death in 1661. He was the father of his successor Rudra Shah"
+        self.tokenized_samples = tokenizer.apply_chat_template(
+            self.samples,
+            tokenize=False,
+            add_generation_prompt=True,
+            enable_thinking=False  # Switches between thinking and non-thinking modes. Default is True.
+        )
 
-    # prepare the model input
-    messages = [
-        {"role": "system", "content": "Answer the given question without writing any additional text. Format your response as\nAnswer: <answer text>"},
-        {"role": "user", "content": "Question: Who is the grandchild of Dambar Shah?"}
-    ]
-    text = tokenizer.apply_chat_template(
-        messages,
-        tokenize=False,
-        add_generation_prompt=True,
-        enable_thinking=False # Switches between thinking and non-thinking modes. Default is True.
-    )
+        self.model_inputs = self.tokenizer(self.tokenized_samples, padding=True, return_tensors="pt")
 
-    model_inputs = tokenizer([text], return_tensors="pt").to(model.device)
+    def __len__(self):
+        return len(self.model_inputs)
+
+    def __getitem__(self, idx):
+        return self.model_inputs[idx]
+
+
+def main(model_name:str, dataset_path:str, batch_size: int) -> None:
+
+    tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_name)
+    model = AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path=model_name,
+                                                 dtype="auto",
+                                                 attn_implementation="flash_attention_2",
+                                                 device_map="auto")
+
+    main_dataset = load_from_disk(dataset_path)
+    torch_dataset = NaiveDataset(tokenizer, main_dataset)
+    torch_dataset_dataloader = DataLoader(torch_dataset, batch_size=batch_size, shuffle=False)
+
+    generated_answers = []
+
+    for batch in tqdm(torch_dataset_dataloader):
+        with torch.no_grad():
+            generated_ids = model.generate(batch, max_new_tokens=50)
+            break
+
+
 
 if __name__ == "__main__":
-    main()
+    parser = ArgumentParser()
+    parser.add_argument("--model_name", type=str, default="Qwen/Qwen3-8B")
+    parser.add_argument("--dataset_path", type=str, default="../../../data/2wiki/2wiki_with_retrieved_triples_from_naive_baseline")
+    parser.add_argument("--batch_size", type=int, default=32)
+    args = parser.parse_args()
+    main(model_name=args.model_name, dataset_path=args.dataset_path, batch_size=args.batch_size)
