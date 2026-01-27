@@ -1,7 +1,7 @@
 #!/bin/bash
 
 dataset_name=$1
-output_dir="../data/$dataset_name"
+output_dir="../../data/$dataset_name"
 
 if [ "$dataset_name" = '2wiki' ]; then
   mkdir -p "$output_dir"
