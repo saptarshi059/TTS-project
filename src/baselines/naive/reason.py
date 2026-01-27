@@ -17,7 +17,7 @@ class NaiveDataset(Dataset):
         for row in tqdm(dataset):
             supporting_facts = "\n".join(triple for triple in row['retrieved_triples'])
             self.samples.append([{"role": "system", "content": "Answer the given question using the provided knowledge graph triples."
-                                                               "Please keep your response concise."
+                                                               "Please keep your response concise. If no answer exists, please return ''."
                                                                "Format your response as\nAnswer: <answer text>"},
                                  {"role": "user", "content": f"SUPPORTING FACTS:\n{supporting_facts}\n\nQUESTION: {row['question']}"}])
 
