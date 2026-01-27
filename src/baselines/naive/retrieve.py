@@ -17,13 +17,14 @@ def main(dataset_name: str, batch_size: int) -> None:
     all_questions = dataset["question"]
 
     # Loading embedding model
-    model = SentenceTransformer("Qwen/Qwen3-Embedding-8B")
+    model = SentenceTransformer(model_name_or_path="Qwen/Qwen3-Embedding-8B",
+                                model_kwargs={"attn_implementation": "flash_attention_2"})
 
     print("Creating embeddings .....")
     embedding_options = {"show_progress_bar": True, "convert_to_tensor": True, "batch_size": batch_size}
 
-    kg_triple_embeddings = model.encode_document(kg, **embedding_options)
-    query_embeddings = model.encode_query(all_questions, **embedding_options)
+    kg_triple_embeddings = model.encode(kg, **embedding_options)
+    query_embeddings = model.encode(all_questions, **embedding_options)
 
     hits = semantic_search(query_embeddings, kg_triple_embeddings, top_k=10)
 
