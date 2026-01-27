@@ -4,6 +4,7 @@ from datasets import load_dataset
 from argparse import ArgumentParser
 from pathlib import Path
 from tqdm import tqdm
+import torch
 
 def main(dataset_name: str, batch_size: int) -> None:
     base_path = Path(f"../../../data/{dataset_name}")
@@ -18,7 +19,9 @@ def main(dataset_name: str, batch_size: int) -> None:
 
     # Loading embedding model
     model = SentenceTransformer(model_name_or_path="Qwen/Qwen3-Embedding-8B",
-                                model_kwargs={"attn_implementation": "flash_attention_2"})
+                                model_kwargs={"attn_implementation": "flash_attention_2",
+                                              "dtype": torch.float16}
+                                )
 
     print("Creating embeddings .....")
     embedding_options = {"show_progress_bar": True, "convert_to_tensor": True, "batch_size": batch_size}
