@@ -1,4 +1,4 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, set_seed
 from torch.utils.data import Dataset, DataLoader
 from datasets import tqdm, load_from_disk
 from argparse import ArgumentParser
@@ -39,6 +39,8 @@ class NaiveDataset(Dataset):
 
 
 def main(model_name:str, dataset:str, batch_size: int) -> None:
+    set_seed(42)
+
     base_path = Path(f"../../../data/")
 
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_name, padding_side='left')
@@ -55,7 +57,7 @@ def main(model_name:str, dataset:str, batch_size: int) -> None:
 
     for batch in tqdm(torch_dataset_dataloader):
         with torch.no_grad():
-            generated_ids = model.generate(**batch, max_new_tokens=200)
+            generated_ids = model.generate(**batch, max_new_tokens=200, do_sample=False)
             raw_responses.extend(tokenizer.batch_decode(generated_ids, skip_special_tokens=True))
 
     main_dataset = main_dataset.add_column("raw_responses", raw_responses)
