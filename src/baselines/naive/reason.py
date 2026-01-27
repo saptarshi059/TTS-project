@@ -53,7 +53,7 @@ def main(model_name:str, dataset_path:str, batch_size: int) -> None:
 
     for batch in tqdm(torch_dataset_dataloader):
         with torch.no_grad():
-            generated_ids = model.generate(input_ids=batch[0], attention_mask=batch[1], max_new_tokens=50)
+            generated_ids = model.generate(**batch, max_new_tokens=50)
             break
 
 
