@@ -7,17 +7,22 @@ def main(prediction_dataset_path: str) -> None:
     def clean_prediction(text: str) -> str:
         match = re.search(r"<\/think>([\s\S]*)", text)
         answer = match.group(1) if match else None
-        return answer.split('Answer:')[1].strip()
+        if answer:
+            return answer.split('Answer:')[1].strip()
+        else:
+            return ""
 
     squad_metric = load("squad")
     prediction_dataset = load_from_disk(prediction_dataset_path)
     predictions, references = [], []
     for row in tqdm(prediction_dataset):
+        print(row['raw_responses'], clean_prediction(row['raw_responses']), "\n.........")
         predictions.append({'prediction_text': clean_prediction(row['raw_responses']), 'id': row['id']})
         references.append([{'answers': {'answer_start': [0], 'text': [row['answer']]}, 'id': row['id']}])
 
+    '''
     results = squad_metric.compute(predictions=predictions, references=references)
-    print(results)
+    print(results)'''
 
 if __name__ == "__main__":
     parser = ArgumentParser()
