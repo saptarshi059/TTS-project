@@ -10,21 +10,17 @@ def main(prediction_dataset_path: str) -> None:
         try:
             return answer.split('Answer:')[1].strip()
         except:
-            print(text)
+            return ""
 
     squad_metric = load("squad")
     prediction_dataset = load_from_disk(prediction_dataset_path)
     predictions, references = [], []
     for row in tqdm(prediction_dataset):
-        clean_prediction(row['raw_responses'])
-        #if clean_prediction(row['raw_responses']) == "":
-        #    print(row['raw_responses'], clean_prediction(row['raw_responses']), "\n.........")
-        #predictions.append({'prediction_text': clean_prediction(row['raw_responses']), 'id': row['id']})
-        #references.append([{'answers': {'answer_start': [0], 'text': [row['answer']]}, 'id': row['id']}])
+        predictions.append({'prediction_text': clean_prediction(row['raw_responses']), 'id': row['id']})
+        references.append([{'answers': {'answer_start': [0], 'text': [row['answer']]}, 'id': row['id']}])
 
-    '''
     results = squad_metric.compute(predictions=predictions, references=references)
-    print(results)'''
+    print(results)
 
 if __name__ == "__main__":
     parser = ArgumentParser()
