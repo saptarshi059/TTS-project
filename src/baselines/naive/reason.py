@@ -28,13 +28,13 @@ class NaiveDataset(Dataset):
         self.model_inputs = self.tokenizer(self.tokenized_samples, padding=True, return_tensors="pt")
 
     def __len__(self):
-        return len(self.model_inputs)
+        return len(self.samples)
 
     def __getitem__(self, idx):
-        sample = self.model_inputs[idx]
-        input_ids = sample["input_ids"].to(self.device)
-        attention_mask = sample["attention_mask"].to(self.device)
-        return input_ids, attention_mask
+        return {
+            "input_ids": self.model_inputs["input_ids"][idx].to(self.device),
+            "attention_mask": self.model_inputs["attention_mask"][idx].to(self.device),
+        }
 
 
 def main(model_name:str, dataset_path:str, batch_size: int) -> None:
@@ -48,8 +48,6 @@ def main(model_name:str, dataset_path:str, batch_size: int) -> None:
     main_dataset = load_from_disk(dataset_path)
     torch_dataset = NaiveDataset(tokenizer=tokenizer, dataset=main_dataset, device=model.device)
     torch_dataset_dataloader = DataLoader(torch_dataset, batch_size=batch_size, shuffle=False)
-
-    print(torch_dataset[0])
 
     generated_answers = []
 
