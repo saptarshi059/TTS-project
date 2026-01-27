@@ -16,8 +16,8 @@ def main(prediction_dataset_path: str) -> None:
     prediction_dataset = load_from_disk(prediction_dataset_path)
     predictions, references = [], []
     for row in tqdm(prediction_dataset):
-        predictions.append({'prediction_text': str(clean_prediction(row['raw_responses'])), 'id': str(row['id'])})
-        references.append([{'answers': {'answer_start': [0], 'text': [str(row['answer'])]}, 'id': str(row['id'])}])
+        predictions.append({'prediction_text': clean_prediction(row['raw_responses']), 'id': row['id']})
+        references.append({'answers': {'answer_start': [0], 'text': [row['answer']]}, 'id': row['id']})
 
     results = squad_metric.compute(predictions=predictions, references=references)
     print(results)
