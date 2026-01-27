@@ -38,8 +38,7 @@ class NaiveDataset(Dataset):
 
 
 def main(model_name:str, dataset_path:str, batch_size: int) -> None:
-
-    tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_name)
+    tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_name, padding_side='left')
     model = AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path=model_name,
                                                  dtype="auto",
                                                  attn_implementation="flash_attention_2",
@@ -54,6 +53,7 @@ def main(model_name:str, dataset_path:str, batch_size: int) -> None:
     for batch in tqdm(torch_dataset_dataloader):
         with torch.no_grad():
             generated_ids = model.generate(**batch, max_new_tokens=50)
+            print(tokenizer.batch_decode(generated_ids, skip_special_tokens=True))
             break
 
 
