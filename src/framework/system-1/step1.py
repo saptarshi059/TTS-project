@@ -50,7 +50,7 @@ def main(model_name:str, dataset:str, batch_size: int) -> None:
                                                  attn_implementation="flash_attention_2",
                                                  device_map="auto")
 
-    main_dataset = load_dataset("json", data_files=str(base_path / f"{dataset}/test.json"))
+    main_dataset = load_dataset("json", data_files=str(base_path / f"{dataset}/test.json"))["train"]
     torch_dataset = System1Dataset(tokenizer=tokenizer, dataset=main_dataset, device=model.device)
     torch_dataset_dataloader = DataLoader(torch_dataset, batch_size=batch_size, shuffle=False)
 
