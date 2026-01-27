@@ -40,7 +40,7 @@ def main(dataset_name: str, batch_size: int) -> None:
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("-d", "--dataset_name", type=str, required=True)
-    parser.add_argument("-b", "--batch_size", type=int, required=True, default=100)
+    parser.add_argument("-b", "--batch_size", type=int, default=100)
     args = parser.parse_args()
 
     main(dataset_name=args.dataset_name, batch_size=args.batch_size)
