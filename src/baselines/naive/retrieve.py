@@ -6,7 +6,7 @@ from pathlib import Path
 from tqdm import tqdm
 
 def main(dataset_name: str, batch_size: int) -> None:
-    base_path = Path(f"../../data/{dataset_name}")
+    base_path = Path(f"../../../data/{dataset_name}")
 
     # Loading Graph associated with the dataset
     with open(base_path / "kg.txt", "r") as f:
