@@ -16,7 +16,9 @@ class NaiveDataset(Dataset):
         self.samples = []
         for row in tqdm(dataset):
             supporting_facts = "\n".join(triple for triple in row['retrieved_triples'])
-            self.samples.append([{"role": "system", "content": "Answer the given question using the provided knowledge graph triples. Format your response as\nAnswer: <answer text>"},
+            self.samples.append([{"role": "system", "content": "Answer the given question using the provided knowledge graph triples."
+                                                               "Please keep your response concise."
+                                                               "Format your response as\nAnswer: <answer text>"},
                                  {"role": "user", "content": f"SUPPORTING FACTS:\n{supporting_facts}\n\nQUESTION: {row['question']}"}])
 
         self.tokenized_samples = tokenizer.apply_chat_template(
