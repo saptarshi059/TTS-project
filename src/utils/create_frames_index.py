@@ -33,7 +33,7 @@ def main():
                     "contents": chunk
                 })
 
-            return total_chunks, total_metadata
+        return total_chunks, total_metadata
 
     def build_index(texts):
         print(f"Encoding {len(texts)} chunks...")
@@ -47,6 +47,7 @@ def main():
         faiss.write_index(index, "../baselines/agent-distillation/search/database/frames_wikipedia/e5_Flat.index")
         print("Index saved...")
 
+    print("Loading embedding model...")
     model = SentenceTransformer("intfloat/e5-base-v2")
     tokenizer = model.tokenizer
 
