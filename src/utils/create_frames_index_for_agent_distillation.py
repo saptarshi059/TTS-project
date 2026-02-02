@@ -1,25 +1,16 @@
 from sentence_transformers import SentenceTransformer
-from datasets import load_dataset, tqdm
-from urllib.parse import unquote
+from datasets import load_from_disk, tqdm
 from pathlib import Path
-import wikipediaapi
 import numpy as np
 import faiss
 import json
-import ast
 
 def main():
-    def process_samples(links):
+    def process_samples(corpus_dataset):
         total_chunks = []
         total_metadata = []
-        for url in tqdm(links):
-            page_name = unquote(url.split('/')[-1])
-            page = wiki.page(page_name)
-            if not page.exists():
-                continue
-
-            page_text = page.text
-            chunks = tokenizer(page_text,
+        for row in tqdm(corpus_dataset):
+            chunks = tokenizer(row['text'],
                                truncation=True,
                                max_length=400,
                                return_overflowing_tokens=True,
@@ -50,19 +41,12 @@ def main():
     print("Loading embedding model...")
     model = SentenceTransformer("intfloat/e5-base-v2")
     tokenizer = model.tokenizer
+    print("Embedding model loaded...")
 
-    dataset = load_dataset("google/frames-benchmark")['test']
+    corpus = load_from_disk("../../data/frames/frames_corpus")
 
-    wiki = wikipediaapi.Wikipedia(
-        user_agent="FramesBot/1.0 (contact: your@email.com)",
-        language='en',
-        extract_format=wikipediaapi.ExtractFormat.WIKI
-    )
-
-    all_links = []
-    for row in dataset:
-        all_links.extend(ast.literal_eval(row['wiki_links']))
-    all_chunks, all_metadata = process_samples(all_links)
+    print("Processing documents...")
+    all_chunks, all_metadata = process_samples(corpus)
 
     build_index(all_chunks)
 

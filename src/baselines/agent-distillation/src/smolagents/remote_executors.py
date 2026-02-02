@@ -215,7 +215,7 @@ CMD ["jupyter", "kernelgateway", "--KernelGatewayApp.ip='0.0.0.0'", "--KernelGat
             retries = 0
             while self.container.status != "running" and retries < 5:
                 self.logger.log(f"Container status: {self.container.status}, waiting...", level=LogLevel.INFO)
-                time.sleep(1)
+                time.sleep(10)
                 self.container.reload()
                 retries += 1
 
