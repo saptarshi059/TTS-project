@@ -9,8 +9,8 @@ import ast
 
 def main():
     def process_samples(links):
-        all_chunks = []
-        all_metadata = []
+        total_chunks = []
+        total_metadata = []
         for url in tqdm(links):
             page_name = unquote(url.split('/')[-1])
             page = wiki.page(page_name)
@@ -26,13 +26,13 @@ def main():
             chunks_detokenized = tokenizer.batch_decode(chunks, skip_special_tokens=True)
 
             for idx, chunk in enumerate(chunks_detokenized):
-                all_chunks.append(f"passage: {chunk}")
-                all_metadata.append({
+                total_chunks.append(f"passage: {chunk}")
+                total_metadata.append({
                     "id": str(idx),
                     "contents": chunk
                 })
 
-        return all_chunks, all_metadata
+            return total_chunks, total_metadata
 
     def build_index(texts):
         print(f"Encoding {len(texts)} chunks...")
