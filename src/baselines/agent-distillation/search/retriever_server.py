@@ -17,8 +17,8 @@ from pydantic import BaseModel
 
 
 parser = argparse.ArgumentParser(description="Launch the local faiss retriever.")
-parser.add_argument("--index_path", type=str, default="search/database/wikipedia/e5_Flat.index", help="Corpus indexing file.")
-parser.add_argument("--corpus_path", type=str, default="search/database/wikipedia/wiki-18.jsonl", help="Local corpus file.")
+parser.add_argument("--index_path", type=str, default="/gpuhome/sks6765/TTS-project/src/baselines/agent-distillation/search/database/wikipedia/e5_Flat.index", help="Corpus indexing file.")
+parser.add_argument("--corpus_path", type=str, default="/gpuhome/sks6765/TTS-project/src/baselines/agent-distillation/search/database/wikipedia/wiki-18.jsonl", help="Local corpus file.")
 parser.add_argument("--topk", type=int, default=3, help="Number of retrieved passages for one query.")
 parser.add_argument("--retriever_model", type=str, default="intfloat/e5-base-v2", help="Name of the retriever model.")
 
