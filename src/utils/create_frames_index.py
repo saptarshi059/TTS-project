@@ -4,6 +4,7 @@ from urllib.parse import unquote
 from pathlib import Path
 import wikipediaapi
 import numpy as np
+import faiss
 import json
 import ast
 
