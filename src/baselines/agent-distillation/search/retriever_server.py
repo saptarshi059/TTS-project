@@ -45,11 +45,10 @@ def load_docs(corpus, doc_idxs):
     return results
 
 def load_model(model_path: str, use_fp16: bool = False):
-    model_config = AutoConfig.from_pretrained(model_path, trust_remote_code=True)
+    device = "cuda" if torch.cuda.is_available() else "cpu"
     model = AutoModel.from_pretrained(model_path, trust_remote_code=True)
-    model.eval()
-    model.cuda()
-    if use_fp16: 
+    model.to(device)  # Dynamically move to whatever is available
+    if use_fp16 and device == "cuda":
         model = model.half()
     tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=True, trust_remote_code=True)
     return model, tokenizer
@@ -83,6 +82,8 @@ class Encoder:
 
     @torch.no_grad()
     def encode(self, query_list: List[str], is_query=True) -> np.ndarray:
+        device = next(self.model.parameters()).device  # Check where model is
+
         # processing query for different encoders
         if isinstance(query_list, str):
             query_list = [query_list]
@@ -103,7 +104,7 @@ class Encoder:
                                 truncation=True,
                                 return_tensors="pt"
                                 )
-        inputs = {k: v.cuda() for k, v in inputs.items()}
+        inputs = {k: v.to(device) for k, v in inputs.items()}
 
         if "T5" in type(self.model).__name__:
             # T5-based retrieval model
@@ -217,6 +218,8 @@ class DenseRetriever(BaseRetriever):
     def __init__(self, config):
         super().__init__(config)
         self.index = faiss.read_index(self.index_path)
+        import multiprocessing
+        faiss.omp_set_num_threads(multiprocessing.cpu_count())
         '''if config.faiss_gpu:
             co = faiss.GpuMultipleClonerOptions()
             co.useFloat16 = True
@@ -387,4 +390,4 @@ def retrieve_endpoint(request: QueryRequest):
 
 if __name__ == "__main__":
     # 3) Launch the server. By default, it listens on http://127.0.0.1:8000
-    uvicorn.run(app, host="0.0.0.0", port=8005)
+    uvicorn.run(app, host="0.0.0.0", port=8005, timeout_keep_alive=60, limit_concurrency=10)
