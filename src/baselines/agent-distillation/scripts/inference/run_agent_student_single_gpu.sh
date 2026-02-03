@@ -89,7 +89,8 @@ if ps -p $RETRIEVER_PID > /dev/null; then
      --model_type vllm \
      --model_id "$BASE_MODEL" \
      --parallel_workers 1 \
-     --debug \
+     --multithreading \
+     --use_single_endpoint \
      --fine_tuned --lora_folder "$LORA_PATH"
      # If your experiment fails, add: --retriever_url http://localhost:8005
 else
