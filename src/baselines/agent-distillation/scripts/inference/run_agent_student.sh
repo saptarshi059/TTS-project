@@ -32,21 +32,23 @@ declare -A DATASETS=(
 PIDS=()
 
 cleanup() {
-  echo "🧹 Cleaning up ports and processes..."
+  echo "🧹 Total System Cleanup..."
 
-  # 1. Kill by PIDs we tracked
-  kill ${PIDS[*]} 2>/dev/null
+  # 1. Kill the tracked PIDs (the parents)
+  [ ${#PIDS[@]} -gt 0 ] && kill ${PIDS[*]} 2>/dev/null
 
-  # 2. Kill anything listening on our range of ports
-  for i in {0..5}; do
-    fuser -k $((PORT_BASE + i))/tcp 2>/dev/null
+  # 2. Force-kill anything sitting on our specific ports
+  # This is the most important part to avoid Errno 98
+  for port in 8000 8001 8002 8003 8005; do
+    echo "Clearing port $port..."
+    fuser -k -9 ${port}/tcp 2>/dev/null
   done
 
-  # 3. Kill any stray vllm processes
-  pgrep -f 'vllm serve' | xargs -r kill -9
-  pgrep -f 'retriever_server.py' | xargs -r kill -9
+  # 3. Final nuke for any stray vLLM/Python processes owned by you
+  pkill -u $(whoami) -9 -f vllm
+  pkill -u $(whoami) -9 -f retriever_server
 
-  echo "✅ Ports cleared and processes stopped."
+  echo "✅ All ports and GPUs are now clear."
 }
 
 # Ctrl-C 처리
