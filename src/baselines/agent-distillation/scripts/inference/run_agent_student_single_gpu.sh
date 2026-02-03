@@ -36,9 +36,17 @@ source "$(conda info --base)/etc/profile.d/conda.sh"
 conda activate "$RETRIEVER_CONDA_ENV"
 
 CUDA_VISIBLE_DEVICES=$TARGET_GPU \
-  python search/retriever_server.py --port 8005 > "$RETRIEVER_LOG" 2>&1 &
+  python search/retriever_server.py > "$RETRIEVER_LOG" 2>&1 &
+RETRIEVER_PID=$!
+PIDS+=($RETRIEVER_PID)
+
+echo "🛰️  Retriever PID: $RETRIEVER_PID. Waiting for port 8005..."
+# Wait specifically for the port to open
+while ! nc -z localhost 8010; do
+  sleep 1
+done
+echo "✅ Retriever is UP."
 conda deactivate
-sleep 15
 
 # 1. Start ONLY ONE vLLM instance on GPU 0
 echo "🚀 Starting vLLM on GPU $TARGET_GPU..."
