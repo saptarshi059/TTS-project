@@ -80,17 +80,18 @@ conda deactivate
 # 1. Start all GPUs (0, 1, 2, and 3) in one clean loop
 for i in 0 1 2 3; do
   VLLM_PORT=$((PORT_BASE + i))
-  # This is the "secret sauce": force each instance to use a unique internal port
-  DIST_PORT=$((20000 + i))
+  # These are the magic environment variables vLLM looks for:
+  export MASTER_ADDR="127.0.0.1"
+  export MASTER_PORT=$((10000 + i))  # Unique port for each GPU's internal comms
+  export RAY_PORT=$((12000 + i))     # Unique Ray port
 
-  echo "⏳ Launching vLLM on GPU $i (Port: $VLLM_PORT, Dist Port: $DIST_PORT)..."
+  echo "⏳ Launching vLLM on GPU $i (Port: $VLLM_PORT, Master Port: $MASTER_PORT)..."
 
   # Build the command
   CMD="CUDA_VISIBLE_DEVICES=$i python serve_vllm.py \
     --model \"$BASE_MODEL\" \
     --host 127.0.0.1 \
     --port $VLLM_PORT \
-    --distributed-init-method tcp://127.0.0.1:$DIST_PORT \
     --max-num-seqs 2 \
     --max-model-len 4096 \
     --dtype bfloat16 \

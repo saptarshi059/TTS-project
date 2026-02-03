@@ -24,11 +24,6 @@ def main():
         help="Port to serve the model on"
     )
     parser.add_argument(
-        "--distributed-init-method",
-        type=str,
-        default=None,
-    )
-    parser.add_argument(
         "--dtype",
         type=str,
         default="auto",
@@ -116,8 +111,6 @@ def main():
     
     if args.api_key:
         cmd.extend(["--api-key", args.api_key])
-    if args.distributed_init_method:
-        cmd.extend(["--distributed-init-method", str(args.distributed_init_method)])
     if args.max_model_len:
         cmd.extend(["--max-model-len", str(args.max_model_len)])
     if args.max_num_seqs:
