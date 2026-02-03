@@ -217,14 +217,11 @@ class DenseRetriever(BaseRetriever):
     def __init__(self, config):
         super().__init__(config)
         self.index = faiss.read_index(self.index_path)
-        try:
-            if config.faiss_gpu:
-                co = faiss.GpuMultipleClonerOptions()
-                co.useFloat16 = True
-                co.shard = True
-                self.index = faiss.index_cpu_to_all_gpus(self.index, co=co)
-        except Exception as e:
-            print(f"Failed to move index to GPU, falling back to CPU: {e}")
+        if config.faiss_gpu:
+            co = faiss.GpuMultipleClonerOptions()
+            co.useFloat16 = True
+            co.shard = True
+            self.index = faiss.index_cpu_to_all_gpus(self.index, co=co)
 
         self.corpus = load_corpus(self.corpus_path)
         self.encoder = Encoder(

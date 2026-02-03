@@ -42,12 +42,6 @@ def main():
         help="Maximum model length"
     )
     parser.add_argument(
-        "--max-num-seqs",
-        type=int,
-        default=None,
-        help="Maximum seq length"
-    )
-    parser.add_argument(
         "--gpu-memory-utilization",
         type=float,
         default=0.9,
@@ -83,21 +77,12 @@ def main():
     parser.add_argument(
         "--lora-modules",
         type=str,
-        help="lora model in format {name}={path}"
+        help="lora modeul in format {name}={path}"
     )
     parser.add_argument(
         "--max-lora-rank",
         type=int,
         help="maximum lora rank"
-    )
-    parser.add_argument(
-        "--enforce-eager",
-        action="store_true",
-    )
-    parser.add_argument(
-        "--enable-lora",
-        action="store_true",
-        help="Enable LoRA adapters for the vLLM engine."
     )
 
     args = parser.parse_args()
@@ -113,10 +98,6 @@ def main():
         cmd.extend(["--api-key", args.api_key])
     if args.max_model_len:
         cmd.extend(["--max-model-len", str(args.max_model_len)])
-    if args.max_num_seqs:
-        cmd.extend(["--max-num-seqs", str(args.max_num_seqs)])
-    if args.enforce_eager:
-        cmd.extend(["--enforce-eager"])
     if args.gpu_memory_utilization:
         cmd.extend(["--gpu-memory-utilization", str(args.gpu_memory_utilization)])
     if args.tensor_parallel_size:

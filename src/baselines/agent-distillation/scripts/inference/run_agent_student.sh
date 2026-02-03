@@ -1,19 +1,13 @@
 #!/bin/bash
 
 # ===================== User setting ===================== #
-export OPENBLAS_NUM_THREADS=1
-export OMP_NUM_THREADS=1
-export MKL_NUM_THREADS=1
-export VLLM_WORKER_MULTIPROCESS_METHOD=spawn
-export TOKENIZERS_PARALLELISM=false
-
 BASE_MODEL=$1
 LORA_PATH=$2 # set lora path here
 EXP_TYPE="agent"
-PORT_BASE=18000
+PORT_BASE=8000
 GPU_MEMORY_UTILIZATION=0.6
 MAX_LORA_RANK=64
-N=1
+N=8
 TEMP=0.4
 
 MAX_TOKENS=1024
@@ -25,30 +19,28 @@ RETRIEVER_LOG="retriever_server.log"     # retriever path
 
 declare -A DATASETS=(
   ["hotpotqa"]="data_processor/qa_dataset/test/hotpotqa_500_20250422.json"
+  ["math"]="data_processor/math_dataset/test/math_500_20250414.json"
+  ["aime"]="data_processor/math_dataset/test/aime_90_20250504.json"
   ["musique"]="data_processor/qa_dataset/test/musique_500_20250504.json"
+  ["bamboogle"]="data_processor/qa_dataset/test/bamboogle_125_20250507.json"
+  ["gsm"]="data_processor/math_dataset/test/gsm_hard_500_20250507.json"
   ["2wiki"]="data_processor/qa_dataset/test/2wikimultihopqa_500_20250511.json"
+  ["olymath"]="data_processor/math_dataset/test/olymath_200_20250511.json"
 )
 
 PIDS=()
 
+# 종료 핸들러 정의
 cleanup() {
-  echo "🧹 Total System Cleanup..."
+  echo ""
+  echo "🧹 Cleaning up vLLM servers..."
+  kill ${PIDS[*]} 2>/dev/null
+  # If the process is not cleaned well
+  ps -u $USER -o pid,command | grep 'vllm serve' | grep -v grep | awk '{print $1}' | xargs kill
 
-  # 1. Kill the tracked PIDs (the parents)
-  [ ${#PIDS[@]} -gt 0 ] && kill ${PIDS[*]} 2>/dev/null
-
-  # 2. Force-kill anything sitting on our specific ports
-  # This is the most important part to avoid Errno 98
-  for port in 8000 8001 8002 8003 8005; do
-    echo "Clearing port $port..."
-    fuser -k -9 ${port}/tcp 2>/dev/null
-  done
-
-  # 3. Final nuke for any stray vLLM/Python processes owned by you
-  pkill -u $(whoami) -9 -f vllm
-  pkill -u $(whoami) -9 -f retriever_server
-
-  echo "✅ All ports and GPUs are now clear."
+  pgrep -f 'retriever_server.py' | xargs -r kill
+  wait
+  echo "✅ All vLLM servers stopped."
 }
 
 # Ctrl-C 처리
@@ -58,68 +50,61 @@ export VLLM_USE_V1=0
 # ===================================================== #
 # 0. Run retriever server (background)
 # ===================================================== #
-# 0. Run retriever server
-echo "🔍 Launching retriever server..."
+echo "🔍 Launching retriever server in Conda env \"$RETRIEVER_CONDA_ENV\" …"
+# Conda initialization
 source "$(conda info --base)/etc/profile.d/conda.sh"
-conda activate "$RETRIEVER_CONDA_ENV"
 
-# Use 'nohup' to prevent it from closing when the shell shifts focus
-CUDA_VISIBLE_DEVICES=$RETRIEVER_GPU_DEVICES \
-  nohup python search/retriever_server.py > "$RETRIEVER_LOG" 2>&1 &
-RETRIEVER_PID=$!
+(
+  conda activate "$RETRIEVER_CONDA_ENV"
+  # retriever background
+  CUDA_VISIBLE_DEVICES=$RETRIEVER_GPU_DEVICES \
+    python search/retriever_server.py \
+    > "$RETRIEVER_LOG" 2>&1 &
+  RETRIEVER_PID=$!
+  echo "🛰️  Retriever server started (PID: $RETRIEVER_PID, GPUs: $RETRIEVER_GPU_DEVICES)"
+  conda deactivate
+)&
+
 PIDS+=($RETRIEVER_PID)
 
-echo "🛰️  Retriever PID: $RETRIEVER_PID. Waiting for port 8005..."
-# Wait specifically for the port to open
-while ! nc -z localhost 8005; do
-  sleep 1
-done
-echo "✅ Retriever is UP."
-conda deactivate
-
-# 1. Start all GPUs (0, 1, 2, and 3) in one clean loop
-for i in 0 1 2 3; do
-  VLLM_PORT=$((PORT_BASE + i))
-  # These are the magic environment variables vLLM looks for:
-  export MASTER_ADDR="127.0.0.1"
-  export MASTER_PORT=$((10000 + i))  # Unique port for each GPU's internal comms
-  export RAY_PORT=$((12000 + i))     # Unique Ray port
-
-  echo "⏳ Launching vLLM on GPU $i (Port: $VLLM_PORT, Master Port: $MASTER_PORT)..."
-
-  # Build the command
+# 1. GPU 0~2 background
+for i in 0 1 2; do
   CMD="CUDA_VISIBLE_DEVICES=$i python serve_vllm.py \
     --model \"$BASE_MODEL\" \
-    --port $VLLM_PORT \
-    --max-num-seqs 2 \
-    --max-model-len 4096 \
-    --dtype bfloat16 \
-    --enforce-eager \
-    --enable-lora \
+    --port $((PORT_BASE + i)) \
     --gpu-memory-utilization $GPU_MEMORY_UTILIZATION"
 
   if [ -n "$LORA_PATH" ]; then
     CMD="$CMD --lora-modules finetune=$LORA_PATH --max-lora-rank $MAX_LORA_RANK"
   fi
 
-  # Execute and background
   eval $CMD > vllm_gpu${i}.log 2>&1 &
   PIDS+=($!)
+  echo "🚀 Started vLLM on GPU $i (port $((PORT_BASE + i)))"
+done
 
-  # If this is the LAST GPU (i=3), we wait for it to be fully ready
-  if [ $i -eq 3 ]; then
-    echo "📺 Watching GPU 3 logs for startup completion..."
-    # This replaces your old 'tail' section
-    ( tail -n 0 -f "vllm_gpu3.log" & ) | while read line; do
-      echo "$line"
-      if [[ "$line" == *"Application startup complete."* ]]; then
-        echo "✅ All vLLM servers are UP! Launching Agent..."
-        break
-      fi
-    done
-  else
-    # For GPUs 0, 1, and 2, just wait 20s before starting the next one
-    sleep 20
+# 2. GPU 3 execute + log monitoring
+i=3
+LOG_FILE="vllm_gpu${i}.log"
+CMD="CUDA_VISIBLE_DEVICES=$i python serve_vllm.py \
+  --model \"$BASE_MODEL\" \
+  --port $((PORT_BASE + i)) \
+  --gpu-memory-utilization $GPU_MEMORY_UTILIZATION"
+
+if [ -n "$LORA_PATH" ]; then
+  CMD="$CMD --lora-modules finetune=$LORA_PATH --max-lora-rank $MAX_LORA_RANK"
+fi
+
+eval $CMD > "$LOG_FILE" 2>&1 &
+PIDS+=($!)
+echo "📺 Started final vLLM on GPU $i (port $((PORT_BASE + i))), watching for startup completion..."
+
+# 3. wait until "Application startup complete." detected
+( tail -n 0 -f "$LOG_FILE" & ) | while read line; do
+  echo "$line"
+  if [[ "$line" == *"Application startup complete."* ]]; then
+    echo "✅ vLLM fully started, launching reasoning agent!"
+    break
   fi
 done
 
@@ -132,6 +117,8 @@ for dataset in "${!DATASETS[@]}"; do
     --model_type vllm \
     --model_id \"$BASE_MODEL\" \
     --max_tokens $MAX_TOKENS \
+    --multithreading \
+    --use_process_pool \
     --n $N --temperature $TEMP --top_p 0.8 \
     --seed 42 \
     --verbose"

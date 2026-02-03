@@ -281,8 +281,17 @@ def run_experiment():
         do_extract_answer=do_extract_answer
     )
 
-    print(f"EM: {score_stats['em']:.2%}")
-    print(f"F1: {score_stats['f1']:.2%}")
+    if RICH_AVAILABLE:
+        accuracy_panel = Panel(
+            f"[bold green]{score_stats['accuracy']:.2%}[/bold green]\n"
+            f"[bold]{score_stats['correct_answers']}/{score_stats['total_questions']}[/bold] correct answers",
+            title="Accuracy Results",
+            border_style="green"
+        )
+        console.print(accuracy_panel)
+    else:
+        print(f"Accuracy: {score_stats['accuracy']:.2%}")
+        print(f"Correct: {score_stats['correct_answers']}/{score_stats['total_questions']}")
 
     # Apply filtering if applicable
     if args.do_filtering:
