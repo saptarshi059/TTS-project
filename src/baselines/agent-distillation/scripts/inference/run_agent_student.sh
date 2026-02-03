@@ -74,6 +74,8 @@ for i in 0 1 2; do
   CMD="CUDA_VISIBLE_DEVICES=$i python serve_vllm.py \
     --model \"$BASE_MODEL\" \
     --port $((PORT_BASE + i)) \
+    --max-num-seqs 16 \
+    --max-model-len 8192 \
     --gpu-memory-utilization $GPU_MEMORY_UTILIZATION"
 
   if [ -n "$LORA_PATH" ]; then
@@ -91,6 +93,8 @@ LOG_FILE="vllm_gpu${i}.log"
 CMD="CUDA_VISIBLE_DEVICES=$i python serve_vllm.py \
   --model \"$BASE_MODEL\" \
   --port $((PORT_BASE + i)) \
+  --max-num-seqs 16 \
+  --max-model-len 8192 \
   --gpu-memory-utilization $GPU_MEMORY_UTILIZATION"
 
 if [ -n "$LORA_PATH" ]; then

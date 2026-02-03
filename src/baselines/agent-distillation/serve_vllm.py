@@ -42,6 +42,12 @@ def main():
         help="Maximum model length"
     )
     parser.add_argument(
+        "--max-num-seqs",
+        type=int,
+        default=None,
+        help="Maximum seq length"
+    )
+    parser.add_argument(
         "--gpu-memory-utilization",
         type=float,
         default=0.9,
@@ -77,7 +83,7 @@ def main():
     parser.add_argument(
         "--lora-modules",
         type=str,
-        help="lora modeul in format {name}={path}"
+        help="lora model in format {name}={path}"
     )
     parser.add_argument(
         "--max-lora-rank",
@@ -98,6 +104,8 @@ def main():
         cmd.extend(["--api-key", args.api_key])
     if args.max_model_len:
         cmd.extend(["--max-model-len", str(args.max_model_len)])
+    if args.max_num_seqs:
+        cmd.extend(["--max-num-seqs", str(args.args.max_num_seqs)])
     if args.gpu_memory_utilization:
         cmd.extend(["--gpu-memory-utilization", str(args.gpu_memory_utilization)])
     if args.tensor_parallel_size:
