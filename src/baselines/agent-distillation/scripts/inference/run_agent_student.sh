@@ -55,17 +55,18 @@ export VLLM_USE_V1=0
 echo "🔍 Launching retriever server in Conda env \"$RETRIEVER_CONDA_ENV\" …"
 # Conda initialization
 source "$(conda info --base)/etc/profile.d/conda.sh"
+conda activate "$RETRIEVER_CONDA_ENV"
 
-(
-  conda activate "$RETRIEVER_CONDA_ENV"
-  # retriever background
-  CUDA_VISIBLE_DEVICES=$RETRIEVER_GPU_DEVICES \
-    python search/retriever_server.py \
-    > "$RETRIEVER_LOG" 2>&1 &
-  RETRIEVER_PID=$!
-  echo "🛰️  Retriever server started (PID: $RETRIEVER_PID, GPUs: $RETRIEVER_GPU_DEVICES)"
-  conda deactivate
-)&
+# Use nohup to prevent SIGHUP and run directly in this shell
+CUDA_VISIBLE_DEVICES=$RETRIEVER_GPU_DEVICES \
+  nohup python search/retriever_server.py > "$RETRIEVER_LOG" 2>&1 &
+
+RETRIEVER_PID=$!
+PIDS+=($RETRIEVER_PID)
+disown $RETRIEVER_PID
+
+echo "🛰️  Retriever server started (PID: $RETRIEVER_PID)"
+conda deactivate
 
 PIDS+=($RETRIEVER_PID)
 
