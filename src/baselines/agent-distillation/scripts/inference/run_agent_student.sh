@@ -90,7 +90,6 @@ for i in 0 1 2 3; do
   # Build the command
   CMD="CUDA_VISIBLE_DEVICES=$i python serve_vllm.py \
     --model \"$BASE_MODEL\" \
-    --host 127.0.0.1 \
     --port $VLLM_PORT \
     --max-num-seqs 2 \
     --max-model-len 4096 \
