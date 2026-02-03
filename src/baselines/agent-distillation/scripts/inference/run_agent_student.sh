@@ -51,18 +51,23 @@ export VLLM_USE_V1=0
 # ===================================================== #
 # 0. Run retriever server (background)
 # ===================================================== #
+# 0. Run retriever server
 echo "🔍 Launching retriever server..."
 source "$(conda info --base)/etc/profile.d/conda.sh"
 conda activate "$RETRIEVER_CONDA_ENV"
 
-# Use GPU 4 or similar if available, or isolate them!
-# Let's keep Retriever on 2,3 but REMOVE vLLM from those GPUs.
+# Use 'nohup' to prevent it from closing when the shell shifts focus
 CUDA_VISIBLE_DEVICES=$RETRIEVER_GPU_DEVICES \
-  python search/retriever_server.py > "$RETRIEVER_LOG" 2>&1 &
+  nohup python search/retriever_server.py > "$RETRIEVER_LOG" 2>&1 &
 RETRIEVER_PID=$!
 PIDS+=($RETRIEVER_PID)
-echo "🛰️  Retriever started (PID: $RETRIEVER_PID). Waiting 15s for BERT..."
-sleep 15 # Give the retriever time to bind to its port
+
+echo "🛰️  Retriever PID: $RETRIEVER_PID. Waiting for port 8005..."
+# Wait specifically for the port to open
+while ! nc -z localhost 8005; do
+  sleep 1
+done
+echo "✅ Retriever is UP."
 conda deactivate
 
 # 1. GPU 0~2 background
