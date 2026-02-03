@@ -52,25 +52,22 @@ export VLLM_USE_V1=0
 # ===================================================== #
 # 0. Run retriever server (background)
 # ===================================================== #
-echo "🔍 Launching retriever server in Conda env \"$RETRIEVER_CONDA_ENV\" …"
-# Conda initialization
+echo "🔍 Launching retriever server..."
 source "$(conda info --base)/etc/profile.d/conda.sh"
+conda activate "$RETRIEVER_CONDA_ENV"
 
-(
-  conda activate "$RETRIEVER_CONDA_ENV"
-  # retriever background
-  CUDA_VISIBLE_DEVICES=$RETRIEVER_GPU_DEVICES \
-    python search/retriever_server.py \
-    > "$RETRIEVER_LOG" 2>&1 &
-  RETRIEVER_PID=$!
-  echo "🛰️  Retriever server started (PID: $RETRIEVER_PID, GPUs: $RETRIEVER_GPU_DEVICES)"
-  conda deactivate
-)&
-
+# Use GPU 4 or similar if available, or isolate them!
+# Let's keep Retriever on 2,3 but REMOVE vLLM from those GPUs.
+CUDA_VISIBLE_DEVICES=$RETRIEVER_GPU_DEVICES \
+  python search/retriever_server.py > "$RETRIEVER_LOG" 2>&1 &
+RETRIEVER_PID=$!
 PIDS+=($RETRIEVER_PID)
+echo "🛰️  Retriever started (PID: $RETRIEVER_PID). Waiting 15s for BERT..."
+sleep 15 # Give the retriever time to bind to its port
+conda deactivate
 
 # 1. GPU 0~2 background
-for i in 0 1 2; do
+for i in 0 1; do
   CMD="CUDA_VISIBLE_DEVICES=$i python serve_vllm.py \
     --model \"$BASE_MODEL\" \
     --port $((PORT_BASE + i)) \
@@ -79,7 +76,6 @@ for i in 0 1 2; do
     --dtype bfloat16 \
     --enforce-eager \
     --enable-lora \
-    --lora-modules finetune= $2 \
     --gpu-memory-utilization $GPU_MEMORY_UTILIZATION"
 
   if [ -n "$LORA_PATH" ]; then
@@ -102,7 +98,6 @@ CMD="CUDA_VISIBLE_DEVICES=$i python serve_vllm.py \
   --dtype bfloat16 \
   --enforce-eager \
   --enable-lora \
-  --lora-modules finetune=$2 \
   --gpu-memory-utilization $GPU_MEMORY_UTILIZATION"
 
 if [ -n "$LORA_PATH" ]; then
