@@ -20,12 +20,35 @@ VLLM_LOG="vllm_gpu0.log"
 
 cleanup() {
   echo "🧹 Total System Cleanup..."
-  # Kill by ports
-  fuser -k -9 ${PORT_BASE}/tcp ${PORT_RETRIEVER}/tcp 2>/dev/null
-  # Kill by process name
-  pkill -u $(whoami) -9 -f vllm
-  pkill -u $(whoami) -9 -f retriever_server
-  echo "✅ Clear."
+
+  # 1. Kill by Port (Works without root for your own processes)
+  # fuser -k is usually fine, but let's be more manual to be safe
+  for port in 8000 8005; do
+    PORT_PIDS=$(lsof -t -i:$port)
+    if [ -n "$PORT_PIDS" ]; then
+      echo "Killing processes on port $port..."
+      kill -9 $PORT_PIDS 2>/dev/null
+    fi
+  done
+
+  # 2. Target the specific "VLLM::EngineCore" string
+  # We use pgrep with -u to ensure you only kill your own processes
+  ENGINE_PIDS=$(pgrep -u $(whoami) -f "VLLM::EngineCore")
+  if [ -n "$ENGINE_PIDS" ]; then
+    echo "Terminating orphaned EngineCores: $ENGINE_PIDS"
+    echo $ENGINE_PIDS | xargs kill -9 2>/dev/null
+  fi
+
+  # 3. Catch the "truncated" name just in case
+  # Linux often truncates process names in the task structure
+  pkill -u $(whoami) -9 "VLLM::EngineCor" 2>/dev/null
+
+  # 4. Global wipe for any remaining python/vllm/retriever strings
+  pkill -u $(whoami) -9 -f "vllm"
+  pkill -u $(whoami) -9 -f "retriever_server"
+  pkill -u $(whoami) -9 -f "serve_vllm"
+
+  echo "✅ Cleanup finished (User mode)."
 }
 
 trap 'cleanup; exit 1' SIGINT SIGTERM
