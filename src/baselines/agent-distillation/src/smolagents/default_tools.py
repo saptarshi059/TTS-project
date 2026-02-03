@@ -313,7 +313,7 @@ class WikipediaRetrieverTool(Tool):
             self.port = kwargs["port"]
         else:
             self.port = "8005"
-        self.url = f"http://130.203.139.5:{self.port}/retrieve"
+        self.url = "http://130.203.139.5:8010/retrieve"
 
     def forward(self, query: str) -> str:
         import requests
