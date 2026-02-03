@@ -41,7 +41,7 @@ RETRIEVER_PID=$!
 conda deactivate
 
 # Wait for Retriever to actually be port-ready
-sleep 10
+sleep 30
 
 # 1. Start ONLY ONE vLLM instance on GPU 0
 echo "🚀 Starting vLLM on GPU $TARGET_GPU..."
