@@ -128,7 +128,7 @@ class WikipediaRetrieverTool(Tool):
         }
 
         # Send POST request
-        response = requests.post(self.url, json=payload)
+        response = requests.post(self.url, json=payload, timeout=120)
 
         # Raise an exception if the request failed
         response.raise_for_status()

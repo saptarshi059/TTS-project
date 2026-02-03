@@ -4,8 +4,8 @@
 export VLLM_WORKER_MULTIPROCESS_METHOD=spawn
 export TOKENIZERS_PARALLELISM=false
 # Limit the number of CPU threads for FAISS/OpenMP
-export OMP_NUM_THREADS=8
-export MKL_NUM_THREADS=8
+export OMP_NUM_THREADS=16
+export MKL_NUM_THREADS=16
 
 BASE_MODEL=$1
 LORA_PATH=$2
