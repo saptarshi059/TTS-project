@@ -71,11 +71,22 @@ PIDS+=($RETRIEVER_PID)
 
 # 1. GPU 0~2 background
 for i in 0 1 2; do
+
+
+  --max-num-seqs 4 \
+  --max-model-len 4096 \
+  --max-lora-rank 64
+
+
   CMD="CUDA_VISIBLE_DEVICES=$i python serve_vllm.py \
     --model \"$BASE_MODEL\" \
     --port $((PORT_BASE + i)) \
-    --max-num-seqs 16 \
-    --max-model-len 8192 \
+    --max-num-seqs 4 \
+    --max-model-len 4096 \
+    --dtype bfloat16 \
+    --enforce-eager \
+    --enable-lora \
+    --lora-modules finetune= $2 \
     --gpu-memory-utilization $GPU_MEMORY_UTILIZATION"
 
   if [ -n "$LORA_PATH" ]; then
@@ -93,8 +104,12 @@ LOG_FILE="vllm_gpu${i}.log"
 CMD="CUDA_VISIBLE_DEVICES=$i python serve_vllm.py \
   --model \"$BASE_MODEL\" \
   --port $((PORT_BASE + i)) \
-  --max-num-seqs 16 \
-  --max-model-len 8192 \
+  --max-num-seqs 4 \
+  --max-model-len 4096 \
+  --dtype bfloat16 \
+  --enforce-eager \
+  --enable-lora \
+  --lora-modules finetune=$2 \
   --gpu-memory-utilization $GPU_MEMORY_UTILIZATION"
 
 if [ -n "$LORA_PATH" ]; then

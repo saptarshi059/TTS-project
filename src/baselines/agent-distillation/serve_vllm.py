@@ -90,6 +90,10 @@ def main():
         type=int,
         help="maximum lora rank"
     )
+    parser.add_argument(
+        "--enforce-eager",
+        action="store_true",
+    )
 
     args = parser.parse_args()
 
@@ -106,6 +110,8 @@ def main():
         cmd.extend(["--max-model-len", str(args.max_model_len)])
     if args.max_num_seqs:
         cmd.extend(["--max-num-seqs", str(args.max_num_seqs)])
+    if args.enforce_eager:
+        cmd.extend(["--enforce-eager"])
     if args.gpu_memory_utilization:
         cmd.extend(["--gpu-memory-utilization", str(args.gpu_memory_utilization)])
     if args.tensor_parallel_size:
