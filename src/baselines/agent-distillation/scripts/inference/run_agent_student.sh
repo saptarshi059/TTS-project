@@ -6,7 +6,6 @@ export OMP_NUM_THREADS=1
 export MKL_NUM_THREADS=1
 export VLLM_WORKER_MULTIPROCESS_METHOD=spawn
 export TOKENIZERS_PARALLELISM=false
-export RAY_CHORD_MAX_RETRIES=1
 
 BASE_MODEL=$1
 LORA_PATH=$2 # set lora path here
@@ -14,7 +13,7 @@ EXP_TYPE="agent"
 PORT_BASE=8000
 GPU_MEMORY_UTILIZATION=0.5
 MAX_LORA_RANK=64
-N=8
+N=1
 TEMP=0.4
 
 MAX_TOKENS=1024
@@ -122,8 +121,6 @@ for dataset in "${!DATASETS[@]}"; do
     --model_type vllm \
     --model_id \"$BASE_MODEL\" \
     --max_tokens $MAX_TOKENS \
-    --multithreading \
-    --use_process_pool \
     --n $N --temperature $TEMP --top_p 0.8 \
     --seed 42 \
     --verbose"
