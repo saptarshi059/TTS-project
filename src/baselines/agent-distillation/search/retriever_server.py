@@ -4,7 +4,12 @@ import warnings
 from typing import List, Dict, Optional
 import argparse
 
+import os
+os.environ["OMP_NUM_THREADS"] = "8"
+os.environ["MKL_NUM_THREADS"] = "8"
+
 import faiss
+faiss.omp_set_num_threads(8)
 import torch
 import numpy as np
 from transformers import AutoConfig, AutoTokenizer, AutoModel
