@@ -71,10 +71,15 @@ echo "✅ Retriever is UP."
 conda deactivate
 
 # 1. GPU 0~2 background
-for i in 0 1; do
+for i in 0 1 2; do
+  echo "⏳ Pre-loading vLLM on GPU $i..."
+
+  # Logic: Each instance needs its own temp space to avoid lock contention
+  export VLLM_PORT=$((PORT_BASE + i))
+
   CMD="CUDA_VISIBLE_DEVICES=$i python serve_vllm.py \
     --model \"$BASE_MODEL\" \
-    --port $((PORT_BASE + i)) \
+    --port $VLLM_PORT \
     --dtype bfloat16 \
     --enforce-eager \
     --enable-lora \
@@ -84,9 +89,14 @@ for i in 0 1; do
     CMD="$CMD --lora-modules finetune=$LORA_PATH --max-lora-rank $MAX_LORA_RANK"
   fi
 
+  # RUN AND WAIT: Don't start the next one until this one is at least loading
   eval $CMD > vllm_gpu${i}.log 2>&1 &
   PIDS+=($!)
-  echo "🚀 Started vLLM on GPU $i (port $((PORT_BASE + i)))"
+
+  # CRITICAL: Wait 15-20 seconds between each GPU start
+  # This prevents the LoRA kernel compilation deadlock
+  sleep 20
+  echo "🚀 vLLM on GPU $i is initializing..."
 done
 
 # 2. GPU 3 execute + log monitoring
