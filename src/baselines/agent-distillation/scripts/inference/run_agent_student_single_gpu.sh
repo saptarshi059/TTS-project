@@ -59,11 +59,7 @@ LOG_FILE="vllm_gpu0.log"
 CUDA_VISIBLE_DEVICES=$TARGET_GPU python serve_vllm.py \
   --model "$BASE_MODEL" \
   --port $PORT_BASE \
-  --max-num-seqs 1 \
-  --max-model-len 1024 \
   --dtype bfloat16 \
-  --enforce-eager \
-  --enable-lora \
   --lora-modules finetune=$LORA_PATH \
   --max-lora-rank $MAX_LORA_RANK \
   --gpu-memory-utilization $GPU_MEMORY_UTILIZATION > "$LOG_FILE" 2>&1 &
