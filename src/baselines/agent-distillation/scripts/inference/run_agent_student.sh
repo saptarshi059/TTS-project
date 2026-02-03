@@ -31,17 +31,22 @@ declare -A DATASETS=(
 
 PIDS=()
 
-# 종료 핸들러 정의
 cleanup() {
-  echo ""
-  echo "🧹 Cleaning up vLLM servers..."
-  kill ${PIDS[*]} 2>/dev/null
-  # If the process is not cleaned well
-  ps -u $USER -o pid,command | grep 'vllm serve' | grep -v grep | awk '{print $1}' | xargs kill
+  echo "🧹 Cleaning up ports and processes..."
 
-  pgrep -f 'retriever_server.py' | xargs -r kill
-  wait
-  echo "✅ All vLLM servers stopped."
+  # 1. Kill by PIDs we tracked
+  kill ${PIDS[*]} 2>/dev/null
+
+  # 2. Kill anything listening on our range of ports
+  for i in {0..5}; do
+    fuser -k $((PORT_BASE + i))/tcp 2>/dev/null
+  done
+
+  # 3. Kill any stray vllm processes
+  pgrep -f 'vllm serve' | xargs -r kill -9
+  pgrep -f 'retriever_server.py' | xargs -r kill -9
+
+  echo "✅ Ports cleared and processes stopped."
 }
 
 # Ctrl-C 처리
