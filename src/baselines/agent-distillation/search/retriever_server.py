@@ -217,14 +217,37 @@ class DenseRetriever(BaseRetriever):
     def __init__(self, config):
         super().__init__(config)
         self.index = faiss.read_index(self.index_path)
+
+        # 1. Create a resource object
+        res = faiss.StandardGpuResources()
+
+        # 2. LIMIT THE TEMP MEMORY (Crucial!)
+        # 32GB was failing. Let's limit it to 1GB or 2GB.
+        # 1024 * 1024 * 1024 = 1GB
+        res.setTempMemory(1024 * 1024 * 1024)
+
         try:
+            if config.faiss_gpu:
+                # 3. Use the restricted resources 'res' when moving to GPU
+                # If you are using index_cpu_to_all_gpus:
+                co = faiss.GpuMultipleClonerOptions()
+                co.useFloat16 = True
+                co.shard = True
+                # Pass the resource object here if your version supports it,
+                # or use the single GPU cloner:
+                self.index = faiss.index_cpu_to_gpu(res, 0, self.index, co)
+                print("✅ Successfully moved index to GPU with memory limits")
+        except Exception as e:
+            print(f"❌ Failed to move index to GPU: {e}")
+
+        '''try:
             if config.faiss_gpu:
                 co = faiss.GpuMultipleClonerOptions()
                 co.useFloat16 = True
                 co.shard = True
                 self.index = faiss.index_cpu_to_all_gpus(self.index, co=co)
         except Exception as e:
-            print(f"Failed to move index to GPU, falling back to CPU: {e}")
+            print(f"Failed to move index to GPU, falling back to CPU: {e}")'''
 
         self.corpus = load_corpus(self.corpus_path)
         self.encoder = Encoder(
