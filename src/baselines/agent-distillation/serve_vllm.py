@@ -94,6 +94,11 @@ def main():
         "--enforce-eager",
         action="store_true",
     )
+    parser.add_argument(
+        "--enable-lora",
+        action="store_true",
+        help="Enable LoRA adapters for the vLLM engine."
+    )
 
     args = parser.parse_args()
 
