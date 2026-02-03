@@ -70,7 +70,7 @@ def run_experiment():
 
     # Agent-specific arguments
     parser.add_argument("--search_engine_type", type=str, default="wikipedia", help="Search engine for agent tool")
-    parser.add_argument("--max_steps", type=int, default=5, help="Maximum number of steps for agent")
+    parser.add_argument("--max_steps", type=int, default=1, help="Maximum number of steps for agent")
     parser.add_argument("--use_planning", action="store_true", help="Enable planning in agent")
     parser.add_argument("--prefix_memory", type=str, help="Path for prefix memory")
     parser.add_argument("--cot_memory", type=str, help="Path for CoT memory")
