@@ -390,4 +390,4 @@ def retrieve_endpoint(request: QueryRequest):
 
 if __name__ == "__main__":
     # 3) Launch the server. By default, it listens on http://127.0.0.1:8000
-    uvicorn.run(app, host="0.0.0.0", port=8005, timeout_keep_alive=60, limit_concurrency=10)
+    uvicorn.run(app, host="0.0.0.0", port=8000, timeout_keep_alive=60, limit_concurrency=10)
