@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # ===================== User Setting ===================== #
-BASE_MODEL="Qwen/Qwen2.5-1.5B-Instruct"
-LORA_PATH="training_outputs/qwen-1.5B-instruct/cot_baseline_qwen2.5_32B_teacher" # set lora path here
+BASE_MODEL=$1
+LORA_PATH=$2
 EXP_TYPE="reasoning"
 PORT_BASE=8000
 GPU_MEMORY_UTILIZATION=0.6
