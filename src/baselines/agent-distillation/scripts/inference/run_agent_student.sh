@@ -63,7 +63,7 @@ CUDA_VISIBLE_DEVICES=$RETRIEVER_GPU_DEVICES \
 RETRIEVER_PID=$!
 PIDS+=($RETRIEVER_PID)
 echo "🛰️  Retriever started (PID: $RETRIEVER_PID). Waiting 15s for BERT..."
-sleep 15 # Give the retriever time to bind to its port
+sleep 30 # Give the retriever time to bind to its port
 conda deactivate
 
 # 1. GPU 0~2 background
@@ -71,8 +71,6 @@ for i in 0 1; do
   CMD="CUDA_VISIBLE_DEVICES=$i python serve_vllm.py \
     --model \"$BASE_MODEL\" \
     --port $((PORT_BASE + i)) \
-    --max-num-seqs 4 \
-    --max-model-len 4096 \
     --dtype bfloat16 \
     --enforce-eager \
     --enable-lora \
@@ -93,8 +91,6 @@ LOG_FILE="vllm_gpu${i}.log"
 CMD="CUDA_VISIBLE_DEVICES=$i python serve_vllm.py \
   --model \"$BASE_MODEL\" \
   --port $((PORT_BASE + i)) \
-  --max-num-seqs 4 \
-  --max-model-len 4096 \
   --dtype bfloat16 \
   --enforce-eager \
   --enable-lora \
