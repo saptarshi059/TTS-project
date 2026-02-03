@@ -12,7 +12,7 @@ BASE_MODEL=$1
 LORA_PATH=$2 # set lora path here
 EXP_TYPE="agent"
 PORT_BASE=8000
-GPU_MEMORY_UTILIZATION=0.4
+GPU_MEMORY_UTILIZATION=0.6
 MAX_LORA_RANK=64
 N=8
 TEMP=0.4
@@ -20,7 +20,7 @@ TEMP=0.4
 MAX_TOKENS=1024
 
 RETRIEVER_CONDA_ENV="retriever"          # retriever conda
-RETRIEVER_GPU_DEVICES="2"              # retriever GPU
+RETRIEVER_GPU_DEVICES="2,3"              # retriever GPU
 RETRIEVER_LOG="retriever_server.log"     # retriever path
 # ===================================================== #
 
@@ -55,18 +55,17 @@ export VLLM_USE_V1=0
 echo "🔍 Launching retriever server in Conda env \"$RETRIEVER_CONDA_ENV\" …"
 # Conda initialization
 source "$(conda info --base)/etc/profile.d/conda.sh"
-conda activate "$RETRIEVER_CONDA_ENV"
 
-# Use nohup to prevent SIGHUP and run directly in this shell
-CUDA_VISIBLE_DEVICES=$RETRIEVER_GPU_DEVICES \
-  nohup python search/retriever_server.py > "$RETRIEVER_LOG" 2>&1 &
-
-RETRIEVER_PID=$!
-PIDS+=($RETRIEVER_PID)
-disown $RETRIEVER_PID
-
-echo "🛰️  Retriever server started (PID: $RETRIEVER_PID)"
-conda deactivate
+(
+  conda activate "$RETRIEVER_CONDA_ENV"
+  # retriever background
+  CUDA_VISIBLE_DEVICES=$RETRIEVER_GPU_DEVICES \
+    python search/retriever_server.py \
+    > "$RETRIEVER_LOG" 2>&1 &
+  RETRIEVER_PID=$!
+  echo "🛰️  Retriever server started (PID: $RETRIEVER_PID, GPUs: $RETRIEVER_GPU_DEVICES)"
+  conda deactivate
+)&
 
 PIDS+=($RETRIEVER_PID)
 
