@@ -77,16 +77,22 @@ done
 echo "✅ Retriever is UP."
 conda deactivate
 
-# 1. GPU 0~2 background
-for i in 0 1 2; do
-  echo "⏳ Pre-loading vLLM on GPU $i..."
+# 1. Start all GPUs (0, 1, 2, and 3) in one clean loop
+for i in 0 1 2 3; do
+  VLLM_PORT=$((PORT_BASE + i))
+  # This is the "secret sauce": force each instance to use a unique internal port
+  DIST_PORT=$((20000 + i))
 
-  # Logic: Each instance needs its own temp space to avoid lock contention
-  export VLLM_PORT=$((PORT_BASE + i))
+  echo "⏳ Launching vLLM on GPU $i (Port: $VLLM_PORT, Dist Port: $DIST_PORT)..."
 
+  # Build the command
   CMD="CUDA_VISIBLE_DEVICES=$i python serve_vllm.py \
     --model \"$BASE_MODEL\" \
+    --host 127.0.0.1 \
     --port $VLLM_PORT \
+    --distributed-init-method tcp://127.0.0.1:$DIST_PORT \
+    --max-num-seqs 2 \
+    --max-model-len 4096 \
     --dtype bfloat16 \
     --enforce-eager \
     --enable-lora \
@@ -96,41 +102,24 @@ for i in 0 1 2; do
     CMD="$CMD --lora-modules finetune=$LORA_PATH --max-lora-rank $MAX_LORA_RANK"
   fi
 
-  # RUN AND WAIT: Don't start the next one until this one is at least loading
+  # Execute and background
   eval $CMD > vllm_gpu${i}.log 2>&1 &
   PIDS+=($!)
 
-  # CRITICAL: Wait 15-20 seconds between each GPU start
-  # This prevents the LoRA kernel compilation deadlock
-  sleep 20
-  echo "🚀 vLLM on GPU $i is initializing..."
-done
-
-# 2. GPU 3 execute + log monitoring
-i=3
-LOG_FILE="vllm_gpu${i}.log"
-CMD="CUDA_VISIBLE_DEVICES=$i python serve_vllm.py \
-  --model \"$BASE_MODEL\" \
-  --port $((PORT_BASE + i)) \
-  --dtype bfloat16 \
-  --enforce-eager \
-  --enable-lora \
-  --gpu-memory-utilization $GPU_MEMORY_UTILIZATION"
-
-if [ -n "$LORA_PATH" ]; then
-  CMD="$CMD --lora-modules finetune=$LORA_PATH --max-lora-rank $MAX_LORA_RANK"
-fi
-
-eval $CMD > "$LOG_FILE" 2>&1 &
-PIDS+=($!)
-echo "📺 Started final vLLM on GPU $i (port $((PORT_BASE + i))), watching for startup completion..."
-
-# 3. wait until "Application startup complete." detected
-( tail -n 0 -f "$LOG_FILE" & ) | while read line; do
-  echo "$line"
-  if [[ "$line" == *"Application startup complete."* ]]; then
-    echo "✅ vLLM fully started, launching reasoning agent!"
-    break
+  # If this is the LAST GPU (i=3), we wait for it to be fully ready
+  if [ $i -eq 3 ]; then
+    echo "📺 Watching GPU 3 logs for startup completion..."
+    # This replaces your old 'tail' section
+    ( tail -n 0 -f "vllm_gpu3.log" & ) | while read line; do
+      echo "$line"
+      if [[ "$line" == *"Application startup complete."* ]]; then
+        echo "✅ All vLLM servers are UP! Launching Agent..."
+        break
+      fi
+    done
+  else
+    # For GPUs 0, 1, and 2, just wait 20s before starting the next one
+    sleep 20
   fi
 done
 
