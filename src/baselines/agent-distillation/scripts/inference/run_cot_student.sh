@@ -7,7 +7,6 @@ export TOKENIZERS_PARALLELISM=false
 export OMP_NUM_THREADS=16
 export MKL_NUM_THREADS=16
 
-
 BASE_MODEL=$1
 LORA_PATH=$2
 EXP_TYPE="reasoning"
@@ -17,13 +16,8 @@ MAX_LORA_RANK=64
 
 declare -A DATASETS=(
   ["hotpotqa"]="data_processor/qa_dataset/test/hotpotqa_500_20250422.json"
-  ["math"]="data_processor/math_dataset/test/math_500_20250414.json"
-  ["aime"]="data_processor/math_dataset/test/aime_90_20250504.json"
   ["musique"]="data_processor/qa_dataset/test/musique_500_20250504.json"
-  ["bamboogle"]="data_processor/qa_dataset/test/bamboogle_125_20250507.json"
-  ["gsm"]="data_processor/math_dataset/test/gsm_hard_500_20250507.json"
   ["2wiki"]="data_processor/qa_dataset/test/2wikimultihopqa_500_20250511.json"
-  ["olymath"]="data_processor/math_dataset/test/olymath_200_20250511.json"
 )
 MAX_TOKENS=4096
 # ===================================================== #
@@ -118,6 +112,7 @@ for dataset in "${!DATASETS[@]}"; do
     --experiment_type \"$EXP_TYPE\" \
     --data_path \"${DATASETS[$dataset]}\" \
     --model_type vllm \
+    --use_rag \
     --model_id \"$BASE_MODEL\" \
     --max_tokens $MAX_TOKENS \
     --multithreading \
