@@ -20,7 +20,7 @@ TEMP=0.4
 MAX_TOKENS=1024
 
 RETRIEVER_CONDA_ENV="retriever"          # retriever conda
-RETRIEVER_GPU_DEVICES="2,3"              # retriever GPU
+RETRIEVER_GPU_DEVICES="2"              # retriever GPU
 RETRIEVER_LOG="retriever_server.log"     # retriever path
 # ===================================================== #
 
