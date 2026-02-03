@@ -71,7 +71,7 @@ PIDS+=($RETRIEVER_PID)
 
 echo "🛰️  Retriever PID: $RETRIEVER_PID. Waiting for port 8005..."
 # Wait specifically for the port to open
-while ! nc -z localhost 8010; do
+while ! nc -z localhost 8005; do
   sleep 1
 done
 echo "✅ Retriever is UP."
