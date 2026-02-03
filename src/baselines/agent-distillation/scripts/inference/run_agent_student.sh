@@ -11,7 +11,7 @@ BASE_MODEL=$1
 LORA_PATH=$2 # set lora path here
 EXP_TYPE="agent"
 PORT_BASE=8000
-GPU_MEMORY_UTILIZATION=0.5
+GPU_MEMORY_UTILIZATION=0.6
 MAX_LORA_RANK=64
 N=1
 TEMP=0.4
@@ -62,7 +62,7 @@ CUDA_VISIBLE_DEVICES=$RETRIEVER_GPU_DEVICES \
 RETRIEVER_PID=$!
 PIDS+=($RETRIEVER_PID)
 echo "🛰️  Retriever started (PID: $RETRIEVER_PID). Waiting 15s for BERT..."
-sleep 30 # Give the retriever time to bind to its port
+sleep 15 # Give the retriever time to bind to its port
 conda deactivate
 
 # 1. GPU 0~2 background
