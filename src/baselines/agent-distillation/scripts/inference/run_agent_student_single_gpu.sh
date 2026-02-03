@@ -9,7 +9,7 @@ LORA_PATH=$2
 EXP_TYPE="agent"
 PORT_BASE=8000
 # REDUCED memory to leave room for Retriever and Agent
-GPU_MEMORY_UTILIZATION=0.7
+GPU_MEMORY_UTILIZATION=0.5
 MAX_LORA_RANK=64
 N=1  # Keep it simple for stability
 
