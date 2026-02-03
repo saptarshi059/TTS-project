@@ -9,7 +9,7 @@ LORA_PATH=$2
 EXP_TYPE="agent"
 PORT_BASE=8000
 # REDUCED memory to leave room for Retriever and Agent
-GPU_MEMORY_UTILIZATION=0.5
+GPU_MEMORY_UTILIZATION=0.2
 MAX_LORA_RANK=64
 N=1  # Keep it simple for stability
 
@@ -59,7 +59,7 @@ LOG_FILE="vllm_gpu0.log"
 CUDA_VISIBLE_DEVICES=$TARGET_GPU python serve_vllm.py \
   --model "$BASE_MODEL" \
   --port $PORT_BASE \
-  --max-num-seqs 2 \
+  --max-num-seqs 1 \
   --dtype bfloat16 \
   --enforce-eager \
   --enable-lora \
