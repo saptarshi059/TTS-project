@@ -17,7 +17,7 @@ def main():
                                data_files=str(base_path / "search/database/wikipedia/wiki-18.jsonl"))
 
     print("Loading Index...")
-    cpu_index = faiss.read_index(str(base_path / "e5_Flat.index"))
+    cpu_index = faiss.read_index(str(base_path / "search/database/wikipedia/e5_Flat.index"))
 
     # 3. Transfer the existing index to the GPU
     # '0' refers to the GPU ID. If you have multiple GPUs, you can specify which one to use.
