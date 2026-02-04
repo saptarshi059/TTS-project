@@ -4,6 +4,7 @@ from datasets import load_dataset, tqdm, Dataset
 from sentence_transformers import SentenceTransformer
 from peft import PeftModel
 from transformers import AutoModelForCausalLM, AutoTokenizer
+import re
 
 
 def load_everything():
@@ -64,13 +65,14 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
 
             with torch.no_grad():
                 generated_text = tokenizer.decode(slm.generate(**model_inputs, max_new_tokens=100)[0])
+                generated_text = generated_text.split(input_text)[-1]
 
-            if "Final Answer:" in generated_text:
+            if re.search(r"FINAL ANSWER:", generated_text, re.IGNORECASE):
                 responses[question] = generated_text
                 break
 
-            if "Thought:" in generated_text:
-                thought = generated_text.split(input_text)[-1].split("Thought:")[-1].strip()
+            if re.search(r"THOUGHT:", generated_text):
+                thought = generated_text.split("THOUGHT:")[-1].strip()
                 all_thoughts.append(f"THOUGHT {step}: {thought}")
                 print(f"Searching for documents related to: {thought}")
                 new_docs_indices = index.search(embedding_model(f"query: {thought}"), k=3)
