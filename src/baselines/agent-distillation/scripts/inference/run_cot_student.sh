@@ -8,7 +8,7 @@ BASE_MODEL=$1
 LORA_PATH=$2
 EXP_TYPE="reasoning"
 PORT_BASE=8000
-GPU_MEMORY_UTILIZATION=0.6
+GPU_MEMORY_UTILIZATION=0.4
 MAX_LORA_RANK=64
 
 declare -A DATASETS=(
@@ -57,7 +57,7 @@ cleanup() {
 
 # Ctrl-C
 trap 'echo ""; echo "❌ Interrupted!"; cleanup; exit 1' SIGINT SIGTERM
-# export VLLM_USE_V1=0
+export VLLM_USE_V1=0
 
 # 0. run retriever as background if
 
