@@ -120,7 +120,6 @@ for dataset in "${!DATASETS[@]}"; do
     --max_tokens $MAX_TOKENS \
     --parallel_workers 1 \
     --use_single_endpoint \
-    --task_type "fact" \
     --n 1 --temperature 0.0 --top_p 0.8 \
     --seed 42 \
     --verbose"

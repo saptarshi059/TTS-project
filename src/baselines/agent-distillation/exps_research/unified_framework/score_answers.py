@@ -1,16 +1,14 @@
-import os
 import json
-import time
-from typing import Dict, List
-from smolagents import OpenAIServerModel
-from datetime import datetime
-from pathlib import Path
-from copy import deepcopy
+import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from tqdm import tqdm
-from pydantic import BaseModel
+from copy import deepcopy
+from pathlib import Path
+from typing import Dict
+
 from evaluate import load
-import re
+from pydantic import BaseModel
+from smolagents import OpenAIServerModel
+from tqdm import tqdm
 
 try:
     from .math_utils.qwen_math_parser import extract_answer
@@ -60,9 +58,6 @@ def evaluate_factual_answer(
     squad_metric = load("squad")
     if predicted is None:
         predicted = ""
-    else:
-        match = re.search(r'Answer: (.*)', predicted)
-        predicted = match.group(1) if match else ""
 
     predictions = [{'prediction_text': predicted, 'id': '1'}]
     references = [{'answers': {'answer_start': [0], 'text': [gold]}, 'id': '1'}]
