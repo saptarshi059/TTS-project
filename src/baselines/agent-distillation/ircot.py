@@ -45,7 +45,7 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
         all_thoughts = []
         messages = [{"role": "system", "content": "You are given supporting facts to answer the given question. "
                                                   "If you cannot answer the question, then you can request for more information by formatting your output as, THOUGHT: <required information>. "
-                                                  "Please provide your THOUGHT as a search request, similar to the provided example. "
+                                                  "Please provide your THOUGHT as a search request, similar to the provided example. If you cannot find the needed information, use a different search request. "
                                                   "ONLY when you have the needed information say FINAL ANSWER: <final_answer>. "
                                                   "Respond with either 'THOUGHT: ...' or 'FINAL ANSWER: ... but NOT BOTH. "
                                                   "EXAMPLE:"
@@ -71,9 +71,8 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
             final_match = re.search(r"FINAL ANSWER\s*:\s*(.*)", generated_text, re.IGNORECASE | re.DOTALL)
             thought_match = re.search(r"THOUGHT\s*:\s*(.*)", generated_text, re.IGNORECASE | re.DOTALL)
 
+            print(messages, "\n-------------------")
             print(generated_text, "\n................")
-            print(thought_match)
-
 
             if final_match:
                 # Extract just the answer part after the colon
