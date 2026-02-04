@@ -96,7 +96,7 @@ def main():
         print(f"Working on {dataset_name}...")
         dataset = load_dataset('json',
                                data_files=f"../../../data/{dataset_name}/test.json",
-                               split='train').select(range(2))
+                               split='train')
 
         all_questions = [row['question'] for row in dataset]
         dataset_responses = run_ircot(all_questions, wiki_corpus, index, embedding_model, slm, tokenizer)
@@ -106,7 +106,6 @@ def main():
                                          "gold_answers": gold_answers,
                                          "response": list(dataset_responses.values())})
         response_ds.save_to_disk(f"{dataset_name}_responses")
-        break
 
 
 if __name__ == "__main__":
