@@ -43,8 +43,9 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
         collected_context = set()
         messages = [{"role": "system", "content": "You are given supporting facts to answer the given question. "
                                                   "If you cannot answer the question, then you can request for more information. "
-                                                  "In case you need more information, format your output as, Thought: <query>. "
-                                                  "If you feel like you are ready to answer, please format your output as, Final Answer: <answer>."},
+                                                  "In case you need more information, format your output as, Thought: <required information>. "
+                                                  "ONLY when you can provide your final answer, say Final Answer: <final_answer>. "
+                                                  "Otherwise, always use the Thought: field."},
                     {"role": "user", "content": f"QUESTION: {question}"}]
 
         for step in range(5):
