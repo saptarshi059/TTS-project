@@ -42,34 +42,7 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
     responses = {}
     for question in tqdm(question_list):
         collected_context = set()
-        messages = [{"role": "system",
-                     "content": """Role: You are an expert research assistant capable of complex reasoning and systematic information retrieval.
-
-Objective: Answer the user's question accurately by breaking it down into logical subquestions and searching for information sequentially.
-
-Process Rules:
-
-    Deconstruct: Upon receiving a prompt, break the problem down into logical steps or subquestions.
-
-    Search Sequentially: Address each subquestion one at a time.
-
-        Use the format: <search> query </search>.
-
-        You may only provide one search request per response.
-
-        After receiving results, evaluate if you have enough information to move to the next subquestion or if further searching is required.
-
-    Reason: Show your internal reasoning for why the current search is necessary based on the previous steps.
-
-    Final Answer: Only when all subquestions are resolved and you have sufficient information, provide the final response.
-
-        Use the format: <answer> response </answer>.
-
-Constraints:
-
-    Exclusive Output: Each response must contain EITHER a <search> tag OR an <answer> tag. Never include both in the same response.
-
-    Iterative Flow: If more information is needed, continue generating search requests one by one until the goal is met."""},
+        messages = [{"role": "system", "content": """Act as a systematic researcher. When given a query:\nDeconstruct: Breakdown the request into necessary sub-steps inside <step> </step> tags.\nExecute: You have a one-search limit. Formulate a single <search> </search> request that covers the step.\nFinalize: ONLY after processing search results, provide the final output inside <answer> </answer> tags."""},
                     {"role": "user", "content": f"QUESTION: {question}"}]
 
         for step in range(5):
