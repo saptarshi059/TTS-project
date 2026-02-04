@@ -41,7 +41,7 @@ def main():
 
         distances, indices = gpu_index.search(question_embeddings, 3) # Take top-3 docs
 
-        all_retrieved_data = []
+        all_retrieved_data = {}
 
         # 1. Efficiently grab all documents at once. This is the 'heavy' part for the disk/RAM
         print("Fetching document text from dataset...")
@@ -63,7 +63,7 @@ def main():
                 entry = f"\n\n===== Document {i}, Score: {dist:.2f} =====\n{doc_content}"
                 doc_entries.append(entry)
 
-            all_retrieved_data.append({questions_dataset[q_idx]: "\nRetrieved documents:" + "".join(doc_entries)})
+            all_retrieved_data[questions_dataset[q_idx]] = "\nRetrieved documents:" + "".join(doc_entries)
 
         # 3. Save to JSON
         print(f"Saving to JSON...")
