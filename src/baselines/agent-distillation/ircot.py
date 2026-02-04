@@ -71,6 +71,10 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
             final_match = re.search(r"FINAL ANSWER\s*:\s*(.*)", generated_text, re.IGNORECASE | re.DOTALL)
             thought_match = re.search(r"THOUGHT\s*:\s*(.*)", generated_text, re.IGNORECASE | re.DOTALL)
 
+            print(generated_text, "\n................")
+            print(thought_match)
+
+
             if final_match:
                 # Extract just the answer part after the colon
                 responses[question] = final_match.group(1).strip()
@@ -78,8 +82,6 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
 
             if thought_match:
                 raw_thought = thought_match.group(1).strip()
-
-                print(raw_thought)
 
                 # CLEANING STEP:
                 # LLMs sometimes generate "THOUGHT: I should look for X. (Retrieving...)"
@@ -110,7 +112,7 @@ def main():
         print(f"Working on {dataset_name}...")
         dataset = load_dataset('json',
                                data_files=f"../../../data/{dataset_name}/test.json",
-                               split='train').select(1)
+                               split='train').select(range(0))
 
         all_questions = [row['question'] for row in dataset]
         dataset_responses = run_ircot(all_questions, wiki_corpus, index, embedding_model, slm, tokenizer)
