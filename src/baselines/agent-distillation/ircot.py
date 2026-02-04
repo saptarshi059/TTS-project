@@ -46,7 +46,7 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
                      "content": """
 You are an expert assistant who can answer the given question accurately and provide clear reasoning.
 If you cannot answer the question, then you can request for more information by formatting your output with <thought> xxx </thought>. You can ONLY generate 1 thought.
-Please provide your thought as a search request, similar to the provided example. 
+Please provide your thought as a direct search request, similar to the provided example. 
 If you cannot find the needed information, use a different search request. 
 ONLY when you have the needed information say <answer> xxx </answer>. 
 Respond with either <thought> xxx </thought> or <answer> xxx </answer> but NOT BOTH. 
@@ -57,7 +57,9 @@ QUESTION: When was the last time Brazil won the FIFA world cup?
 Get documents with Brazil's world cup records.
 </thought>
 SUPPORTING FACTS: Brazil won in 1958, 1962, 1970, 1994, 2002.
-FINAL ANSWER: Brazil won last time in 2002.
+<answer>
+Brazil won last time in 2002.
+</answer>
 """},
                     {"role": "user", "content": f"QUESTION: {question}"}]
 
