@@ -83,7 +83,7 @@ def main():
     all_datasets = ["2wikimultihopqa", "hotpotqa", "musique"]
 
     for dataset_name in tqdm(all_datasets):
-        print(f"Working on {dataset}...")
+        print(f"Working on {dataset_name}...")
         dataset = load_dataset('json',
                                data_files=f"../../../data/{dataset_name}/test.json",
                                split='train').select(range(2))
