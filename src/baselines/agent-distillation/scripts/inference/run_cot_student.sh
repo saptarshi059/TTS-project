@@ -3,6 +3,7 @@
 # ===================== User Setting ===================== #
 export VLLM_WORKER_MULTIPROCESS_METHOD=spawn
 export TOKENIZERS_PARALLELISM=false
+export TRANSFORMERS_RE-REGISTER_CONFIG=1
 
 export OPENBLAS_NUM_THREADS=1
 export OMP_NUM_THREADS=1
