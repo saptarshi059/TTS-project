@@ -43,13 +43,14 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
     for question in tqdm(question_list):
         collected_context = set()
         all_thoughts = []
-        messages = [{"role": "system", "content": "You are given supporting facts to answer the given question. "
-                                                  "If you cannot answer the question, then you can request for more information by formatting your output as, THOUGHT: <required information>. "
-                                                  "ONLY when you have the needed information say FINAL ANSWER: <final_answer>. "
+        messages = [{"role": "system", "content": "You are given supporting facts to answer the given question."
+                                                  "If you cannot answer the question, then you can request for more information by formatting your output as, THOUGHT: <required information>."
+                                                  "Please provide your THOUGHT as a search request, similar to the provided example."
+                                                  "ONLY when you have the needed information say FINAL ANSWER: <final_answer>."
                                                   "Respond with either 'THOUGHT: ...' or 'FINAL ANSWER: ... but not both."
                                                   "EXAMPLE:"
                                                   "QUESTION: When was the last time Brazil won the FIFA world cup?"
-                                                  "THOUGHT: I need to get a document with Brazil's world cup records."
+                                                  "THOUGHT: Get documents with Brazil's world cup records."
                                                   "SUPPORTING FACTS: Brazil won in 1958, 1962, 1970, 1994, 2002."
                                                   "FINAL ANSWER: Brazil won last time in 2002."},
                     {"role": "user", "content": f"QUESTION: {question}"}]
@@ -67,12 +68,23 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
                 generated_text = tokenizer.decode(slm.generate(**model_inputs, max_new_tokens=100)[0])
                 generated_text = generated_text.split(input_text)[-1]
 
-            if re.search(r"FINAL ANSWER:", generated_text, re.IGNORECASE):
-                responses[question] = generated_text
+            final_match = re.search(r"FINAL ANSWER\s*:\s*(.*)", generated_text, re.IGNORECASE | re.DOTALL)
+            thought_match = re.search(r"THOUGHT\s*:\s*(.*)", generated_text, re.IGNORECASE | re.DOTALL)
+
+            if final_match:
+                # Extract just the answer part after the colon
+                responses[question] = final_match.group(1).strip()
                 break
 
-            if re.search(r"THOUGHT:", generated_text):
-                thought = generated_text.split("THOUGHT:")[-1].strip()
+            if thought_match:
+                raw_thought = thought_match.group(1).strip()
+
+                # CLEANING STEP:
+                # LLMs sometimes generate "THOUGHT: I should look for X. (Retrieving...)"
+                # We want to strip any trailing sentences or meta-commentary.
+                # This split grabs the first sentence or first line only.
+                thought = raw_thought.split('\n')[0].split('. ')[0].strip()
+
                 all_thoughts.append(f"THOUGHT {step}: {thought}")
                 print(f"Searching for documents related to: {thought}")
                 new_docs_indices = index.search(embedding_model.encode(f"query: {thought}", normalize_embeddings=True), k=3)
