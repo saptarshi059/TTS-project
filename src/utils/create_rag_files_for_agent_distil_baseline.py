@@ -11,10 +11,13 @@ def main():
     all_datasets = ["2wikimultihopqa_500_20250511.json", "hotpotqa_500_20250422.json", "musique_500_20250504.json"]
 
     print("Loading wikipedia database...")
-    wiki_corpus = load_dataset("json", data_files=str(base_path / "search/database/wikipedia/wiki-18.jsonl"))["train"]
+    wiki_corpus = load_dataset("json",
+                               split="train",
+                               num_proc=4,
+                               data_files=str(base_path / "search/database/wikipedia/wiki-18.jsonl"))
 
     print("Loading Index...")
-    cpu_index = faiss.read_index(base_path / "e5_Flat.index")
+    cpu_index = faiss.read_index(str(base_path / "e5_Flat.index"))
 
     # 3. Transfer the existing index to the GPU
     # '0' refers to the GPU ID. If you have multiple GPUs, you can specify which one to use.
