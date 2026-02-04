@@ -67,7 +67,6 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
 
             if search_match:
                 thought = search_match.group(1).strip()
-                print(f"Searching for documents related to: {thought}")
                 _, new_docs_indices = index.search(embedding_model.encode([f"query: {thought}"], normalize_embeddings=True), k=3)
                 for idx in new_docs_indices[0]:
                     if idx != -1:
@@ -77,7 +76,6 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
 
         # If the model could not find an answer.
         if question not in responses:
-            print("Model could not find an answer...")
             responses[question] = ""
 
     return responses
