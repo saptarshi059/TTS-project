@@ -32,7 +32,7 @@ def main():
         print(f"Working on {dataset}...")
         dataset_path = base_path / f"data_processor/qa_dataset/test/{dataset}"
         with Path(dataset_path).open("r") as f:
-            questions_dataset = json.load(f)["examples"]
+            questions_dataset = [x['question'] for x in json.load(f)["examples"]]
 
         # Have to append "query" for e5
         all_questions = [f"query: {ques}" for ques in questions_dataset]
@@ -63,7 +63,7 @@ def main():
                 entry = f"\n\n===== Document {i}, Score: {dist:.2f} =====\n{doc_content}"
                 doc_entries.append(entry)
 
-            all_retrieved_data.append({all_questions[q_idx]: "\nRetrieved documents:" + "".join(doc_entries)})
+            all_retrieved_data.append({questions_dataset[q_idx]: "\nRetrieved documents:" + "".join(doc_entries)})
 
         # 3. Save to JSON
         print(f"Saving to JSON...")
