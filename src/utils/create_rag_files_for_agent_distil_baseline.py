@@ -67,7 +67,7 @@ def main():
 
         # 3. Save to JSON
         print(f"Saving to JSON...")
-        with Path(base_path / f"data_processor/retrieved_documents/{dataset}.json").open("w", encoding="utf-8") as f:
+        with Path(base_path / f"data_processor/retrieved_documents/{dataset}").open("w", encoding="utf-8") as f:
             json.dump(all_retrieved_data, f, indent=4, ensure_ascii=False)
 
 if __name__ == "__main__":
