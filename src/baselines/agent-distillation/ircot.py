@@ -42,7 +42,6 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
     responses = {}
     for question in tqdm(question_list):
         collected_context = set()
-        all_thoughts = []
         messages = [{"role": "system",
                      "content": """
 You are an expert assistant who can answer the given question accurately and provide clear reasoning.
@@ -65,8 +64,7 @@ FINAL ANSWER: Brazil won last time in 2002.
         for step in range(5):
             if step != 0:
                 supporting_facts_string = "\n".join(collected_context)
-                thoughts_string = "\n".join(all_thoughts)
-                messages[1]["content"] = f"SUPPORTING FACTS: {supporting_facts_string}\nALL THOUGHTS: {thoughts_string}\nQUESTION: {question}"
+                messages[1]["content"] = f"SUPPORTING FACTS: {supporting_facts_string}\nQUESTION: {question}"
 
             input_text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
             model_inputs = tokenizer([input_text], return_tensors="pt").to(slm.device)
@@ -88,15 +86,7 @@ FINAL ANSWER: Brazil won last time in 2002.
                 break
 
             if thought_match:
-                raw_thought = thought_match.group(1).strip()
-
-                # CLEANING STEP:
-                # LLMs sometimes generate "THOUGHT: I should look for X. (Retrieving...)"
-                # We want to strip any trailing sentences or meta-commentary.
-                # This split grabs the first sentence or first line only.
-                thought = raw_thought.split('\n')[0].split('. ')[0].strip()
-
-                all_thoughts.append(f"THOUGHT {step}: {thought}")
+                thought = thought_match.group(1).strip()
                 print(f"Searching for documents related to: {thought}")
                 _, new_docs_indices = index.search(embedding_model.encode([f"query: {thought}"], normalize_embeddings=True), k=3)
                 for idx in new_docs_indices[0]:
