@@ -43,17 +43,23 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
     for question in tqdm(question_list):
         collected_context = set()
         all_thoughts = []
-        messages = [{"role": "system", "content": "You are given supporting facts to answer the given question. "
-                                                  "If you cannot answer the question, then you can request for more information by formatting your output as, THOUGHT: <required information>. "
-                                                  "Please provide your THOUGHT as a search request, similar to the provided example. If you cannot find the needed information, use a different search request. "
-                                                  "ONLY when you have the needed information say FINAL ANSWER: <final_answer>. "
-                                                  "You are allowed to generate only 1 THOUGHT. "
-                                                  "Respond with either 'THOUGHT: ...' or 'FINAL ANSWER: ... but NOT BOTH. "
-                                                  "EXAMPLE:"
-                                                  "QUESTION: When was the last time Brazil won the FIFA world cup?"
-                                                  "THOUGHT: Get documents with Brazil's world cup records."
-                                                  "SUPPORTING FACTS: Brazil won in 1958, 1962, 1970, 1994, 2002."
-                                                  "FINAL ANSWER: Brazil won last time in 2002."},
+        messages = [{"role": "system",
+                     "content": """
+You are an expert assistant who can answer the given question accurately and provide clear reasoning.
+If you cannot answer the question, then you can request for more information by formatting your output with <thought> xxx </thought>. You can ONLY generate 1 thought.
+Please provide your thought as a search request, similar to the provided example. 
+If you cannot find the needed information, use a different search request. 
+ONLY when you have the needed information say <answer> xxx </answer>. 
+Respond with either <thought> xxx </thought> or <answer> xxx </answer> but NOT BOTH. 
+
+EXAMPLE:
+QUESTION: When was the last time Brazil won the FIFA world cup?
+<thought> 
+Get documents with Brazil's world cup records.
+</thought>
+SUPPORTING FACTS: Brazil won in 1958, 1962, 1970, 1994, 2002.
+FINAL ANSWER: Brazil won last time in 2002.
+"""},
                     {"role": "user", "content": f"QUESTION: {question}"}]
 
         for step in range(5):
@@ -69,15 +75,15 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
                 generated_text = tokenizer.decode(slm.generate(**model_inputs, max_new_tokens=100)[0])
                 generated_text = generated_text.split(input_text)[-1]
 
-            final_match = re.search(r"FINAL ANSWER\s*:\s*(.*)", generated_text, re.IGNORECASE | re.DOTALL)
-            thought_match = re.search(r"THOUGHT\s*:\s*(.*)", generated_text, re.IGNORECASE | re.DOTALL)
+            answer_match = re.search(r"<answer>\s*:\s*(.*)</answer>", generated_text, re.IGNORECASE | re.DOTALL)
+            thought_match = re.search(r"<thought>\s*:\s*(.*)</thought>", generated_text, re.IGNORECASE | re.DOTALL)
 
             print(messages, "\n-------------------")
             print(generated_text, "\n................")
 
-            if final_match:
+            if answer_match:
                 # Extract just the answer part after the colon
-                responses[question] = final_match.group(1).strip()
+                responses[question] = answer_match.group(1).strip()
                 break
 
             if thought_match:
