@@ -115,7 +115,6 @@ for dataset in "${!DATASETS[@]}"; do
     --experiment_type \"$EXP_TYPE\" \
     --data_path \"${DATASETS[$dataset]}\" \
     --model_type vllm \
-    --use_rag \
     --model_id \"$BASE_MODEL\" \
     --max_tokens $MAX_TOKENS \
     --parallel_workers 1 \
