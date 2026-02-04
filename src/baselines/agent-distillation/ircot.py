@@ -43,11 +43,11 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
     for question in tqdm(question_list):
         collected_context = set()
         all_thoughts = []
-        messages = [{"role": "system", "content": "You are given supporting facts to answer the given question."
-                                                  "If you cannot answer the question, then you can request for more information by formatting your output as, THOUGHT: <required information>."
-                                                  "Please provide your THOUGHT as a search request, similar to the provided example."
-                                                  "ONLY when you have the needed information say FINAL ANSWER: <final_answer>."
-                                                  "Respond with either 'THOUGHT: ...' or 'FINAL ANSWER: ... but not both."
+        messages = [{"role": "system", "content": "You are given supporting facts to answer the given question. "
+                                                  "If you cannot answer the question, then you can request for more information by formatting your output as, THOUGHT: <required information>. "
+                                                  "Please provide your THOUGHT as a search request, similar to the provided example. "
+                                                  "ONLY when you have the needed information say FINAL ANSWER: <final_answer>. "
+                                                  "Respond with either 'THOUGHT: ...' or 'FINAL ANSWER: ... but NOT BOTH. "
                                                   "EXAMPLE:"
                                                   "QUESTION: When was the last time Brazil won the FIFA world cup?"
                                                   "THOUGHT: Get documents with Brazil's world cup records."
