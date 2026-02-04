@@ -20,7 +20,7 @@ def load_everything():
 
     # 3. Transfer the existing index to the GPU
     # '0' refers to the GPU ID. If you have multiple GPUs, you can specify which one to use.
-    print("Moving Index to GPUs...")
+    print("Moving Index to GPU...")
     gpu_index = faiss.index_cpu_to_gpu(res, 0, cpu_index)
     print("Index Loaded...")
 
@@ -86,12 +86,12 @@ def main():
         print(f"Working on {dataset}...")
         dataset = load_dataset('json',
                                data_files=f"../../../data/{dataset}/test.json",
-                               split='train').select(range(5))
+                               split='train').select(range(2))
 
         all_questions = [row['question'] for row in dataset]
         dataset_responses = run_ircot(all_questions, wiki_corpus, index, embedding_model, slm, tokenizer)
         print("Saving responses...")
-        gold_answers = [row['Answer'] for row in dataset]
+        gold_answers = [row['answer'] for row in dataset]
         response_ds = Dataset.from_dict({"question": list(dataset_responses.keys()),
                                          "gold_answers": gold_answers,
                                          "response": list(dataset_responses.values())})
