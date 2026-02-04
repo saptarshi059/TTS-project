@@ -82,10 +82,10 @@ def main():
     wiki_corpus, index, embedding_model, slm, tokenizer = load_everything()
     all_datasets = ["2wikimultihopqa", "hotpotqa", "musique"]
 
-    for dataset in tqdm(all_datasets):
+    for dataset_name in tqdm(all_datasets):
         print(f"Working on {dataset}...")
         dataset = load_dataset('json',
-                               data_files=f"../../../data/{dataset}/test.json",
+                               data_files=f"../../../data/{dataset_name}/test.json",
                                split='train').select(range(2))
 
         all_questions = [row['question'] for row in dataset]
@@ -95,7 +95,7 @@ def main():
         response_ds = Dataset.from_dict({"question": list(dataset_responses.keys()),
                                          "gold_answers": gold_answers,
                                          "response": list(dataset_responses.values())})
-        response_ds.save_to_disk(f"{dataset}_responses")
+        response_ds.save_to_disk(f"{dataset_name}_responses")
         break
 
 
