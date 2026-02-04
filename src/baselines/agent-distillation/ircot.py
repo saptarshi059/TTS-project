@@ -44,11 +44,11 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
         collected_context = set()
         messages = [{"role": "system",
                      "content": """
-You are an expert assistant who can answer the given question accurately and provide clear reasoning.
-You can search documents by formatting your output as <search> xxx </search>. You can ONLY generate 1 search request.
-Always breakdown a question into subquestions and make search requests for each subquestion.
-ONLY when you have the needed information say <answer> xxx </answer>. 
-Respond with either <search> or <answer> but NOT BOTH. """},
+Act as a systematic researcher. When given a query:
+Deconstruct: Mentally break the request into necessary sub-steps.
+Execute: You have a one-search limit. Formulate a single <search> xxx </search> request that covers all sub-steps.
+Finalize: Only after processing search results, provide the final output inside <answer> xxx </answer> tags.
+Strict Rule: Every response must contain either a search tag or an answer tag, but never both."""},
                     {"role": "user", "content": f"QUESTION: {question}"}]
 
         for step in range(5):
