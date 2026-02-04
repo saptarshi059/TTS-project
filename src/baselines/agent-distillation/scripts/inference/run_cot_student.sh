@@ -3,9 +3,6 @@
 # ===================== User Setting ===================== #
 export VLLM_WORKER_MULTIPROCESS_METHOD=spawn
 export TOKENIZERS_PARALLELISM=false
-# Limit the number of CPU threads for FAISS/OpenMP
-export OMP_NUM_THREADS=16
-export MKL_NUM_THREADS=16
 
 BASE_MODEL=$1
 LORA_PATH=$2
@@ -60,7 +57,7 @@ cleanup() {
 
 # Ctrl-C
 trap 'echo ""; echo "❌ Interrupted!"; cleanup; exit 1' SIGINT SIGTERM
-export VLLM_USE_V1=0
+# export VLLM_USE_V1=0
 
 # 0. run retriever as background if
 
@@ -115,8 +112,9 @@ for dataset in "${!DATASETS[@]}"; do
     --use_rag \
     --model_id \"$BASE_MODEL\" \
     --max_tokens $MAX_TOKENS \
-    --multithreading \
-    --use_process_pool \
+    --parallel_workers 1 \
+    --use_single_endpoint \
+    --task_type "fact" \
     --n 1 --temperature 0.0 --top_p 0.8 \
     --seed 42 \
     --verbose"
