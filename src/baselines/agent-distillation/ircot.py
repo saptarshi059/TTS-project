@@ -112,7 +112,7 @@ def main():
         print(f"Working on {dataset_name}...")
         dataset = load_dataset('json',
                                data_files=f"../../../data/{dataset_name}/test.json",
-                               split='train').select(range(0))
+                               split='train').select(range(2))
 
         all_questions = [row['question'] for row in dataset]
         dataset_responses = run_ircot(all_questions, wiki_corpus, index, embedding_model, slm, tokenizer)
