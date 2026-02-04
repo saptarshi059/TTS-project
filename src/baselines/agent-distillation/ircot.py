@@ -11,10 +11,10 @@ def load_everything():
     corpus = load_dataset("json",
                           split="train",
                           num_proc=4,
-                          data_files="search/database/wikipedia/wiki-18.jsonl")
+                          data_files="wiki-18.jsonl")
 
     print("Loading Index...")
-    cpu_index = faiss.read_index("search/database/wikipedia/e5_Flat.index")
+    cpu_index = faiss.read_index("e5_Flat.index")
 
     # 3. Transfer the existing index to the GPU
     # '0' refers to the GPU ID. If you have multiple GPUs, you can specify which one to use.
