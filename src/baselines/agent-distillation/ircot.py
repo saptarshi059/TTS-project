@@ -79,6 +79,8 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
             if thought_match:
                 raw_thought = thought_match.group(1).strip()
 
+                print(raw_thought)
+
                 # CLEANING STEP:
                 # LLMs sometimes generate "THOUGHT: I should look for X. (Retrieving...)"
                 # We want to strip any trailing sentences or meta-commentary.
@@ -108,7 +110,7 @@ def main():
         print(f"Working on {dataset_name}...")
         dataset = load_dataset('json',
                                data_files=f"../../../data/{dataset_name}/test.json",
-                               split='train')
+                               split='train').select(1)
 
         all_questions = [row['question'] for row in dataset]
         dataset_responses = run_ircot(all_questions, wiki_corpus, index, embedding_model, slm, tokenizer)
@@ -118,7 +120,7 @@ def main():
                                          "gold_answers": gold_answers,
                                          "response": list(dataset_responses.values())})
         response_ds.save_to_disk(f"{dataset_name}_responses")
-
+        break
 
 if __name__ == "__main__":
     main()
