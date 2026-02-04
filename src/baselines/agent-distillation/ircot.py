@@ -100,7 +100,6 @@ def main():
                                          "gold_answers": gold_answers,
                                          "response": list(dataset_responses.values())})
         response_ds.save_to_disk(f"{dataset_name}_responses")
-        break
 
 if __name__ == "__main__":
     main()
