@@ -36,7 +36,7 @@ def main():
 
         # Have to append "query" for e5
         all_questions = [f"query: {ques}" for ques in questions_dataset]
-        embedding_options = {"show_progress_bar": True, "convert_to_tensor": True}
+        embedding_options = {"show_progress_bar": True}
         question_embeddings = model.encode(all_questions, **embedding_options)
 
         distances, indices = gpu_index.search(question_embeddings, 3) # Take top-3 docs
