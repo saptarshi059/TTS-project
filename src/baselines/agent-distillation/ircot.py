@@ -47,6 +47,7 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
                                                   "If you cannot answer the question, then you can request for more information by formatting your output as, THOUGHT: <required information>. "
                                                   "Please provide your THOUGHT as a search request, similar to the provided example. If you cannot find the needed information, use a different search request. "
                                                   "ONLY when you have the needed information say FINAL ANSWER: <final_answer>. "
+                                                  "You are allowed to generate only 1 THOUGHT. "
                                                   "Respond with either 'THOUGHT: ...' or 'FINAL ANSWER: ... but NOT BOTH. "
                                                   "EXAMPLE:"
                                                   "QUESTION: When was the last time Brazil won the FIFA world cup?"
