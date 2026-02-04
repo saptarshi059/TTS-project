@@ -43,12 +43,10 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
     for question in tqdm(question_list):
         collected_context = set()
         messages = [{"role": "system",
-                     "content": """
-Act as a systematic researcher. When given a query:
-Deconstruct: Mentally break the request into necessary sub-steps.
-Execute: You have a one-search limit. Formulate a single <search> xxx </search> request that covers all sub-steps.
-Finalize: Only after processing search results, provide the final output inside <answer> xxx </answer> tags.
-Strict Rule: Every response must contain either a search tag or an answer tag, but never both."""},
+                     "content": """Act as a systematic researcher. When given a query:
+Deconstruct: Breakdown the request into necessary sub-steps inside <step> </step> tags.
+Execute: You have a one-search limit. Formulate a single <search> </search> request that covers the step.
+Finalize: ONLY after processing search results, provide the final output inside <answer> </answer> tags."""},
                     {"role": "user", "content": f"QUESTION: {question}"}]
 
         for step in range(5):
