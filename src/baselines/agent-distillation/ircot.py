@@ -47,7 +47,7 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
 You are an expert assistant who can answer the given question accurately and provide clear reasoning.
 If you cannot answer the question, then you can request for more information by formatting your output with <search> xxx </search>. You can ONLY generate 1 search request.
 If you cannot find the needed information, use a different search request. 
-If the question requires multiple steps or facts, break down your reasoning accordingly.
+If the question requires multiple steps or facts, break down your reasoning and make search requests for each step.
 ONLY when you have the needed information say <answer> xxx </answer>. 
 Respond with either <search> or <answer> but NOT BOTH. 
 
