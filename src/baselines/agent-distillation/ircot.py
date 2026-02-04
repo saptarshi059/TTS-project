@@ -63,7 +63,7 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
             if "Thought:" in generated_text:
                 thought = generated_text.split(input_text)[-1].split("Thought:")[-1].strip()
                 print(f"Searching for: {thought}")
-                new_docs_indices = index.search(query=f"query: {thought}", k=3)
+                new_docs_indices = index.search(embedding_model(f"query: {thought}"), k=3)
                 for idx in new_docs_indices:
                     doc = corpus[idx]
                     if doc not in collected_context:
