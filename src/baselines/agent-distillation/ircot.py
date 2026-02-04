@@ -60,10 +60,6 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
             answer_match = re.search(r"<answer>(.*?)</answer>", generated_text, re.IGNORECASE | re.DOTALL)
             search_match = re.search(r"<search>(.*?)</search>", generated_text, re.IGNORECASE | re.DOTALL)
 
-            print(messages, "\n-------------------")
-            print(generated_text, "\n................")
-            print(search_match, "\n***************************")
-
             if answer_match:
                 # Extract just the answer part after the colon
                 responses[question] = answer_match.group(1).strip()
@@ -94,7 +90,7 @@ def main():
         print(f"Working on {dataset_name}...")
         dataset = load_dataset('json',
                                data_files=f"../../../data/{dataset_name}/test.json",
-                               split='train').select(range(2))
+                               split='train')
 
         all_questions = [row['question'] for row in dataset]
         dataset_responses = run_ircot(all_questions, wiki_corpus, index, embedding_model, slm, tokenizer)
