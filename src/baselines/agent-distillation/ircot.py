@@ -45,17 +45,16 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
         messages = [{"role": "system",
                      "content": """
 You are an expert assistant who can answer the given question accurately and provide clear reasoning.
-If you cannot answer the question, then you can request for more information by formatting your output with <thought> xxx </thought>. You can ONLY generate 1 thought.
-Please provide your thought as a direct search request, similar to the provided example. 
+If you cannot answer the question, then you can request for more information by formatting your output with <search> xxx </search>. You can ONLY generate 1 search request.
 If you cannot find the needed information, use a different search request. 
 ONLY when you have the needed information say <answer> xxx </answer>. 
-Respond with either <thought> xxx </thought> or <answer> xxx </answer> but NOT BOTH. 
+Respond with either <search> or <answer> but NOT BOTH. 
 
 EXAMPLE:
 QUESTION: When was the last time Brazil won the FIFA world cup?
-<thought> 
+<search> 
 Get documents with Brazil's world cup records.
-</thought>
+</search>
 SUPPORTING FACTS: Brazil won in 1958, 1962, 1970, 1994, 2002.
 <answer>
 Brazil won last time in 2002.
@@ -76,19 +75,19 @@ Brazil won last time in 2002.
                 generated_text = generated_text.split(input_text)[-1].strip()
 
             answer_match = re.search(r"<answer>(.*?)</answer>", generated_text, re.IGNORECASE | re.DOTALL)
-            thought_match = re.search(r"<thought>(.*?)</thought>", generated_text, re.IGNORECASE | re.DOTALL)
+            search_match = re.search(r"<search>(.*?)</search>", generated_text, re.IGNORECASE | re.DOTALL)
 
             print(messages, "\n-------------------")
             print(generated_text, "\n................")
-            print(thought_match, "\n***************************")
+            print(search_match, "\n***************************")
 
             if answer_match:
                 # Extract just the answer part after the colon
                 responses[question] = answer_match.group(1).strip()
                 break
 
-            if thought_match:
-                thought = thought_match.group(1).strip()
+            if search_match:
+                thought = search_match.group(1).strip()
                 print(f"Searching for documents related to: {thought}")
                 _, new_docs_indices = index.search(embedding_model.encode([f"query: {thought}"], normalize_embeddings=True), k=3)
                 for idx in new_docs_indices[0]:
