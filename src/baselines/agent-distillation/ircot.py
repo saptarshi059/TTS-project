@@ -92,10 +92,13 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
                 all_thoughts.append(f"THOUGHT {step}: {thought}")
                 print(f"Searching for documents related to: {thought}")
                 new_docs_indices = index.search(embedding_model.encode([f"query: {thought}"], normalize_embeddings=True), k=3)
-                for idx in new_docs_indices:
-                    doc = corpus[idx]
-                    if doc not in collected_context:
-                        collected_context.add(doc)
+                for idx in new_docs_indices[0]:
+                    if idx != -1:
+                        doc = corpus[idx]
+                        if doc not in collected_context:
+                            collected_context.add(doc)
+                    else:
+                        collected_context.add("No relevant documents found...")
 
         # If the model could not find an answer.
         if question not in responses:
