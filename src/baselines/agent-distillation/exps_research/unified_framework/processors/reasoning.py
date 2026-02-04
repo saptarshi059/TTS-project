@@ -88,6 +88,9 @@ class ReasoningExperimentProcessor(ExperimentProcessor):
             else:
                 print(f"\n\n--- Processing question: {entry['question']} ---")
 
+        print(entry)
+        print(retrieved_documents)
+
         if add_think_token:
             user_prompt = entry['question'] + '\n<think>'
         else:
