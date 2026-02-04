@@ -1,16 +1,6 @@
 #!/bin/bash
 
 # ===================== User Setting ===================== #
-export VLLM_WORKER_MULTIPROCESS_METHOD=spawn
-export TOKENIZERS_PARALLELISM=false
-export TRANSFORMERS_RE_REGISTER_CONFIG=1
-
-export OPENBLAS_NUM_THREADS=1
-export OMP_NUM_THREADS=1
-export MKL_NUM_THREADS=1
-export TOKENIZERS_PARALLELISM=false
-export RAY_CHORD_MAX_RETRIES=1
-
 BASE_MODEL=$1
 LORA_PATH=$2
 EXP_TYPE="reasoning"
