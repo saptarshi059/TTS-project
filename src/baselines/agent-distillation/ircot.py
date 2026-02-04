@@ -41,16 +41,23 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
     responses = {}
     for question in tqdm(question_list):
         collected_context = set()
+        all_thoughts = []
         messages = [{"role": "system", "content": "You are given supporting facts to answer the given question. "
-                                                  "If you cannot answer the question, then you can request for more information by formatting your output as, Thought: <required information>. "
-                                                  "ONLY when you can provide your final answer, say Final Answer: <final_answer>. "
-                                                  "DO NOT INCLUDE Thought and Final Answer together in your response. You can ONLY say one or the other."},
+                                                  "If you cannot answer the question, then you can request for more information by formatting your output as, THOUGHT: <required information>. "
+                                                  "ONLY when you have the needed information say FINAL ANSWER: <final_answer>. "
+                                                  "Respond with either 'THOUGHT: ...' or 'FINAL ANSWER: ... but not both."
+                                                  "EXAMPLE:"
+                                                  "QUESTION: When was the last time Brazil won the FIFA world cup?"
+                                                  "THOUGHT: I need to get a document with Brazil's world cup records."
+                                                  "SUPPORTING FACTS: Brazil won in 1958, 1962, 1970, 1994, 2002."
+                                                  "FINAL ANSWER: Brazil won last time in 2002."},
                     {"role": "user", "content": f"QUESTION: {question}"}]
 
         for step in range(5):
             if step != 0:
                 supporting_facts_string = "\n".join(collected_context)
-                messages[1]["content"] = f"SUPPORTING FACTS: {supporting_facts_string}\nQUESTION: {question}"
+                thoughts_string = "\n".join(all_thoughts)
+                messages[1]["content"] = f"SUPPORTING FACTS: {supporting_facts_string}\nALL THOUGHTS: {thoughts_string}\nQUESTION: {question}"
 
             input_text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
             model_inputs = tokenizer([input_text], return_tensors="pt").to(slm.device)
@@ -64,6 +71,7 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
 
             if "Thought:" in generated_text:
                 thought = generated_text.split(input_text)[-1].split("Thought:")[-1].strip()
+                all_thoughts.append(f"THOUGHT {step}: {thought}")
                 print(f"Searching for documents related to: {thought}")
                 new_docs_indices = index.search(embedding_model(f"query: {thought}"), k=3)
                 for idx in new_docs_indices:
