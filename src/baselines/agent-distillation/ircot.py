@@ -45,22 +45,10 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
         messages = [{"role": "system",
                      "content": """
 You are an expert assistant who can answer the given question accurately and provide clear reasoning.
-If you cannot answer the question, then you can request for more information by formatting your output with <search> xxx </search>. You can ONLY generate 1 search request.
-If you cannot find the needed information, use a different search request. 
-If the question requires multiple steps or facts, break down your reasoning and make search requests for each step.
+You can search documents by formatting your output as <search> xxx </search>. You can ONLY generate 1 search request.
+Always breakdown a question into subquestions and make search requests for each subquestion.
 ONLY when you have the needed information say <answer> xxx </answer>. 
-Respond with either <search> or <answer> but NOT BOTH. 
-
-EXAMPLE:
-QUESTION: When was the last time Brazil won the FIFA world cup?
-<search> 
-Brazil world cup records.
-</search>
-SUPPORTING FACTS: Brazil won in 1958, 1962, 1970, 1994, 2002.
-<answer>
-Brazil won last time in 2002.
-</answer>
-"""},
+Respond with either <search> or <answer> but NOT BOTH. """},
                     {"role": "user", "content": f"QUESTION: {question}"}]
 
         for step in range(5):
