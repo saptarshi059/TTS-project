@@ -44,10 +44,9 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
         collected_context = set()
         messages = [{"role": "system",
                      "content": """Act as a systematic researcher. When given a query:
-Deconstruct: Breakdown the request into necessary sub-steps inside <step> </step> tags.
-Execute: You have a one-search limit. Formulate a single <search> </search> request that covers the step. Try different search requests to get the appropriate information.
-Finalize: ONLY after processing search results, provide the final output inside <answer> </answer> tags.
-Strict Rule: ALWAYS generate 1 <step> and 1 <search> request at each step."""},
+                     Deconstruct: Breakdown the request into necessary sub-steps inside <step> </step> tags.
+                     Execute: You have a one-search limit. Formulate a single <search> </search> request that covers the step.
+                     Finalize: ONLY after processing search results, provide the final output inside <answer> </answer> tags."""},
                     {"role": "user", "content": f"QUESTION: {question}"}]
 
         for step in range(5):
