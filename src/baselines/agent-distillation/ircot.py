@@ -91,7 +91,7 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
 
                 all_thoughts.append(f"THOUGHT {step}: {thought}")
                 print(f"Searching for documents related to: {thought}")
-                new_docs_indices = index.search(embedding_model.encode(f"query: {thought}", normalize_embeddings=True), k=3)
+                new_docs_indices = index.search(embedding_model.encode([f"query: {thought}"], normalize_embeddings=True), k=3)
                 for idx in new_docs_indices:
                     doc = corpus[idx]
                     if doc not in collected_context:
