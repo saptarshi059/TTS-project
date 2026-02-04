@@ -13,13 +13,15 @@ def load_everything():
                           num_proc=4,
                           data_files="wiki-18.jsonl")
 
+    res = faiss.StandardGpuResources()
+
     print("Loading Index...")
     cpu_index = faiss.read_index("e5_Flat.index")
 
     # 3. Transfer the existing index to the GPU
     # '0' refers to the GPU ID. If you have multiple GPUs, you can specify which one to use.
     print("Moving Index to GPUs...")
-    gpu_index = faiss.index_cpu_to_all_gpus(cpu_index)
+    gpu_index = faiss.index_cpu_to_gpu(res, 0, cpu_index)
     print("Index Loaded...")
 
     print("Loading embedding model...")
