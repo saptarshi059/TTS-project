@@ -73,13 +73,14 @@ FINAL ANSWER: Brazil won last time in 2002.
 
             with torch.no_grad():
                 generated_text = tokenizer.decode(slm.generate(**model_inputs, max_new_tokens=100)[0])
-                generated_text = generated_text.split(input_text)[-1]
+                generated_text = generated_text.split(input_text)[-1].strip()
 
-            answer_match = re.search(r"<answer>\s*:\s*(.*)</answer>", generated_text, re.IGNORECASE | re.DOTALL)
-            thought_match = re.search(r"<thought>\s*:\s*(.*)</thought>", generated_text, re.IGNORECASE | re.DOTALL)
+            answer_match = re.search(r"<answer>(.*?)</answer>", generated_text, re.IGNORECASE | re.DOTALL)
+            thought_match = re.search(r"<thought>(.*?)</thought>", generated_text, re.IGNORECASE | re.DOTALL)
 
             print(messages, "\n-------------------")
             print(generated_text, "\n................")
+            print(thought_match, "\n***************************")
 
             if answer_match:
                 # Extract just the answer part after the colon
