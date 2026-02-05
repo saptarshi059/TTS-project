@@ -1,6 +1,7 @@
 import faiss
 import torch
-from datasets import load_dataset, tqdm, Dataset
+from datasets import tqdm, Dataset, load_dataset
+import pandas as pd
 from sentence_transformers import SentenceTransformer
 from peft import PeftModel
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -8,16 +9,16 @@ import re
 
 
 def load_everything():
-    print("Loading wikipedia database...")
+    print("Loading wikipedia database for FRAMES...")
     corpus = load_dataset("json",
                           split="train",
                           num_proc=4,
-                          data_files="wiki-18.jsonl")
+                          data_files="frames-wiki.jsonl")
 
     res = faiss.StandardGpuResources()
 
     print("Loading Index...")
-    cpu_index = faiss.read_index("e5_Flat.index")
+    cpu_index = faiss.read_index("frames_index.index")
 
     # 3. Transfer the existing index to the GPU
     # '0' refers to the GPU ID. If you have multiple GPUs, you can specify which one to use.
@@ -82,22 +83,18 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
 
 def main():
     wiki_corpus, index, embedding_model, slm, tokenizer = load_everything()
-    all_datasets = ["2wikimultihopqa", "hotpotqa", "musique", "frames"]
 
-    for dataset_name in tqdm(all_datasets):
-        print(f"Working on {dataset_name}...")
-        dataset = load_dataset('json',
-                               data_files=f"../../../sampled_data/{dataset_name}/sampled_ds.json",
-                               split='train')
+    print(f"Working on FRAMES...")
+    dataset = pd.read_json("../../../sampled_data/frames/sampled_ds.json")
 
-        all_questions = [row['question'] for row in dataset]
-        dataset_responses = run_ircot(all_questions, wiki_corpus, index, embedding_model, slm, tokenizer)
-        print("Saving responses...")
-        gold_answers = [row['answer'] for row in dataset]
-        response_ds = Dataset.from_dict({"question": list(dataset_responses.keys()),
-                                         "gold_answers": gold_answers,
-                                         "response": list(dataset_responses.values())})
-        response_ds.save_to_disk(f"{dataset_name}_responses")
+    all_questions = [row.question for row in dataset.itertuples()]
+    dataset_responses = run_ircot(all_questions, wiki_corpus, index, embedding_model, slm, tokenizer)
+    print("Saving responses...")
+    gold_answers = [row.answer for row in dataset.itertuples()]
+    response_ds = Dataset.from_dict({"question": list(dataset_responses.keys()),
+                                     "gold_answers": gold_answers,
+                                     "response": list(dataset_responses.values())})
+    response_ds.save_to_disk("frames_responses")
 
 if __name__ == "__main__":
     main()
