@@ -35,7 +35,7 @@ def main():
         index.add(np.array(embeddings).astype('float32'))
         print("Index created...")
 
-        faiss.write_index(index, "../src/baselines/agent-distillation/frames_index.index")
+        faiss.write_index(index, "../baselines/agent-distillation/frames_index.index")
         print("Index saved...")
 
     print("Loading embedding model...")
