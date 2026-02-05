@@ -85,7 +85,7 @@ def main():
     wiki_corpus, index, embedding_model, slm, tokenizer = load_everything()
 
     print(f"Working on FRAMES...")
-    dataset = pd.read_json("../../../sampled_data/frames/sampled_ds.json").sample(n=1)
+    dataset = pd.read_json("../../../sampled_data/frames/sampled_ds.json")
 
     all_questions = [row.question for row in dataset.itertuples()]
     dataset_responses = run_ircot(all_questions, wiki_corpus, index, embedding_model, slm, tokenizer)
