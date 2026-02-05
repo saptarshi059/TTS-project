@@ -43,7 +43,20 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
     responses = {}
     for question in tqdm(question_list):
         collected_context = set()
-        messages = [{"role": "system", "content": """Act as a systematic researcher. When given a query:\nDeconstruct: Breakdown the request into necessary sub-steps inside <step> </step> tags.\nExecute: You have a one-search limit. Formulate a single <search> </search> request that covers the step.\nFinalize: ONLY after processing search results, provide the final output inside <answer> </answer> tags."""},
+        messages = [{"role": "system", "content": """Process the given query iteratively. At each step, produce one step and one search. 
+Do not provide a final answer until you have all the information.
+
+At each turn, generate, 
+<step> The single immediate next sub-action required. </step>
+<search> A single optimized query for this step. </search>
+
+ONLY WHEN YOU HAVE ALL OF THE INFORMATION, generate,
+<answer> Your final answer based on the supporting facts. Do NOT use this in TURN 0, unless you are absolutely certain. </answer>
+
+Rules:
+Stop immediately after the </search> tag.
+No planning of future steps; focus only on the current one.
+The <answer> tag is forbidden if any data is missing or if a search is still needed."""},
                     {"role": "user", "content": f"QUESTION: {question}"}]
 
         for step in range(5):
