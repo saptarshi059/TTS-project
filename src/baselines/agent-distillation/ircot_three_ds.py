@@ -46,24 +46,23 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
         messages = [{"role": "system", "content": """Process the given query iteratively. At each step, produce one step and one search. 
 Do not provide a final answer until you have all the information.
 
-OUTPUT FORMAT:
-Every non-final step,
+At each turn, generate, 
 <step> The single immediate next sub-action required. </step>
 <search> A single optimized query for this step. </search>
 
-Final Step, 
-<answer> Final answer. </answer>
+ONLY WHEN YOU HAVE ALL OF THE INFORMATION, generate,
+<answer> Your final answer based on the supporting facts. Do NOT use this in TURN 0, unless you are absolutely certain. </answer>
 
 Rules:
 Stop immediately after the </search> tag.
 No planning of future steps; focus only on the current one.
 The <answer> tag is forbidden if any data is missing or if a search is still needed."""},
-                    {"role": "user", "content": f"QUESTION: {question}"}]
+                    {"role": "user", "content": f"TURN 0\nQUESTION: {question}"}]
 
         for step in range(5):
             if step != 0:
                 supporting_facts_string = "\n".join(collected_context)
-                messages[1]["content"] = f"SUPPORTING FACTS: {supporting_facts_string}\nQUESTION: {question}"
+                messages[1]["content"] = f"SUPPORTING FACTS: {supporting_facts_string}\nTURN {step}\nQUESTION: {question}"
 
             input_text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
             model_inputs = tokenizer([input_text], return_tensors="pt").to(slm.device)
