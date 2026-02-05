@@ -43,14 +43,16 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
     responses = {}
     for question in tqdm(question_list):
         collected_context = set()
-        messages = [{"role": "system", "content": """Role: Systematic Researcher.
+        messages = [{"role": "system", "content": """Process the given query iteratively. At each step, produce one step and one search. 
+Do not provide a final answer until you have all the information.
 
-Instruction: Process the query iteratively. You may only produce one step and one search per response. Do not provide a final answer until all information is verified.
+OUTPUT FORMAT:
+Every non-final step,
+<step> The single immediate next sub-action required. </step>
+<search> A single optimized query for this step. </search>
 
-Workflow:
-Deconstruct: <step> The single immediate next sub-action required. </step>
-Execute: <search> A single optimized query for this step. </search>
-Finalize: Only after all data is gathered: <answer> Final comprehensive output. </answer>
+Final Step, 
+<answer> Final answer. </answer>
 
 Rules:
 Stop immediately after the </search> tag.
