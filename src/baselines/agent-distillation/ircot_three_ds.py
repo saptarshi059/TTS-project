@@ -87,7 +87,7 @@ def main():
 
     for dataset_name in tqdm(all_datasets):
         print(f"Working on {dataset_name}...")
-        dataset = pd.read_json(f"../../../sampled_data/{dataset_name}/sampled_ds.json").sample(1)
+        dataset = pd.read_json(f"../../../sampled_data/{dataset_name}/sampled_ds.json")
 
         all_questions = [row.question for row in dataset.itertuples()]
         dataset_responses = run_ircot(all_questions, wiki_corpus, index, embedding_model, slm, tokenizer)
