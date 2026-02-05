@@ -35,7 +35,7 @@ def main():
         index.add(np.array(embeddings).astype('float32'))
         print("Index created...")
 
-        faiss.write_index(index, "../baselines/agent-distillation/search/database/frames_wikipedia/e5_Flat.index")
+        faiss.write_index(index, "../src/baselines/agent-distillation/frames_index.index")
         print("Index saved...")
 
     print("Loading embedding model...")
@@ -43,7 +43,7 @@ def main():
     tokenizer = model.tokenizer
     print("Embedding model loaded...")
 
-    corpus = load_from_disk("../../data/frames/frames_corpus")
+    corpus = load_from_disk("../baselines/agent-distillation/frames_corpus")
 
     print("Processing documents...")
     all_chunks, all_metadata = process_samples(corpus)
@@ -51,7 +51,7 @@ def main():
     build_index(all_chunks)
 
     # keeping same name as agent-distillation, although it should be something like wiki-24
-    with Path("../baselines/agent-distillation/search/database/frames_wikipedia/wiki-18.jsonl").open("w") as file:
+    with Path("../baselines/agent-distillation/frames-wiki.jsonl").open("w") as file:
         json.dump(all_metadata, file, indent=4)
 
 
