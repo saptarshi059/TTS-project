@@ -43,7 +43,19 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
     responses = {}
     for question in tqdm(question_list):
         collected_context = set()
-        messages = [{"role": "system", "content": """Act as a systematic researcher. When given a query:\nDeconstruct: Breakdown the request into necessary sub-steps inside <step> </step> tags.\nExecute: You have a one-search limit. Formulate a single <search> </search> request that covers the step.\nFinalize: ONLY after processing search results, provide the final output inside <answer> </answer> tags."""},
+        messages = [{"role": "system", "content": """Role: Systematic Researcher.
+
+Instruction: Process the query iteratively. You may only produce one step and one search per response. Do not provide a final answer until all information is verified.
+
+Workflow:
+Deconstruct: <step> The single immediate next sub-action required. </step>
+Execute: <search> A single optimized query for this step. </search>
+Finalize: Only after all data is gathered: <answer> Final comprehensive output. </answer>
+
+Rules:
+Stop immediately after the </search> tag.
+No planning of future steps; focus only on the current one.
+The <answer> tag is forbidden if any data is missing or if a search is still needed."""},
                     {"role": "user", "content": f"QUESTION: {question}"}]
 
         for step in range(5):
@@ -87,7 +99,7 @@ def main():
 
     for dataset_name in tqdm(all_datasets):
         print(f"Working on {dataset_name}...")
-        dataset = pd.read_json(f"../../../sampled_data/{dataset_name}/sampled_ds.json")
+        dataset = pd.read_json(f"../../../sampled_data/{dataset_name}/sampled_ds.json").sample(1)
 
         all_questions = [row.question for row in dataset.itertuples()]
         dataset_responses = run_ircot(all_questions, wiki_corpus, index, embedding_model, slm, tokenizer)
@@ -97,6 +109,7 @@ def main():
                                          "gold_answers": gold_answers,
                                          "response": list(dataset_responses.values())})
         response_ds.save_to_disk(f"{dataset_name}_responses")
+        break
 
 if __name__ == "__main__":
     main()
