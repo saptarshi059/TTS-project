@@ -20,7 +20,8 @@ def main():
 
         dataset.drop_duplicates(subset=column_name, inplace=True)
         sampled_ds = dataset.sample(n=500, random_state=42)
-        sampled_ds.to_json(f"../../sampled_data/{dataset_name}/sampled_ds.json")
+        sampled_ds.rename(columns={'Prompt': 'question', 'Answer': 'answer'}, inplace=True)
+        sampled_ds.to_json(f"../../sampled_data/{dataset_name}/sampled_ds.json", index=False)
 
 if __name__ == "__main__":
     main()

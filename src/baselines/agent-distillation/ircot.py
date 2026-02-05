@@ -82,12 +82,12 @@ def run_ircot(question_list, corpus, index, embedding_model, slm, tokenizer):
 
 def main():
     wiki_corpus, index, embedding_model, slm, tokenizer = load_everything()
-    all_datasets = ["2wikimultihopqa", "hotpotqa", "musique"]
+    all_datasets = ["2wikimultihopqa", "hotpotqa", "musique", "frames"]
 
     for dataset_name in tqdm(all_datasets):
         print(f"Working on {dataset_name}...")
         dataset = load_dataset('json',
-                               data_files=f"../../../data/{dataset_name}/test.json",
+                               data_files=f"../../../sampled_data/{dataset_name}/sampled_ds.json",
                                split='train')
 
         all_questions = [row['question'] for row in dataset]
