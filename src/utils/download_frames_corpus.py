@@ -1,11 +1,12 @@
-from datasets import load_dataset, tqdm, Dataset
 from urllib.parse import unquote
+from tqdm import tqdm
+import pandas as pd
 import wikipediaapi
 import time
 import ast
 
 def main():
-    dataset = load_dataset("google/frames-benchmark")['test']
+    frames_dataset = pd.read_json("../../sampled_data/frames/sampled_ds.json")
 
     wiki = wikipediaapi.Wikipedia(
         user_agent="FramesBot/1.0 (contact: your@email.com)",
@@ -14,23 +15,23 @@ def main():
     )
 
     all_links = []
-    for row in dataset:
-        all_links.extend(ast.literal_eval(row['wiki_links']))
+    for row in frames_dataset.itertuples():
+        all_links.extend(ast.literal_eval(row.wiki_links))
 
-    corpus = {}
+    all_texts = []
     print("Downloading pages...")
-    for idx, url in tqdm(enumerate(all_links)):
+    for url in tqdm(all_links):
         page_name = unquote(url.split('/')[-1])
         time.sleep(0.1)
         page = wiki.page(page_name)
         if not page.exists():
             continue
 
-        page_text = page.text
-        corpus[str(idx)] = page_text
+        all_texts.append(page.text)
 
-    corpus_dataset = Dataset.from_dict({"id": list(corpus.keys()), "text": list(corpus.values())})
-    corpus_dataset.save_to_disk("../../data/frames/frames_corpus")
+    print("Saving corpus...")
+    pd.DataFrame(columns=["URL", "Text"], data=zip(all_links, all_texts)).to_parquet("../../all_data/frames/frames_corpus")
+
 
 if __name__ == "__main__":
     main()
