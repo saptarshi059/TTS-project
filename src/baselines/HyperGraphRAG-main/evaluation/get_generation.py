@@ -12,7 +12,7 @@ methods = args.methods.split(',')
 data_sources = args.data_sources.split(',')
 
 os.environ["OPENAI_API_KEY"] = open("openai_api_key.txt").read().strip()
-client = OpenAI(base_url="https://vip.apiyi.com/v1")
+client = OpenAI()
 
 def generate_response(d):
     # d['knowledge'] = ' '.join(d['knowledge'].split(' ')[:1200])
