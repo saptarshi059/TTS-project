@@ -1,3 +1,0 @@
-[submodule "src/baselines/HyperGraphRAG"]
-	path = src/baselines/HyperGraphRAG
-	url = https://github.com/LHRLAB/HyperGraphRAG.git
