@@ -54,6 +54,7 @@ async def openai_complete_if_cache(
     prompt,
     system_prompt=None,
     history_messages=[],
+    base_url="https://api.openai.com/v1",
     api_key=None,
     **kwargs,
 ) -> str:
@@ -770,6 +771,7 @@ async def zhipu_embedding(
 async def openai_embedding(
     texts: list[str],
     model: str = "text-embedding-3-small",
+    base_url: str = "https://api.openai.com/v1",
     api_key: str = None,
 ) -> np.ndarray:
     if api_key:
