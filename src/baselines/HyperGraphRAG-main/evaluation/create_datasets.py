@@ -18,7 +18,7 @@ def main():
     base_path = Path("../../../../sampled_data")
     datasets = ['2wikimultihopqa', 'frames', 'hotpotqa', 'musique']
 
-    frames_corpus = pd.read_parquet("../../../../all_data/frames/frames_corpus")
+    frames_corpus = pd.read_parquet("frames_corpus")
 
     for dataset_name in tqdm(datasets):
         print(f"Working on {dataset_name}...")
