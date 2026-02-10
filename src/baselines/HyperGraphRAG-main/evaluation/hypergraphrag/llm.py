@@ -1020,7 +1020,7 @@ async def ollama_embedding(texts: list[str], embed_model, **kwargs) -> np.ndarra
 
     return embed_text
 
-@wrap_embedding_func_with_attrs(embedding_dim=4096, max_token_size=8192)
+@wrap_embedding_func_with_attrs(embedding_dim=1024, max_token_size=8192)
 @retry(
     stop=stop_after_attempt(3),
     wait=wait_exponential(multiplier=1, min=4, max=60),
