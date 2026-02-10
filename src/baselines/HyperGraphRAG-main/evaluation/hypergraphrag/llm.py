@@ -587,7 +587,8 @@ async def ollama_model_complete(
     keyword_extraction = kwargs.pop("keyword_extraction", None)
     if keyword_extraction:
         kwargs["format"] = "json"
-    model_name = kwargs["hashing_kv"].global_config["llm_model_name"]
+    #model_name = kwargs["hashing_kv"].global_config["llm_model_name"]
+    model_name = "qwen2.5:latest"
     return await ollama_model_if_cache(
         model_name,
         prompt,
@@ -1020,7 +1021,7 @@ async def ollama_embedding(texts: list[str], embed_model, **kwargs) -> np.ndarra
     return embed_text
 
 
-async def ollama_embed(texts: list[str], embed_model, **kwargs) -> np.ndarray:
+async def ollama_embed(texts: list[str], embed_model: str = "qwen3-embedding:latest", **kwargs) -> np.ndarray:
     ollama_client = ollama.Client(**kwargs)
     data = ollama_client.embed(model=embed_model, input=texts)
     return data["embeddings"]
