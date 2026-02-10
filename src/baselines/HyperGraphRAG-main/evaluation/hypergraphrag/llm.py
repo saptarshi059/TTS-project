@@ -1020,7 +1020,12 @@ async def ollama_embedding(texts: list[str], embed_model, **kwargs) -> np.ndarra
 
     return embed_text
 
-
+@wrap_embedding_func_with_attrs(embedding_dim=4096, max_token_size=8192)
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=4, max=60),
+    retry=retry_if_exception_type((RateLimitError, APIConnectionError, Timeout)),
+)
 async def ollama_embed(texts: list[str], embed_model: str = "qwen3-embedding:latest", **kwargs) -> np.ndarray:
     ollama_client = ollama.Client(**kwargs)
     data = ollama_client.embed(model=embed_model, input=texts)
