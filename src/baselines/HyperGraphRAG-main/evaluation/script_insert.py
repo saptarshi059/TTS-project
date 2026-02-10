@@ -36,6 +36,6 @@ WORKING_DIR = f"expr/{cls}"
 if not os.path.exists(WORKING_DIR):
     os.makedirs(WORKING_DIR)
 
-rag = HyperGraphRAG(working_dir=WORKING_DIR,embedding_func_max_async=4,llm_model_max_async=4)
+rag = HyperGraphRAG(working_dir=WORKING_DIR,embedding_func_max_async=32,llm_model_max_async=32)
 
 insert_text(rag, f"contexts/{cls}_contexts.json")
