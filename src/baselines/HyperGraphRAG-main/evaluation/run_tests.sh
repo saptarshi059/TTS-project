@@ -2,7 +2,6 @@
 
 # --- Configuration ---
 OLLAMA_BIN="./ollama/bin/ollama"
-LOG_FILE="full_pipeline.log"
 
 # --- 1. Start Ollama ---
 if ! pgrep -f "$OLLAMA_BIN serve" > /dev/null
