@@ -27,6 +27,7 @@ def main():
                     break
 
                 try:
+                    # Have to do this because some samples have wrong gold sentence indices.
                     gold = []
                     for x in row.supporting_facts:
                         ent, line = x[0], x[1]

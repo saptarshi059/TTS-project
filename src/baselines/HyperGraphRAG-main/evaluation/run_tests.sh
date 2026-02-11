@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Start 2 connections first - serve ollama in one & run the scripts in the other.
+
 # 2wiki
 python script_insert.py --cls 2wikimultihopqa
 python script_hypergraphrag.py --data_source 2wikimultihopqa
