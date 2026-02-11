@@ -19,7 +19,30 @@ def main():
             column_name = 'Prompt'
 
         dataset.drop_duplicates(subset=column_name, inplace=True)
-        sampled_ds = dataset.sample(n=500, random_state=42)
+        if dataset_name in {'2wikimultihopqa', 'hotpotqa'}:
+            sampled_ds = dataset.sample(n=1000, random_state=42)
+            final_rows = []
+            for row in sampled_ds.itertuples():
+                if len(final_rows) == 500:
+                    break
+
+                try:
+                    gold = []
+                    for x in row.supporting_facts:
+                        ent, line = x[0], x[1]
+                        for y in row.context:
+                            if y[0] == ent:
+                                gold.append(y[1][line])
+                                break
+                    final_rows.append(row)
+                except:
+                    continue
+
+            sampled_ds = pd.DataFrame(final_rows)
+        else:
+            sampled_ds = dataset.sample(n=500, random_state=42)
+
+
         sampled_ds.rename(columns={'Prompt': 'question', 'Answer': 'answer'}, inplace=True)
         sampled_ds.to_json(f"../../sampled_data/{dataset_name}/sampled_ds.json", index=False)
 

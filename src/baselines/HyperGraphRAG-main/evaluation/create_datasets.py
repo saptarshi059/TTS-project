@@ -10,7 +10,6 @@ def return_gold_ctx(context, supporting_facts):
         ent, line = x[0], x[1]
         for y in context:
             if y[0] == ent:
-                print(y)
                 gold.append(y[1][line])
                 break
     return gold
