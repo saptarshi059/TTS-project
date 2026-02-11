@@ -2,23 +2,22 @@ import pandas as pd
 from tqdm import tqdm
 from pathlib import Path
 import json
-import ast
 
-def flatten_deep(items):
-    """Yield items from any nested iterable."""
-    for x in items:
-        # Check if an item is an iterable but not a string or bytes
-        if isinstance(x, list):
-            yield from flatten_deep(x)
-        else:
-            yield x
+
+def return_gold_ctx(context, supporting_facts):
+    gold = []
+    for x in supporting_facts:
+        ent, line = x[0], x[1]
+        for y in context:
+            if y[0] == ent:
+                gold.append(y[1][line])
+                break
+    return gold
 
 
 def main():
     base_path = Path("../../../../sampled_data")
-    datasets = ['2wikimultihopqa', 'frames', 'hotpotqa', 'musique']
-
-    frames_corpus = pd.read_parquet("frames_corpus")
+    datasets = ['2wikimultihopqa', 'hotpotqa', 'musique']
 
     for dataset_name in tqdm(datasets):
         print(f"Working on {dataset_name}...")
@@ -28,16 +27,13 @@ def main():
         all_ctx = []
         formatted_questions = []
         for row in dataset.itertuples():
-            if dataset_name == 'frames':
-                row_links = ast.literal_eval(row.wiki_links)
-                context_list = list(frames_corpus[frames_corpus["URL"].isin(row_links)].Text)
-            elif dataset_name in {"2wikimultihopqa", "hotpotqa"}:
-                context_list = row.context
+            if dataset_name in {"2wikimultihopqa", "hotpotqa"}:
+                context_list = return_gold_ctx(row.context, row.supporting_facts)
             else:
                 context_dicts = list(filter(lambda x: x['is_supporting'], row.paragraphs))
                 context_list = [x['paragraph_text'] for x in context_dicts]
 
-            all_ctx.extend(flatten_deep(context_list))
+            all_ctx.extend(context_list)
             formatted_questions.append({"question": row.question, "golden_answers": row.answer})
 
         print("Saving files...")
