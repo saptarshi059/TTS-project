@@ -189,8 +189,6 @@ dependencies:
       - urllib3
       - uvicorn
       - uvloop
-      - vllm
-      - vllm-flash-attn
       - watchfiles
       - websockets
       - wrapt
