@@ -13,8 +13,8 @@ import yaml
 from glob import glob
 from itertools import chain
 from tqdm import tqdm
-from llama_index import Document
-from llama_index.node_parser import SimpleNodeParser
+from llama_index.core import Document
+from llama_index.core.node_parser import SimpleNodeParser
 from bs4 import BeautifulSoup
 import random
 
