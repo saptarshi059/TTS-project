@@ -1,7 +1,7 @@
 channels:
   - defaults
 dependencies:
-  - python=3.9
+  - python=3.10
   - pip
   - pip:
       - accelerate==1.10.1
@@ -23,7 +23,7 @@ dependencies:
       - certifi==2025.8.3
       - cffi==2.0.0
       - charset-normalizer==3.4.3
-      - click==8.2.1
+      - click
       - cloudpickle==3.1.1
       - cmake==4.1.0
       - colorama==0.4.6
