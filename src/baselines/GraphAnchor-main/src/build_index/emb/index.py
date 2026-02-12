@@ -100,7 +100,7 @@ if __name__ == "__main__":
             for i, (text, title) in enumerate(data.items())
         ]
     else: # FRAMES
-        ds = pd.read_parquet("../../../../../../all_data/frames/frames_corpus")
+        ds = pd.read_parquet("../../../../../../sampled_data/frames/frames_corpus")
 
         data = {}
         for item in tqdm(ds.itertuples()):
