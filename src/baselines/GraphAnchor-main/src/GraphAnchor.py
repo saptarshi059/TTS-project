@@ -11,7 +11,7 @@ import backoff
 from multiprocessing.pool import ThreadPool
 import multiprocessing
 from tqdm import tqdm
-from eval import acc_score, F1_scorer, compute_exact, eval_asqa, acc_choice
+from eval import acc_score, F1_scorer, compute_exact, acc_choice
 from utils import seed_everything
 from vllm import LLM, SamplingParams
 import torch
