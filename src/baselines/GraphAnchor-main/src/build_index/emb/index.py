@@ -70,7 +70,7 @@ def build_index(embeddings, vectorstore_path):
 if __name__ == "__main__":
 
     model = SentenceTransformer(config["model"][args.model],
-                                model_kwargs={"attn_implementation": "flash_attention_2", "device_map": "auto"},
+                                model_kwargs={"attn_implementation": "flash_attention_2", "dtype": "auto", "device_map": "auto"},
                                 tokenizer_kwargs={"padding_side": "left"})
     dataset_name = args.dataset
     vectorstore_path = f"../data/corpus/{dataset_name}/{dataset_name}.index"
