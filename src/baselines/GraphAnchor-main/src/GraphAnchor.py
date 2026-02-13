@@ -324,7 +324,7 @@ if __name__ == "__main__":
             "2wikimultihopqa",
             "hotpotqa",
             "musique",
-            "bamboogle",
+            "frames",
         ],
         default="musique",
         help="Dataset to use",
