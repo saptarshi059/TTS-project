@@ -114,7 +114,7 @@ if __name__ == "__main__":
     contents = split_text(contents)
     embeddings = model.encode(contents, batch_size=600)
     with open(
-        f"../../../data/corpus/{dataset_name}/chunk.json", "w", encoding="utf-8"
+        f"../data/corpus/{dataset_name}/chunk.json", "w", encoding="utf-8"
     ) as fout:
         json.dump(contents, fout, ensure_ascii=False)
     print("Building index ...")
