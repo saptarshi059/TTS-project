@@ -24,8 +24,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     "--model",
     type=str,
-    choices=["bge-large-en-v1.5", "gtr-t5-xxl"],
-    default="bge-large-en-v1.5",
+    choices=["bge-large-en-v1.5", "gtr-t5-xxl", "qwen3-Embedding-0.6B"],
+    default="qwen3-Embedding-0.6B",
     help="Model to use",
 )
 parser.add_argument(
