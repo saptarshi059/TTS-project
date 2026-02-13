@@ -358,7 +358,6 @@ if __name__ == "__main__":
     llm = LLM(
         model=config["model"][args.model],
         tensor_parallel_size=1,
-        tokenizer_mode="slow",  # Forced use of the basic python tokenizer,
         trust_remote_code=True,
         dtype="bfloat16",
         max_model_len=8192,
