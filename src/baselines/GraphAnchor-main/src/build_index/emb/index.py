@@ -18,7 +18,7 @@ from llama_index.core.node_parser import SimpleNodeParser
 from bs4 import BeautifulSoup
 import random
 
-with open("../../../config/config.yaml", "r") as f:
+with open("../config/config.yaml", "r") as f:
     config = yaml.safe_load(f)
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -71,12 +71,12 @@ if __name__ == "__main__":
 
     model = SentenceTransformer(config["model"][args.model], device=args.device)
     dataset_name = args.dataset
-    vectorstore_path = f"../../../data/corpus/{dataset_name}/{dataset_name}.index"
+    vectorstore_path = f"../data/corpus/{dataset_name}/{dataset_name}.index"
     contents = []
     print("loading document ...")
     start = time.time()
     if dataset_name in {"2wikimultihopqa", 'hotpotqa'}:
-        ds = pd.read_json(f"../../../../../../sampled_data/{dataset_name}/sampled_ds.json")
+        ds = pd.read_json(f"../../../../sampled_data/{dataset_name}/sampled_ds.json")
 
         data = {}
         for item in tqdm(ds.itertuples()):
@@ -88,7 +88,7 @@ if __name__ == "__main__":
             for i, (text, title) in enumerate(data.items())
         ]
     elif dataset_name == "musique":
-        ds = pd.read_json("../../../../../../sampled_data/musique/sampled_ds.json")
+        ds = pd.read_json("../../../../sampled_data/musique/sampled_ds.json")
 
         data = {}
         for item in tqdm(ds.itertuples()):
@@ -100,7 +100,7 @@ if __name__ == "__main__":
             for i, (text, title) in enumerate(data.items())
         ]
     else: # FRAMES
-        ds = pd.read_parquet("../../../../../../sampled_data/frames/frames_corpus")
+        ds = pd.read_parquet("../../../../sampled_data/frames/frames_corpus")
 
         data = {}
         for item in tqdm(ds.itertuples()):
