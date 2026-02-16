@@ -82,8 +82,8 @@ def main(dataset_name):
     tokenizer = model.tokenizer
     print("Embedding model loaded...")
 
-    base_path = Path(f"../sampled_data/{dataset_name}")
-    dataset = pd.read_json(base_path / "sampled_ds.json") if dataset_name != "frames" else pd.read_parquet("../../all_data/frames/frames_corpus")
+    base_path = Path(f"../../sampled_data/{dataset_name}")
+    dataset = pd.read_json(base_path / "sampled_ds.json") if dataset_name != "frames" else pd.read_parquet(base_path / "frames_corpus")
 
     print("Collecting all contexts...")
     all_contexts = collect_contexts(dataset, dataset_name)
