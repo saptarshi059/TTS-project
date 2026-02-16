@@ -1,145 +1,123 @@
 #!/bin/bash
 
+# Prevents memory fragmentation (crucial when running 4 separate vLLM instances)
+export PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True"
+
+# Optimizes communication for multi-GPU setups (even if running separate instances)
+export NCCL_IGNORE_DISABLED_P2P=1
+
+# Forces vLLM to use the faster Triton kernels for attention and LoRA
+export VLLM_ATTENTION_BACKEND=FLASH_ATTN
+
+# Optional: If you see "Too many open files" errors during high multithreading
+ulimit -n 65535
+
 # ===================== User setting ===================== #
-BASE_MODEL=$1
-LORA_PATH=$2 # set lora path here
+BASE_MODEL="/gpuhome/sks6765/.cache/huggingface/hub/models--Qwen--Qwen2.5-7B-Instruct/snapshots/a09a35458c702b33eeacc393d103063234e8bc28/"
+LORA_PATH="/gpuhome/sks6765/.cache/huggingface/hub/models--agent-distillation--agent_distilled_Qwen2.5-7B-Instruct/snapshots/816cf2f90baa7948ddb29cd0667b1d83567b0707/"
 EXP_TYPE="agent"
 PORT_BASE=8000
-GPU_MEMORY_UTILIZATION=0.6
+GPU_MEMORY_UTILIZATION=0.85  # Increased for better KV cache capacity
 MAX_LORA_RANK=64
 N=8
 TEMP=0.4
-
 MAX_TOKENS=1024
 
-RETRIEVER_CONDA_ENV="retriever"          # retriever conda
-RETRIEVER_GPU_DEVICES="2,3"              # retriever GPU
-RETRIEVER_LOG="retriever_server.log"     # retriever path
+# Dataset Base Location
+BASE_DATA_DIR="../../../../sampled_data"
+
+RETRIEVER_GPU_DEVICES="2,3"
+RETRIEVER_LOG="retriever_server.log"
 # ===================================================== #
 
-declare -A DATASETS=(
-  ["hotpotqa"]="data_processor/qa_dataset/test/hotpotqa_500_20250422.json"
-  ["math"]="data_processor/math_dataset/test/math_500_20250414.json"
-  ["aime"]="data_processor/math_dataset/test/aime_90_20250504.json"
-  ["musique"]="data_processor/qa_dataset/test/musique_500_20250504.json"
-  ["bamboogle"]="data_processor/qa_dataset/test/bamboogle_125_20250507.json"
-  ["gsm"]="data_processor/math_dataset/test/gsm_hard_500_20250507.json"
-  ["2wiki"]="data_processor/qa_dataset/test/2wikimultihopqa_500_20250511.json"
-  ["olymath"]="data_processor/math_dataset/test/olymath_200_20250511.json"
-)
+# 1. Argument Handling
+if [ -z "$1" ]; then
+  echo "❌ Usage: $0 <dataset_name>"
+  exit 1
+fi
+
+DATASET_NAME=$1
+# Rigid pathing: Always expects BASE_DATA_DIR/name/sampled_ds.json
+DATA_PATH="${BASE_DATA_DIR}/${DATASET_NAME}/sampled_ds.json"
+
+if [ ! -f "$DATA_PATH" ]; then
+  echo "❌ Dataset file not found: $DATA_PATH"
+  exit 1
+fi
 
 PIDS=()
 
-# 종료 핸들러 정의
 cleanup() {
-  echo ""
-  echo "🧹 Cleaning up vLLM servers..."
+  echo -e "\n🧹 Cleaning up servers..."
   kill ${PIDS[*]} 2>/dev/null
-  # If the process is not cleaned well
-  ps -u $USER -o pid,command | grep 'vllm serve' | grep -v grep | awk '{print $1}' | xargs kill
-
-  pgrep -f 'retriever_server.py' | xargs -r kill
-  wait
-  echo "✅ All vLLM servers stopped."
+  ps -u $USER -o pid,command | grep 'vllm serve' | grep -v grep | awk '{print $1}' | xargs kill 2>/dev/null
+  pgrep -f 'retriever_server.py' | xargs -r kill 2>/dev/null
+  echo "✅ Done."
 }
 
-# Ctrl-C 처리
-trap 'echo ""; echo "❌ Interrupted!"; cleanup; exit 1' SIGINT SIGTERM
+trap 'cleanup; exit 1' SIGINT SIGTERM
 export VLLM_USE_V1=0
 
-# ===================================================== #
-# 0. Run retriever server (background)
-# ===================================================== #
-echo "🔍 Launching retriever server in Conda env \"$RETRIEVER_CONDA_ENV\" …"
-# Conda initialization
-source "$(conda info --base)/etc/profile.d/conda.sh"
-
-(
-  conda activate "$RETRIEVER_CONDA_ENV"
-  # retriever background
-  CUDA_VISIBLE_DEVICES=$RETRIEVER_GPU_DEVICES \
-    python search/retriever_server.py \
-    > "$RETRIEVER_LOG" 2>&1 &
-  RETRIEVER_PID=$!
-  echo "🛰️  Retriever server started (PID: $RETRIEVER_PID, GPUs: $RETRIEVER_GPU_DEVICES)"
-  conda deactivate
-)&
-
-PIDS+=($RETRIEVER_PID)
-
-# 1. GPU 0~2 background
-for i in 0 1 2; do
-  CMD="CUDA_VISIBLE_DEVICES=$i python serve_vllm.py \
-    --model \"$BASE_MODEL\" \
-    --port $((PORT_BASE + i)) \
-    --gpu-memory-utilization $GPU_MEMORY_UTILIZATION"
-
-  if [ -n "$LORA_PATH" ]; then
-    CMD="$CMD --lora-modules finetune=$LORA_PATH --max-lora-rank $MAX_LORA_RANK"
-  fi
-
-  eval $CMD > vllm_gpu${i}.log 2>&1 &
-  PIDS+=($!)
-  echo "🚀 Started vLLM on GPU $i (port $((PORT_BASE + i)))"
-done
-
-# 2. GPU 3 execute + log monitoring
-i=3
-LOG_FILE="vllm_gpu${i}.log"
-CMD="CUDA_VISIBLE_DEVICES=$i python serve_vllm.py \
-  --model \"$BASE_MODEL\" \
-  --port $((PORT_BASE + i)) \
-  --gpu-memory-utilization $GPU_MEMORY_UTILIZATION"
-
-if [ -n "$LORA_PATH" ]; then
-  CMD="$CMD --lora-modules finetune=$LORA_PATH --max-lora-rank $MAX_LORA_RANK"
-fi
-
-eval $CMD > "$LOG_FILE" 2>&1 &
+# 2. Launch Retriever (Single Env)
+echo "🔍 Launching retriever on GPUs: $RETRIEVER_GPU_DEVICES..."
+CUDA_VISIBLE_DEVICES=$RETRIEVER_GPU_DEVICES python search/retriever_server.py --index_path "${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}_index.index" --corpus_path "${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}-chunks.jsonl" > "$RETRIEVER_LOG" 2>&1 &
 PIDS+=($!)
-echo "📺 Started final vLLM on GPU $i (port $((PORT_BASE + i))), watching for startup completion..."
 
-# 3. wait until "Application startup complete." detected
-( tail -n 0 -f "$LOG_FILE" & ) | while read line; do
-  echo "$line"
-  if [[ "$line" == *"Application startup complete."* ]]; then
-    echo "✅ vLLM fully started, launching reasoning agent!"
-    break
-  fi
-done
+# 3. vLLM Optimizations
+# --enable-prefix-caching: Speeds up repeated context (great for agents)
+# --enable-chunked-prefill: Better throughput for long prompts
+# --max-num-batched-tokens: Optimizes batch processing size
+VLLM_OPTS="--gpu-memory-utilization $GPU_MEMORY_UTILIZATION \
+           --enable-prefix-caching \
+           --enable-chunked-prefill \
+           --max-num-batched-tokens 32768"
 
-for dataset in "${!DATASETS[@]}"; do
-  # 4. run experiment
-  echo "🧠 Running reasoning..."
-  AGENT_CMD="python -m exps_research.unified_framework.run_experiment \
-    --experiment_type \"$EXP_TYPE\" \
-    --data_path \"${DATASETS[$dataset]}\" \
-    --model_type vllm \
-    --model_id \"$BASE_MODEL\" \
-    --max_tokens $MAX_TOKENS \
-    --multithreading \
-    --use_process_pool \
-    --n $N --temperature $TEMP --top_p 0.8 \
-    --seed 42 \
-    --verbose"
+# 4. Start vLLM Servers
+for i in 0 1 2 3; do
+  LOG="vllm_gpu${i}.log"
+  CMD="CUDA_VISIBLE_DEVICES=$i python serve_vllm.py \
+       --model \"$BASE_MODEL\" \
+       --port $((PORT_BASE + i)) \
+       $VLLM_OPTS"
 
   if [ -n "$LORA_PATH" ]; then
-    AGENT_CMD="$AGENT_CMD --fine_tuned --lora_folder \"$LORA_PATH\""
+    CMD="$CMD --lora-modules finetune=$LORA_PATH --max-lora-rank $MAX_LORA_RANK --enable-lora"
   fi
 
-  eval $AGENT_CMD
+  eval "$CMD" > "$LOG" 2>&1 &
+  PIDS+=($!)
+  echo "🚀 Started vLLM on GPU $i (Port $((PORT_BASE + i)))"
+
+  # Only wait for the last one to be fully ready before starting the agent
+  if [ $i -eq 3 ]; then
+    echo "📺 Waiting for final vLLM startup..."
+    ( tail -n 0 -f "$LOG" & ) | while read line; do
+      if [[ "$line" == *"Application startup complete."* ]]; then
+        pkill -P $$ tail
+        break
+      fi
+    done
+  fi
 done
 
+# 5. Run Experiment
+echo "🧠 Running reasoning for: $DATASET_NAME"
+AGENT_CMD="python -m exps_research.unified_framework.run_experiment \
+  --experiment_type \"$EXP_TYPE\" \
+  --data_path \"$DATA_PATH\" \
+  --model_type vllm \
+  --model_id \"$BASE_MODEL\" \
+  --max_tokens $MAX_TOKENS \
+  --multithreading \
+  --use_process_pool \
+  --n $N --temperature $TEMP --top_p 0.8 \
+  --seed 42 \
+  --verbose"
+
+[ -n "$LORA_PATH" ] && AGENT_CMD="$AGENT_CMD --fine_tuned --lora_folder \"$LORA_PATH\""
+
+eval "$AGENT_CMD"
 RUN_EXIT_CODE=$?
 
-# 5. clean up server
 cleanup
-
-# 6. check exit code
-if [ $RUN_EXIT_CODE -ne 0 ]; then
-  echo "⚠️ Agent script failed with exit code $RUN_EXIT_CODE"
-  exit $RUN_EXIT_CODE
-else
-  echo "✅ Agent script completed successfully"
-  exit 0
-fi
+exit $RUN_EXIT_CODE
