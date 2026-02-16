@@ -1,19 +1,12 @@
-import json
-import os
-from eval import cal_em, cal_f1
-from eval_r import cal_rsim
-from eval_g import cal_gen
-from concurrent.futures import ProcessPoolExecutor
-from tqdm import tqdm
 import argparse
-import os
 import json
+import os
 import traceback
-from tqdm import tqdm
-from eval import cal_em, cal_f1
-from eval_r import cal_rsim
-from eval_g import cal_gen
 from concurrent.futures import ThreadPoolExecutor
+
+from tqdm import tqdm
+
+from eval import cal_em, cal_f1
 
 
 def evaluate_one(d):
