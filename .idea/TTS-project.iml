@@ -4,10 +4,10 @@
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/tts_project_venv" />
       <excludeFolder url="file://$MODULE_DIR$/all_data" />
-      <excludeFolder url="file://$MODULE_DIR$/src/baselines/agent-distillation/2wikimultihopqa_responses" />
-      <excludeFolder url="file://$MODULE_DIR$/src/baselines/agent-distillation/frames_responses" />
-      <excludeFolder url="file://$MODULE_DIR$/src/baselines/agent-distillation/hotpotqa_responses" />
-      <excludeFolder url="file://$MODULE_DIR$/src/baselines/agent-distillation/musique_responses" />
+      <excludeFolder url="file://$MODULE_DIR$/src/baselines/agent-distillation/my_implementation/2wikimultihopqa_responses" />
+      <excludeFolder url="file://$MODULE_DIR$/src/baselines/agent-distillation/my_implementation/frames_responses" />
+      <excludeFolder url="file://$MODULE_DIR$/src/baselines/agent-distillation/my_implementation/hotpotqa_responses" />
+      <excludeFolder url="file://$MODULE_DIR$/src/baselines/agent-distillation/my_implementation/musique_responses" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.12 (HT_project_venv)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
