@@ -1,9 +1,11 @@
+import argparse
 import json
 import os
-from tqdm import tqdm
-from openai import OpenAI
 from concurrent.futures import ThreadPoolExecutor, as_completed
-import argparse
+
+from openai import OpenAI
+from tqdm import tqdm
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--data_sources', default='hypertension')
 parser.add_argument('--methods', default='StandardRAG')
@@ -11,8 +13,11 @@ args = parser.parse_args()
 methods = args.methods.split(',')
 data_sources = args.data_sources.split(',')
 
-os.environ["OPENAI_API_KEY"] = open("openai_api_key.txt").read().strip()
-client = OpenAI(base_url="https://api.openai.com/v1")
+#os.environ["OPENAI_API_KEY"] = open("openai_api_key.txt").read().strip()
+client = OpenAI(
+    base_url="http://localhost:11434/v1",
+    api_key="ollama"  # Ollama doesn't require a real key, but the client needs a string
+)
 
 def generate_response(d):
     # d['knowledge'] = ' '.join(d['knowledge'].split(' ')[:1200])
@@ -45,7 +50,7 @@ Output format for answer:
     d['prompt'] = prompt
     try:
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="qwen2.5:latest",
             messages=[{"role": "user", "content": prompt}]
         )
         d['generation'] = response.choices[0].message.content

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source hgrag_venv/bin/activate
+
 # --- Configuration ---
 OLLAMA_BIN="./ollama/bin/ollama"
 
