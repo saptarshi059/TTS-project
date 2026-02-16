@@ -54,7 +54,7 @@ def collect_contexts(dataset, dataset_name):
                 if isinstance(text, str):
                     all_contexts.append(f"{title}\n{text}")
                 else:
-                    all_contexts.append(f"{title}\n{" ".join(text)}")
+                    all_contexts.append(f"{title}\n{' '.join(text)}")
     elif dataset_name == "musique":
         for row in dataset.itertuples():
             row_ctx = row.paragraphs
