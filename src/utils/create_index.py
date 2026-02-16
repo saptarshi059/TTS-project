@@ -39,7 +39,7 @@ def build_index(model, texts, base_path, dataset_name):
     index.add(np.array(embeddings).astype('float32'))
     print("Index created...")
 
-    faiss.write_index(index, base_path / f'{dataset_name}_index.index')
+    faiss.write_index(index, str(base_path / f'{dataset_name}_index.index'))
     print("Index saved...")
 
 
