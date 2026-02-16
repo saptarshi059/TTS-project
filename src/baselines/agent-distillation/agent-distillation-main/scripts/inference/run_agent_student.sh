@@ -78,7 +78,7 @@ for i in 0 1 2 3; do
        $VLLM_OPTS"
 
   if [ -n "$LORA_PATH" ]; then
-    CMD="$CMD --lora-modules finetune=$LORA_PATH --max-lora-rank $MAX_LORA_RANK --enable-lora"
+    CMD="$CMD --lora-modules finetune=$LORA_PATH --max-lora-rank $MAX_LORA_RANK"
   fi
 
   eval "$CMD" > "$LOG" 2>&1 &
