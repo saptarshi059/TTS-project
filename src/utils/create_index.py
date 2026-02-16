@@ -75,7 +75,8 @@ def main(dataset_name):
     print("Loading embedding model...")
     model = SentenceTransformer("Qwen/Qwen3-Embedding-0.6B",
                                 model_kwargs={"attn_implementation": "flash_attention_2",
-                                              "device_map": "auto"},
+                                              "device_map": "auto",
+                                              "dtype": "auto"},
                                 tokenizer_kwargs={"padding_side": "left"}
                                 )
     tokenizer = model.tokenizer
