@@ -67,10 +67,7 @@ PIDS+=($!)
 # --enable-prefix-caching: Speeds up repeated context (great for agents)
 # --enable-chunked-prefill: Better throughput for long prompts
 # --max-num-batched-tokens: Optimizes batch processing size
-VLLM_OPTS="--gpu-memory-utilization $GPU_MEMORY_UTILIZATION \
-           --enable-prefix-caching \
-           --enable-chunked-prefill \
-           --max-num-batched-tokens 32768"
+VLLM_OPTS="--gpu-memory-utilization $GPU_MEMORY_UTILIZATION"
 
 # 4. Start vLLM Servers
 for i in 0 1 2 3; do
