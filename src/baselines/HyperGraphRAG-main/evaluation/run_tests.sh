@@ -14,9 +14,9 @@ else
 fi
 
 # --- 2. Knowledge HyperGraph Construction ---
-python -u script_insert.py --cls 2wikimultihopqa
-python -u script_insert.py --cls hotpotqa
-python -u script_insert.py --cls musique
+#python -u script_insert.py --cls 2wikimultihopqa
+#python -u script_insert.py --cls hotpotqa
+#python -u script_insert.py --cls musique
 
 # --- 3. Retrieve Knowledge of HyperGraphRAG ---
 python -u script_hypergraphrag.py --data_source 2wikimultihopqa
