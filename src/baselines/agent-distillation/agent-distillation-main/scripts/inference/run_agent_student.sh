@@ -26,7 +26,7 @@ MAX_TOKENS=1024
 # Dataset Base Location
 BASE_DATA_DIR="../../../../sampled_data"
 
-RETRIEVER_GPU_DEVICES="2,3"
+#RETRIEVER_GPU_DEVICES="2,3"
 RETRIEVER_LOG="retriever_server.log"
 # ===================================================== #
 
@@ -59,8 +59,8 @@ trap 'cleanup; exit 1' SIGINT SIGTERM
 export VLLM_USE_V1=0
 
 # 2. Launch Retriever (Single Env)
-echo "🔍 Launching retriever on GPUs: $RETRIEVER_GPU_DEVICES..."
-CUDA_VISIBLE_DEVICES=$RETRIEVER_GPU_DEVICES python search/retriever_server.py --index_path "${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}_index.index" --corpus_path "${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}-chunks.jsonl" > "$RETRIEVER_LOG" 2>&1 &
+echo "🔍 Launching retriever..."
+python search/retriever_server.py --index_path "${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}_index.index" --corpus_path "${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}-chunks.jsonl" > "$RETRIEVER_LOG" 2>&1 &
 PIDS+=($!)
 
 # 3. vLLM Optimizations
