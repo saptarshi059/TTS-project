@@ -56,7 +56,7 @@ CMD="CUDA_VISIBLE_DEVICES=1 python serve_vllm.py \
   --model \"$BASE_MODEL\" \
   --port $PORT \
   --enforce-eager \
-  --max-model-len 4096 \
+  --max-model-len 8192 \
   --enable-prefix-caching \
   --max-num-seqs 64 \
   --gpu-memory-utilization $GPU_MEMORY_UTILIZATION"
