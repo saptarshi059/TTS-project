@@ -104,8 +104,8 @@ def main():
         cmd.extend(["--tensor-parallel-size", str(args.tensor_parallel_size)])
     if args.trust_remote_code:
         cmd.append("--trust-remote-code")
-    if args.generation_config:
-        cmd.extend(["--generation-config", args.generation_config])
+    '''if args.generation_config:
+        cmd.extend(["--generation-config", args.generation_config])'''
     if args.disable_log_requests:
         cmd.append("--disable-log-requests")
     if args.disable_log_stats:
