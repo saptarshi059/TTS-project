@@ -1,16 +1,20 @@
 #!/bin/bash
 
-# Prevents memory fragmentation (crucial when running 4 separate vLLM instances)
-export PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True"
-
-# Optimizes communication for multi-GPU setups (even if running separate instances)
-export NCCL_IGNORE_DISABLED_P2P=1
-
-# Forces vLLM to use the faster Triton kernels for attention and LoRA
-export VLLM_ATTENTION_BACKEND=FLASH_ATTN
-
-# Optional: If you see "Too many open files" errors during high multithreading
+# --- Resource Limits ---
 ulimit -n 65535
+ulimit -u 4096 2>/dev/null
+
+# --- Threading Optimizations (Crucial for the OpenBLAS error) ---
+export OPENBLAS_NUM_THREADS=4
+export MKL_NUM_THREADS=4
+export OMP_NUM_THREADS=4
+export VECLIB_MAXIMUM_THREADS=4
+export NUMEXPR_NUM_THREADS=4
+
+# --- GPU/vLLM Optimizations ---
+export PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True"
+export NCCL_IGNORE_DISABLED_P2P=1
+export VLLM_ATTENTION_BACKEND=FLASH_ATTN
 
 # ===================== User setting ===================== #
 BASE_MODEL="/gpuhome/sks6765/.cache/huggingface/hub/models--Qwen--Qwen2.5-7B-Instruct/snapshots/a09a35458c702b33eeacc393d103063234e8bc28/"
