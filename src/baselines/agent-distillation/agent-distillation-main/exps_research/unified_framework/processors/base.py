@@ -62,9 +62,9 @@ def process_entry_in_process(
     else:
         # Only modify API base if it's not explicitly set
         if use_single_endpoint:
-            model_kwargs_copy["api_base"] = "http://localhost:8005/v1"
+            model_kwargs_copy["api_base"] = "http://localhost:8000/v1"
         else:
-            model_kwargs_copy["api_base"] = f"http://localhost:{8005 + worker_id}/v1"
+            model_kwargs_copy["api_base"] = f"http://localhost:{8000 + worker_id}/v1"
     
     # Create model with the modified parameters
     model = setup_model(**model_kwargs_copy)
@@ -144,9 +144,9 @@ class ExperimentProcessor(ABC):
             # Only modify API base if it's not explicitly set
             if not model_kwargs.get('api_base'):
                 if use_single_endpoint:
-                    model_kwargs["api_base"] = "http://localhost:8005/v1"
+                    model_kwargs["api_base"] = "http://localhost:8000/v1"
                 else:
-                    model_kwargs["api_base"] = f"http://localhost:{8005 + worker_id}/v1"
+                    model_kwargs["api_base"] = f"http://localhost:{8000 + worker_id}/v1"
         
         return setup_model(**model_kwargs)
     
