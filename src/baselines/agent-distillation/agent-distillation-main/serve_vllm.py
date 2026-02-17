@@ -136,7 +136,7 @@ def main():
     if args.enable_prefix_caching:
         cmd.append("--enable-prefix-caching")
     if args.kv_cache_dtype:
-        cmd.extend(["kv-cache-dtype", str(args.kv_cache_dtype)])
+        cmd.extend(["--kv-cache-dtype", str(args.kv_cache_dtype)])
     if args.max_num_seqs:
         cmd.extend(["--max-num-seqs", str(args.max_num_seqs)])
 
