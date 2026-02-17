@@ -84,7 +84,7 @@ python -m exps_research.unified_framework.run_experiment \
   --api_base "http://localhost:$PORT_VLLM/v1" \
   --api_key "$API_KEY" \
   --model_type vllm \
-  --model_id "$BASE_MODEL" \
+  --model_id "finetune" \
   --max_tokens 1024 \
   --multithreading \
   --use_process_pool \
