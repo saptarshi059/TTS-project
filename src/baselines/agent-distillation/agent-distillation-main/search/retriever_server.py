@@ -72,6 +72,15 @@ def pooling(
         return last_hidden.sum(dim=1) / attention_mask.sum(dim=1)[..., None]
     elif pooling_method == "cls":
         return last_hidden_state[:, 0]
+    elif pooling_method == "last_token":
+        # Get the index of the last non-padding token
+        left_padding = (attention_mask[:, -1].sum() == attention_mask.shape[0])
+        if left_padding:
+            return last_hidden_state[:, -1]
+        else:
+            # Standard right padding: find the last 1 in the mask
+            sequence_lengths = attention_mask.sum(dim=1) - 1
+            return last_hidden_state[torch.arange(last_hidden_state.size(0)), sequence_lengths]
     elif pooling_method == "pooler":
         return pooler_output
     else:
@@ -127,7 +136,7 @@ class Encoder:
             query_emb = output.last_hidden_state[:, 0, :]
         else:
             output = self.model(**inputs, return_dict=True)
-            query_emb = pooling(output.pooler_output,
+            query_emb = pooling(getattr(output, "pooler_output", None), # Safely get pooler_output if it exists,
                                 output.last_hidden_state,
                                 inputs['attention_mask'],
                                 self.pooling_method)

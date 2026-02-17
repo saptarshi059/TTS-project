@@ -61,7 +61,7 @@ DATA_PATH="${BASE_DATA_DIR}/${DATASET_NAME}/sampled_ds.json"
 # 0. Run retriever server (background)
 # ===================================================== #
 echo "🔍 Launching retriever server..."
-CUDA_VISIBLE_DEVICES=0 search/retriever_server.py --index_path "${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}_index.index" --corpus_path "${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}-chunks.jsonl" --retriever_model "Qwen/Qwen3-Embedding-0.6B" > "$RETRIEVER_LOG" 2>&1 &
+CUDA_VISIBLE_DEVICES=0 python search/retriever_server.py --index_path "${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}_index.index" --corpus_path "${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}-chunks.jsonl" --retriever_model "Qwen/Qwen3-Embedding-0.6B" > "$RETRIEVER_LOG" 2>&1 &
 PIDS+=($!)
 
 # 1. GPU 0~2 background
