@@ -405,8 +405,10 @@ if __name__ == "__main__":
 
     formatted_time = datetime.datetime.now().strftime("%Y%m%d-%H:%M:%S")
 
-    with open(f"../../../../sampled_data/{dataset_name}/sampled_ds.json", encoding="utf-8") as f:
-        qa_data = json.load(f)
+    qa_data = pd.read_json(f"../../../../sampled_data/{dataset_name}/sampled_ds.json")
+
+    '''with open(f"../../../../sampled_data/{dataset_name}/sampled_ds.json", encoding="utf-8") as f:
+        qa_data = json.load(f)'''
 
     retrieve_method = args.retrieve_method
 
@@ -430,7 +432,7 @@ if __name__ == "__main__":
     last_id = len(resume_data)
     logger.info("start predicting ...")
     for i in tqdm(range(last_id, len(qa_data))):
-        doc_cell = qa_data[i]
+        doc_cell = qa_data.iloc[i]
         result = process_doc_cell(i, doc_cell, args)
         if result and result.get("final_output") is not None:
             all_result.append(result)
