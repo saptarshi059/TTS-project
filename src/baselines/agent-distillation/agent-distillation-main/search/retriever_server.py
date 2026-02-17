@@ -139,7 +139,8 @@ class Encoder:
             query_emb = pooling(getattr(output, "pooler_output", None), # Safely get pooler_output if it exists,
                                 output.last_hidden_state,
                                 inputs['attention_mask'],
-                                self.pooling_method)
+                                # Change this to last_token for Qwen
+                                pooling_method="last_token")
             if "dpr" not in self.model_name.lower():
                 query_emb = torch.nn.functional.normalize(query_emb, dim=-1)
 
@@ -361,7 +362,7 @@ config = Config(
     corpus_path=args.corpus_path,
     retrieval_topk=args.topk,
     faiss_gpu=True,
-    retrieval_pooling_method="last_token",
+    retrieval_pooling_method="mean",
     retrieval_query_max_length=256,
     retrieval_use_fp16=True,
     retrieval_batch_size=512,
