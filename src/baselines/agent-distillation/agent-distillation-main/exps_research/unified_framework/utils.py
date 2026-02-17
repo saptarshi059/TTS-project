@@ -9,6 +9,7 @@ from typing import Dict, List, Set, Any, Optional
 from pathlib import Path
 from fractions import Fraction  # This is where Rational comes from
 import numpy as np  # To handle ndarray and numpy scalars
+import pandas as pd
 import sympy
 
 # Global lock for thread-safe file writing
@@ -63,8 +64,8 @@ def load_dataset(file_path: str) -> List[Dict]:
     Returns:
         List of examples
     """
-    with open(file_path, 'r', encoding='utf-8') as f:
-        return json.load(f)["examples"]
+    return pd.read_json(file_path).to_dict(orient='records')
+
 
 
 def get_answered_questions(file_path: str) -> Set[str]:
