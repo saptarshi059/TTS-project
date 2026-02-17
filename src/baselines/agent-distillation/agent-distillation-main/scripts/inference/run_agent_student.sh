@@ -7,7 +7,7 @@ export MKL_NUM_THREADS=4
 export OMP_NUM_THREADS=4
 
 # --- GPU/vLLM Optimizations ---
-export PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True"
+#export PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True"
 export NCCL_IGNORE_DISABLED_P2P=1
 export VLLM_ATTENTION_BACKEND=FLASH_ATTN
 export VLLM_USE_V1=0
