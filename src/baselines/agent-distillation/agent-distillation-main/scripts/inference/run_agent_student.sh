@@ -1,100 +1,131 @@
 #!/bin/bash
 
-# --- 1. Environment Fixes ---
-# Prevents the script from trying to use a system proxy for local ports
-export no_proxy=localhost,127.0.0.1
-export NO_PROXY=localhost,127.0.0.1
+# --- Resource Limits & Threading ---
+
+ulimit -n 65535
 export OPENBLAS_NUM_THREADS=4
 export MKL_NUM_THREADS=4
 export OMP_NUM_THREADS=4
 
-# --- 2. Configuration ---
-SESSION_NAME="research_env"
-PORT_VLLM=8000
-PORT_RETRIEVER=8005
-API_KEY="token-abc"
+# --- GPU/vLLM Optimizations ---
 
-# Paths - Ensure these are absolute or correctly relative to where you run the script
+#export PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True"
+export NCCL_IGNORE_DISABLED_P2P=1
+export VLLM_ATTENTION_BACKEND=FLASH_ATTN
+export VLLM_USE_V1=0
+
+# ===================== User setting ===================== #
+
 BASE_MODEL="/gpuhome/sks6765/.cache/huggingface/hub/models--Qwen--Qwen2.5-7B-Instruct/snapshots/a09a35458c702b33eeacc393d103063234e8bc28/"
 LORA_PATH="/gpuhome/sks6765/.cache/huggingface/hub/models--agent-distillation--agent_distilled_Qwen2.5-7B-Instruct/snapshots/816cf2f90baa7948ddb29cd0667b1d83567b0707/"
+EXP_TYPE="agent"
+PORT=8000
+GPU_MEMORY_UTILIZATION=0.6
+MAX_LORA_RANK=64
+N=1
+TEMP=0.4
+MAX_TOKENS=1024
 BASE_DATA_DIR="../../../../sampled_data"
+# ===================================================== #
+
+PIDS=()
+
+cleanup() {
+echo "🧹 Cleaning up..."
+kill ${PIDS[*]} 2>/dev/null
+pgrep -f 'vllm serve' | xargs -r kill -9
+pgrep -f 'retriever_server.py' | xargs -r kill -9
+echo "✅ All servers stopped."
+}
+
+trap 'cleanup; exit 1' SIGINT SIGTERM
 
 DATASET_NAME=$1
-if [ -z "$DATASET_NAME" ]; then
-    echo "❌ Error: Please provide a dataset name (e.g., 2wikimultihopqa)"
-    exit 1
-fi
-
 DATA_PATH="${BASE_DATA_DIR}/${DATASET_NAME}/sampled_ds.json"
 
-# --- 3. Persistent Infrastructure (tmux) ---
-if ! tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
-    echo "🏗️ Creating tmux session: $SESSION_NAME"
-    tmux new-session -d -s "$SESSION_NAME" -n "retriever"
+# 1. Start Retriever on GPU 0
+echo "🔍 Launching retriever server on GPU 0..."
+CUDA_VISIBLE_DEVICES=0 python search/retriever_server.py \
+--index_path "${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}_index.index" \
+--corpus_path "${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}-chunks.jsonl" \
+--retriever_model "Qwen/Qwen3-Embedding-0.6B" > retriever_server.log 2>&1 &
 
-    # Window 0: Retriever
-    echo "🔍 Starting Retriever on GPU 0..."
-    tmux send-keys -t "$SESSION_NAME:0" "CUDA_VISIBLE_DEVICES=0 python search/retriever_server.py \
-        --port $PORT_RETRIEVER \
-        --index_path '${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}_index.index' \
-        --corpus_path '${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}-chunks.jsonl' \
-        --retriever_model 'Qwen/Qwen3-Embedding-0.6B'" C-m
+PIDS+=($!)
 
-    # Window 1: vLLM
-    echo "🚀 Starting vLLM on GPU 1..."
-    tmux new-window -t "$SESSION_NAME:1" -n "vllm"
-    VLLM_CMD="CUDA_VISIBLE_DEVICES=1 python serve_vllm.py \
-        --model '$BASE_MODEL' \
-        --port $PORT_VLLM \
-        --api-key $API_KEY \
-        --max-model-len 8192 \
-        --enable-prefix-caching \
-        --gpu-memory-utilization 0.7"
+# 1. GPU 0~2 background
+for i in 0 1 2; do
+  CMD="CUDA_VISIBLE_DEVICES=$i python serve_vllm.py \
+    --model \"$BASE_MODEL\" \
+    --port $((PORT_BASE + i)) \
+    --gpu-memory-utilization $GPU_MEMORY_UTILIZATION"
 
-    if [ -n "$LORA_PATH" ]; then
-        VLLM_CMD="$VLLM_CMD --lora-modules finetune=$LORA_PATH --max-lora-rank 64"
-    fi
+  if [ -n "$LORA_PATH" ]; then
+    CMD="$CMD --lora-modules finetune=$LORA_PATH --max-lora-rank $MAX_LORA_RANK"
+  fi
 
-    tmux send-keys -t "$SESSION_NAME:1" "$VLLM_CMD" C-m
-else
-    echo "✅ Infrastructure already running in tmux session '$SESSION_NAME'"
+  eval $CMD > vllm_gpu${i}.log 2>&1 &
+  PIDS+=($!)
+  echo "🚀 Started vLLM on GPU $i (port $((PORT_BASE + i)))"
+done
+
+# 2. GPU 3 execute + log monitoring
+i=3
+LOG_FILE="vllm_gpu${i}.log"
+CMD="CUDA_VISIBLE_DEVICES=$i python serve_vllm.py \
+  --model \"$BASE_MODEL\" \
+  --port $((PORT_BASE + i)) \
+  --gpu-memory-utilization $GPU_MEMORY_UTILIZATION"
+
+if [ -n "$LORA_PATH" ]; then
+  CMD="$CMD --lora-modules finetune=$LORA_PATH --max-lora-rank $MAX_LORA_RANK"
 fi
 
-# --- 4. Health Check Loop ---
-echo -n "⏳ Waiting for vLLM API to be ready (this can take 1-2 mins)"
-MAX_RETRIES=60
-COUNT=0
-until curl -s -H "Authorization: Bearer $API_KEY" "http://localhost:$PORT_VLLM/v1/models" > /dev/null; do
-    echo -n "."
-    sleep 5
-    COUNT=$((COUNT + 1))
-    if [ $COUNT -ge $MAX_RETRIES ]; then
-        echo -e "\n❌ Timeout: vLLM failed to start. Check logs with: tmux attach -t $SESSION_NAME"
-        exit 1
-    fi
+eval $CMD > "$LOG_FILE" 2>&1 &
+PIDS+=($!)
+echo "📺 Started final vLLM on GPU $i (port $((PORT_BASE + i))), watching for startup completion..."
+
+# 3. wait until "Application startup complete." detected
+( tail -n 0 -f "$LOG_FILE" & ) | while read line; do
+  echo "$line"
+  if [[ "$line" == *"Application startup complete."* ]]; then
+    echo "✅ vLLM fully started, launching reasoning agent!"
+    break
+  fi
 done
-echo -e "\n✅ vLLM is ONLINE."
 
-# --- 5. Run Experiment ---
-echo "🧠 Running Experiment: $DATASET_NAME"
-# Use the absolute path for model_id because that is how vLLM registered it
-python -m exps_research.unified_framework.run_experiment \
-  --experiment_type "agent" \
-  --data_path "$DATA_PATH" \
-  --api_base "http://localhost:$PORT_VLLM/v1" \
-  --api_key "$API_KEY" \
-  --model_type vllm \
-  --model_id "finetune" \
-  --max_tokens 1024 \
-  --multithreading \
-  --use_process_pool \
-  --n 1 \
-  --temperature 0.4 \
-  --parallel_workers 4 \
-  --use_single_endpoint \
-  --seed 42 \
-  --fine_tuned \
-  --lora_folder "$LORA_PATH"
 
-# End of script - Servers stay alive in tmux!
-echo "🏁 Done. To stop servers later, run: tmux kill-session -t $SESSION_NAME"
+echo "🧠 Running reasoning..."
+AGENT_CMD="python -m exps_research.unified_framework.run_experiment \
+--experiment_type \"$EXP_TYPE\" \
+--data_path \"$DATA_PATH\" \
+--api_base "http://localhost:8000/v1" \
+--api_key "token-abc" \
+--model_type vllm \
+--model_id \"$BASE_MODEL\" \
+--max_tokens $MAX_TOKENS \
+--multithreading \
+--use_process_pool \
+--n $N --temperature $TEMP --top_p 0.8 \
+--parallel_workers 4 \
+--use_single_endpoint
+--seed 42"
+
+if [ -n "$LORA_PATH" ]; then
+  AGENT_CMD="$AGENT_CMD --fine_tuned --lora_folder \"$LORA_PATH\""
+fi
+
+eval $AGENT_CMD
+
+RUN_EXIT_CODE=$?
+
+# 5. clean up server
+cleanup
+
+# 6. check exit code
+if [ $RUN_EXIT_CODE -ne 0 ]; then
+  echo "⚠️ Agent script failed with exit code $RUN_EXIT_CODE"
+  exit $RUN_EXIT_CODE
+else
+  echo "✅ Agent script completed successfully"
+  exit 0
+fi
