@@ -114,14 +114,7 @@ def run_experiment():
     if args.fine_tuned and not args.lora_folder:
         parser.error("--lora_folder is required when --fine_tuned is set")
 
-    if not args.task_type:
-        # Auto-set task type for reasoning experiments if not provided
-        if "math" in args.data_path:
-            args.task_type = "math"
-        elif "qa" in args.data_path:
-            args.task_type = "fact"
-        else:
-            parser.error("--task_type is required for experiments when it cannot be inferred from data_path")
+    args.task_type = "fact"
 
     # Set up log folder
     model_name = args.model_id.replace("/", "_") if args.model_id else "default"
