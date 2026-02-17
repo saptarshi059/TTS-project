@@ -142,7 +142,7 @@ def main():
     if args.kv_cache_dtype:
         cmd.extend(["--kv-cache-dtype", str(args.kv_cache_dtype)])
     if args.swap_space:
-        cmd.extend(["--swap_space", str(args.swap_space)])
+        cmd.extend(["--swap-space", str(args.swap_space)])
     if args.max_num_seqs:
         cmd.extend(["--max-num-seqs", str(args.max_num_seqs)])
 
