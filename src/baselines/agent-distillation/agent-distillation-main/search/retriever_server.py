@@ -94,6 +94,7 @@ class Encoder:
         self.max_length = max_length
         self.use_fp16 = use_fp16
 
+        print(f"--- Model Loaded Successfully: {self.model_name} ---")
         self.model, self.tokenizer = load_model(model_path=model_path, use_fp16=use_fp16)
         self.model.eval()
 
