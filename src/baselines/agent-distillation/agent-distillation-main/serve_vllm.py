@@ -89,6 +89,7 @@ def main():
     )
     parser.add_argument(
         "--kv-cache-dtype",
+        type=str
     )
     parser.add_argument(
         "--lora-modules",
