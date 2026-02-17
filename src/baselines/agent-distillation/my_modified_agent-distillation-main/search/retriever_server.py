@@ -46,12 +46,19 @@ def load_docs(corpus, doc_idxs):
 
 def load_model(model_path: str, use_fp16: bool = False):
     model_config = AutoConfig.from_pretrained(model_path, trust_remote_code=True)
-    model = AutoModel.from_pretrained(model_path, trust_remote_code=True)
+    if "qwen" in model_path.lower():
+        model = AutoModel.from_pretrained(model_path, attn_implementation="flash_attention_2", dtype="auto", device_map="auto", trust_remote_code=True)
+    else:
+        model = AutoModel.from_pretrained(model_path, trust_remote_code=True)
     model.eval()
     model.cuda()
     if use_fp16: 
         model = model.half()
-    tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=True, trust_remote_code=True)
+
+    if "qwen" in model_path.lower():
+        tokenizer = AutoTokenizer.from_pretrained(model_path, padding_side='left', use_fast=True, trust_remote_code=True)
+    else:
+        tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=True, trust_remote_code=True)
     return model, tokenizer
 
 def pooling(
@@ -65,6 +72,15 @@ def pooling(
         return last_hidden.sum(dim=1) / attention_mask.sum(dim=1)[..., None]
     elif pooling_method == "cls":
         return last_hidden_state[:, 0]
+    elif pooling_method == "last_token":
+        # Get the index of the last non-padding token
+        left_padding = (attention_mask[:, -1].sum() == attention_mask.shape[0])
+        if left_padding:
+            return last_hidden_state[:, -1]
+        else:
+            # Standard right padding: find the last 1 in the mask
+            sequence_lengths = attention_mask.sum(dim=1) - 1
+            return last_hidden_state[torch.arange(last_hidden_state.size(0)), sequence_lengths]
     elif pooling_method == "pooler":
         return pooler_output
     else:
@@ -78,6 +94,7 @@ class Encoder:
         self.max_length = max_length
         self.use_fp16 = use_fp16
 
+        print(f"--- Model Loaded Successfully: {self.model_name} ---")
         self.model, self.tokenizer = load_model(model_path=model_path, use_fp16=use_fp16)
         self.model.eval()
 
@@ -96,6 +113,10 @@ class Encoder:
         if "bge" in self.model_name.lower():
             if is_query:
                 query_list = [f"Represent this sentence for searching relevant passages: {query}" for query in query_list]
+
+        if "qwen" in self.model_name.lower():
+            if is_query:
+                query_list = [f"Instruct: Given a web search query, retrieve relevant passages that answer the query\nQuery: {query}" for query in query_list]
 
         inputs = self.tokenizer(query_list,
                                 max_length=self.max_length,
@@ -116,10 +137,11 @@ class Encoder:
             query_emb = output.last_hidden_state[:, 0, :]
         else:
             output = self.model(**inputs, return_dict=True)
-            query_emb = pooling(output.pooler_output,
+            query_emb = pooling(getattr(output, "pooler_output", None), # Safely get pooler_output if it exists,
                                 output.last_hidden_state,
                                 inputs['attention_mask'],
-                                self.pooling_method)
+                                # Change this to last_token for Qwen
+                                pooling_method="last_token")
             if "dpr" not in self.model_name.lower():
                 query_emb = torch.nn.functional.normalize(query_emb, dim=-1)
 
@@ -217,11 +239,11 @@ class DenseRetriever(BaseRetriever):
     def __init__(self, config):
         super().__init__(config)
         self.index = faiss.read_index(self.index_path)
-        if config.faiss_gpu:
+        '''if config.faiss_gpu:
             co = faiss.GpuMultipleClonerOptions()
             co.useFloat16 = True
             co.shard = True
-            self.index = faiss.index_cpu_to_all_gpus(self.index, co=co)
+            self.index = faiss.index_cpu_to_all_gpus(self.index, co=co)'''
 
         self.corpus = load_corpus(self.corpus_path)
         self.encoder = Encoder(
@@ -335,12 +357,12 @@ app = FastAPI()
 # 1) Build a config (could also parse from arguments).
 #    In real usage, you'd parse your CLI arguments or environment variables.
 config = Config(
-    retrieval_method = "e5",  # or "dense"
+    retrieval_method = args.retriever_model,
+    retrieval_model_path = args.retriever_model,
     index_path=args.index_path,
     corpus_path=args.corpus_path,
     retrieval_topk=args.topk,
     faiss_gpu=True,
-    retrieval_model_path=args.retriever_model,
     retrieval_pooling_method="mean",
     retrieval_query_max_length=256,
     retrieval_use_fp16=True,

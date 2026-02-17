@@ -1,21 +1,12 @@
 #!/bin/bash
 
-# ===================== User setting ===================== #
-BASE_MODEL=$1
-LORA_PATH=$2 # set lora path here
-EXP_TYPE="agent"
+# ===================== User Setting ===================== #
+BASE_MODEL="Qwen/Qwen2.5-1.5B-Instruct"
+LORA_PATH="training_outputs/qwen-1.5B-instruct/cot_baseline_qwen2.5_32B_teacher" # set lora path here
+EXP_TYPE="reasoning"
 PORT_BASE=8000
 GPU_MEMORY_UTILIZATION=0.6
 MAX_LORA_RANK=64
-N=8
-TEMP=0.4
-
-MAX_TOKENS=1024
-
-RETRIEVER_CONDA_ENV="retriever"          # retriever conda
-RETRIEVER_GPU_DEVICES="2,3"              # retriever GPU
-RETRIEVER_LOG="retriever_server.log"     # retriever path
-# ===================================================== #
 
 declare -A DATASETS=(
   ["hotpotqa"]="data_processor/qa_dataset/test/hotpotqa_500_20250422.json"
@@ -27,45 +18,27 @@ declare -A DATASETS=(
   ["2wiki"]="data_processor/qa_dataset/test/2wikimultihopqa_500_20250511.json"
   ["olymath"]="data_processor/math_dataset/test/olymath_200_20250511.json"
 )
+MAX_TOKENS=4096
+# ===================================================== #
 
 PIDS=()
 
-# 종료 핸들러 정의
+# set end handler
 cleanup() {
   echo ""
   echo "🧹 Cleaning up vLLM servers..."
   kill ${PIDS[*]} 2>/dev/null
   # If the process is not cleaned well
   ps -u $USER -o pid,command | grep 'vllm serve' | grep -v grep | awk '{print $1}' | xargs kill
-
-  pgrep -f 'retriever_server.py' | xargs -r kill
   wait
   echo "✅ All vLLM servers stopped."
 }
 
-# Ctrl-C 처리
+# Ctrl-C
 trap 'echo ""; echo "❌ Interrupted!"; cleanup; exit 1' SIGINT SIGTERM
 export VLLM_USE_V1=0
 
-# ===================================================== #
-# 0. Run retriever server (background)
-# ===================================================== #
-echo "🔍 Launching retriever server in Conda env \"$RETRIEVER_CONDA_ENV\" …"
-# Conda initialization
-source "$(conda info --base)/etc/profile.d/conda.sh"
-
-(
-  conda activate "$RETRIEVER_CONDA_ENV"
-  # retriever background
-  CUDA_VISIBLE_DEVICES=$RETRIEVER_GPU_DEVICES \
-    python search/retriever_server.py \
-    > "$RETRIEVER_LOG" 2>&1 &
-  RETRIEVER_PID=$!
-  echo "🛰️  Retriever server started (PID: $RETRIEVER_PID, GPUs: $RETRIEVER_GPU_DEVICES)"
-  conda deactivate
-)&
-
-PIDS+=($RETRIEVER_PID)
+# 0. run retriever as background if
 
 # 1. GPU 0~2 background
 for i in 0 1 2; do
@@ -119,7 +92,7 @@ for dataset in "${!DATASETS[@]}"; do
     --max_tokens $MAX_TOKENS \
     --multithreading \
     --use_process_pool \
-    --n $N --temperature $TEMP --top_p 0.8 \
+    --n 1 --temperature 0.0 --top_p 0.8 \
     --seed 42 \
     --verbose"
 

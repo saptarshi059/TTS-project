@@ -10,6 +10,7 @@ from pathlib import Path
 from fractions import Fraction  # This is where Rational comes from
 import numpy as np  # To handle ndarray and numpy scalars
 import sympy
+import pandas as pd
 
 # Global lock for thread-safe file writing
 APPEND_ANSWER_LOCK = threading.Lock()
@@ -63,8 +64,10 @@ def load_dataset(file_path: str) -> List[Dict]:
     Returns:
         List of examples
     """
-    with open(file_path, 'r', encoding='utf-8') as f:
-        return json.load(f)["examples"]
+    return pd.read_json(file_path).to_dict(orient='records')
+
+    '''with open(file_path, 'r', encoding='utf-8') as f:
+        return json.load(f)["examples"]'''
 
 
 def get_answered_questions(file_path: str) -> Set[str]:
