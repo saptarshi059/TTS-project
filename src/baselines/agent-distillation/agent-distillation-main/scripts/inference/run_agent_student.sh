@@ -56,6 +56,9 @@ CMD="CUDA_VISIBLE_DEVICES=1 python serve_vllm.py \
   --model \"$BASE_MODEL\" \
   --port $PORT \
   --enforce-eager \
+  --max-model-len 4096 \
+  --enable-prefix-caching \
+  --max-num-seqs 64 \
   --gpu-memory-utilization $GPU_MEMORY_UTILIZATION"
 
 if [ -n "$LORA_PATH" ]; then
@@ -88,7 +91,7 @@ AGENT_CMD="python -m exps_research.unified_framework.run_experiment \
   --multithreading \
   --use_process_pool \
   --n $N --temperature $TEMP --top_p 0.8 \
-  --parallel_workers 1 \
+  --parallel_workers 4 \
   --use_single_endpoint
   --seed 42"
 

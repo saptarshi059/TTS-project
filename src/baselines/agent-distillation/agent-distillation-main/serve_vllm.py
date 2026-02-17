@@ -80,6 +80,14 @@ def main():
         help="Whether to enforce eager execution (disables CUDA graphs)"
     )
     parser.add_argument(
+        "--enable-prefix-caching",
+        action="store_true"
+    )
+    parser.add_argument(
+        "--max-num-seqs",
+        type=int
+    )
+    parser.add_argument(
         "--lora-modules",
         type=str,
         help="lora modeul in format {name}={path}"
@@ -121,6 +129,10 @@ def main():
         cmd.extend(["--max-lora-rank", str(args.max_lora_rank)])
     if args.enforce_eager:
         cmd.append("--enforce-eager")
+    if args.enable_prefix_caching:
+        cmd.append("--enable-prefix-caching")
+    if args.max_num_seqs:
+        cmd.extend(["--max-num-seqs", str(args.max_num_seqs)])
 
     # Print the command that will be executed
     print("Executing command:", " ".join(cmd))
