@@ -12,6 +12,7 @@ import json
 def process_samples(contexts, tokenizer):
     total_chunks = []
     total_metadata = []
+    idx = 0
     for ctx in tqdm(contexts):
         chunks = tokenizer(ctx,
                            truncation=True,
@@ -20,12 +21,13 @@ def process_samples(contexts, tokenizer):
                            stride=50)['input_ids']
         chunks_detokenized = tokenizer.batch_decode(chunks, skip_special_tokens=True)
 
-        for idx, chunk in enumerate(chunks_detokenized):
+        for chunk in chunks_detokenized:
             total_chunks.append(chunk)
             total_metadata.append({
                 "id": str(idx),
                 "contents": chunk
             })
+            idx += 1
 
     return total_chunks, total_metadata
 

@@ -384,26 +384,28 @@ if __name__ == "__main__":
         logger.info("%s -->   %s", keystr, val)
 
     dataset_name = args.dataset
-    corpus_dataset = "hotpotqa" if args.dataset == "bamboogle" else args.dataset
-    vector_path = f"../data/corpus/{corpus_dataset}/{corpus_dataset}.index"
+    vector_path = f"../../../../sampled_data/{dataset_name}/{dataset_name}_index.index"
 
     if args.retrieve_method == "emb":
-        emb_model = SentenceTransformer(
-            config["model"]["bge-large-en-v1.5"], device=device
+        emb_model = SentenceTransformer(config["model"]["qwen3-Embedding-0.6B"],
+                                        model_kwargs={"attn_implementation": "flash_attention_2",
+                                                      "device_map": "auto",
+                                                      "dtype": "auto"},
+                                        tokenizer_kwargs={"padding_side": "left"},
         )
-        with open(f"../data/corpus/{corpus_dataset}/chunk.json", encoding="utf-8") as f:
+        with open(f"../../../../sampled_data/{dataset_name}/{dataset_name}-chunks.jsonl", encoding="utf-8") as f:
             raw_data = json.load(f)
         vector = faiss.read_index(vector_path)
 
 
         def retrieve(_, query, topk):
-            feature = emb_model.encode([query])
+            feature = emb_model.encode([query], prompt_name="query")
             _, match_id = vector.search(feature, topk)
             return [raw_data[i] for i in match_id[0]]
 
     formatted_time = datetime.datetime.now().strftime("%Y%m%d-%H:%M:%S")
 
-    with open(f"../data/eval/{args.dataset}/test.json", encoding="utf-8") as f:
+    with open(f"../../../../sampled_data/{dataset_name}/sampled_ds.json", encoding="utf-8") as f:
         qa_data = json.load(f)
 
     retrieve_method = args.retrieve_method
