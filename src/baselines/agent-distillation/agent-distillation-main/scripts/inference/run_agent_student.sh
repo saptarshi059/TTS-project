@@ -64,7 +64,7 @@ export VLLM_USE_V1=0
 
 # 2. Launch Retriever (Single Env)
 echo "🔍 Launching retriever..."
-python search/retriever_server.py --index_path "${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}_index.index" --corpus_path "${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}-chunks.jsonl" --retriever_model "Qwen/Qwen3-Embedding-0.6B" > "$RETRIEVER_LOG" 2>&1 &
+CUDA_VISIBLE_DEVICES=0 search/retriever_server.py --index_path "${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}_index.index" --corpus_path "${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}-chunks.jsonl" --retriever_model "Qwen/Qwen3-Embedding-0.6B" > "$RETRIEVER_LOG" 2>&1 &
 PIDS+=($!)
 
 # 3. vLLM Optimizations
