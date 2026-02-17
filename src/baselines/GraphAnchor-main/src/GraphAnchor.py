@@ -407,9 +407,6 @@ if __name__ == "__main__":
 
     qa_data = pd.read_json(f"../../../../sampled_data/{dataset_name}/sampled_ds.json")
 
-    '''with open(f"../../../../sampled_data/{dataset_name}/sampled_ds.json", encoding="utf-8") as f:
-        qa_data = json.load(f)'''
-
     retrieve_method = args.retrieve_method
 
     save_path = f"../output/{args.dataset}/{retrieve_method}/{args.method}/{args.model}"
