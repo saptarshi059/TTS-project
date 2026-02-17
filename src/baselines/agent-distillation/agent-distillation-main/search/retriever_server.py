@@ -339,12 +339,12 @@ app = FastAPI()
 # 1) Build a config (could also parse from arguments).
 #    In real usage, you'd parse your CLI arguments or environment variables.
 config = Config(
-    retrieval_method = "e5",  # or "dense"
+    retrieval_method = args.retriever_model,
+    retrieval_model_path = args.retriever_model,
     index_path=args.index_path,
     corpus_path=args.corpus_path,
     retrieval_topk=args.topk,
     faiss_gpu=True,
-    retrieval_model_path=args.retriever_model,
     retrieval_pooling_method="mean",
     retrieval_query_max_length=256,
     retrieval_use_fp16=True,
