@@ -92,7 +92,7 @@ def main():
         type=str
     )
     parser.add_argument(
-        "--swap_space",
+        "--swap-space",
         type=int
     )
     parser.add_argument(
