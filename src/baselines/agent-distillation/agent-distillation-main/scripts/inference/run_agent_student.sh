@@ -17,9 +17,9 @@ BASE_MODEL="/gpuhome/sks6765/.cache/huggingface/hub/models--Qwen--Qwen2.5-7B-Ins
 LORA_PATH="/gpuhome/sks6765/.cache/huggingface/hub/models--agent-distillation--agent_distilled_Qwen2.5-7B-Instruct/snapshots/816cf2f90baa7948ddb29cd0667b1d83567b0707/"
 EXP_TYPE="agent"
 PORT=8000
-GPU_MEMORY_UTILIZATION=0.85
+GPU_MEMORY_UTILIZATION=0.6
 MAX_LORA_RANK=64
-N=8
+N=1
 TEMP=0.4
 MAX_TOKENS=1024
 BASE_DATA_DIR="../../../../sampled_data"
@@ -79,12 +79,16 @@ echo "🧠 Running reasoning for: $DATASET_NAME"
 AGENT_CMD="python -m exps_research.unified_framework.run_experiment \
   --experiment_type \"$EXP_TYPE\" \
   --data_path \"$DATA_PATH\" \
+  --api_base "http://localhost:8000/v1" \
+  --api_key "token-abc" \
   --model_type vllm \
   --model_id \"$BASE_MODEL\" \
   --max_tokens $MAX_TOKENS \
   --multithreading \
   --use_process_pool \
   --n $N --temperature $TEMP --top_p 0.8 \
+  --parallel_workers 1 \
+  --use_single_endpoint
   --seed 42"
 
 [ -n "$LORA_PATH" ] && AGENT_CMD="$AGENT_CMD --fine_tuned --lora_folder \"$LORA_PATH\""
