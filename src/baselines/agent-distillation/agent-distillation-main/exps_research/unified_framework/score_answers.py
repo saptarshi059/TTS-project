@@ -23,8 +23,7 @@ class ResponseFormat(BaseModel):
 
 def load_api_key() -> str:
     """Load OpenAI API key from file"""
-    with open("keys/openai-key/key.env") as f:
-        return f.read().strip()
+    return ""
 
 def setup_scoring_model() -> OpenAIServerModel:
     """Initialize the OpenAI model for scoring"""
