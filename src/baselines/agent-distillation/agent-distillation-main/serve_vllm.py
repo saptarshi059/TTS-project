@@ -92,6 +92,10 @@ def main():
         type=str
     )
     parser.add_argument(
+        "--swap_space",
+        type=int
+    )
+    parser.add_argument(
         "--lora-modules",
         type=str,
         help="lora modeul in format {name}={path}"
@@ -137,6 +141,8 @@ def main():
         cmd.append("--enable-prefix-caching")
     if args.kv_cache_dtype:
         cmd.extend(["--kv-cache-dtype", str(args.kv_cache_dtype)])
+    if args.swap_space:
+        cmd.extend(["--swap_space", str(args.swap_space)])
     if args.max_num_seqs:
         cmd.extend(["--max-num-seqs", str(args.max_num_seqs)])
 
