@@ -55,6 +55,8 @@ def collect_contexts(dataset, dataset_name):
                 text = ctx[1]
                 if isinstance(text, str):
                     all_contexts.append(f"{title}\n{text}")
+                    print('here')
+                    exit()
                 else:
                     all_contexts.append(f"{title}\n{' '.join(text)}")
     elif dataset_name == "musique":
