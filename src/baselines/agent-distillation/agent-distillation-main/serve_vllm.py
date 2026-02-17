@@ -75,6 +75,11 @@ def main():
         help="Disable stats logging"
     )
     parser.add_argument(
+        "--enforce-eager",
+        action="store_true",
+        help="Whether to enforce eager execution (disables CUDA graphs)"
+    )
+    parser.add_argument(
         "--lora-modules",
         type=str,
         help="lora modeul in format {name}={path}"
@@ -114,6 +119,8 @@ def main():
         cmd.extend(["--enable-lora", "--lora-modules", str(args.lora_modules)])
     if args.max_lora_rank:
         cmd.extend(["--max-lora-rank", str(args.max_lora_rank)])
+    if args.enforce_eager:
+        cmd.append("--enforce-eager")
 
     # Print the command that will be executed
     print("Executing command:", " ".join(cmd))

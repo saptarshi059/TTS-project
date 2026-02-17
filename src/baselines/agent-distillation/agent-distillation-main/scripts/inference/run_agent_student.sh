@@ -55,6 +55,7 @@ LOG_FILE="vllm_gpu1.log"
 CMD="CUDA_VISIBLE_DEVICES=1 python serve_vllm.py \
   --model \"$BASE_MODEL\" \
   --port $PORT \
+  --enforce-eager \
   --gpu-memory-utilization $GPU_MEMORY_UTILIZATION"
 
 if [ -n "$LORA_PATH" ]; then
