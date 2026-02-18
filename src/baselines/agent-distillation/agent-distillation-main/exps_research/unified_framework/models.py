@@ -64,6 +64,7 @@ def setup_model(
                 import json
                 chat_template = None
                 tokenizer_config = os.path.join(model_id, "tokenizer_config.json")
+                print(model_id, tokenizer_config)
                 if os.path.exists(tokenizer_config):
                     with open(tokenizer_config) as f:
                         chat_template = json.load(f).get("chat_template")
