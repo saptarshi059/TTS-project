@@ -62,7 +62,7 @@ def process_entry_in_process(
     else:
         # Only modify API base if it's not explicitly set
         if use_single_endpoint:
-            model_kwargs_copy["api_base"] = "http://localhost:8000/v1"
+            model_kwargs_copy["api_base"] = model_kwargs["api_base"]
         else:
             model_kwargs_copy["api_base"] = f"http://localhost:{8000 + worker_id}/v1"
     

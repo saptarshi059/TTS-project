@@ -16,7 +16,7 @@ DATASET_NAME=$1
 
 # Inference Config
 PORT=49135
-GPU_UTIL=0.90      # High util for 80GB A100 (vLLM on GPU 0)
+GPU_UTIL=0.7      # High util for 80GB A100 (vLLM on GPU 0)
 MAX_LORA_RANK=64
 WORKERS=32         # High concurrency for 500 samples
 # ========================================================= #
@@ -75,6 +75,8 @@ python -m exps_research.unified_framework.run_experiment \
     --max_tokens 1024 \
     --multithreading \
     --use_process_pool \
+    --use_single_endpoint \
+    --debug \
     --parallel_workers $WORKERS \
     --n 1 --temperature 0.4 --top_p 0.8 --seed 42 \
     $( [[ -n "$LORA_PATH" ]] && echo "--fine_tuned --lora_folder $LORA_PATH" )
