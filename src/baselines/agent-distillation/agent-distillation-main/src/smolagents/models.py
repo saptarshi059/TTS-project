@@ -1278,6 +1278,7 @@ class VLLMServerModel(ApiModel):
         if self.lora_name:
             completion_kwargs["model"] = self.lora_name
 
+        print(f"DEBUG extra_body in completion_kwargs: {completion_kwargs.get('extra_body')}")
         response = self.client.chat.completions.create(**completion_kwargs)
         self.last_input_token_count = response.usage.prompt_tokens
         self.last_output_token_count = response.usage.completion_tokens
