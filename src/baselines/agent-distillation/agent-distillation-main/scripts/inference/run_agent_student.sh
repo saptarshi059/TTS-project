@@ -17,7 +17,6 @@ DATASET_NAME="2wikimultihopqa"
 
 EXP_TYPE="agent"
 PORT_BASE=13579
-RPC_PORT_BASE=12340  # Base for internal RPC ports
 GPU_MEMORY_UTILIZATION=0.6
 MAX_LORA_RANK=64
 N=8
@@ -38,12 +37,9 @@ PIDS=()
 cleanup() {
   echo ""
   echo "🧹 Cleaning up servers..."
-  # Kill specific PIDs collected
   for pid in "${PIDS[@]}"; do
     kill "$pid" 2>/dev/null
   done
-
-  # Extra safety for vLLM and Retriever
   pkill -f 'vllm.entrypoints.openai.api_server'
   pgrep -f 'retriever_server.py' | xargs -r kill
   echo "✅ All servers stopped."
@@ -70,13 +66,11 @@ PIDS+=($RETRIEVER_PID)
 NUM_GPUS=4
 for i in $(seq 0 $((NUM_GPUS - 1))); do
   CURRENT_PORT=$((PORT_BASE + i))
-  CURRENT_RPC=$((RPC_PORT_BASE + i))
   LOG_FILE="vllm_gpu${i}.log"
 
-  echo "🚀 Launching vLLM on GPU $i (API: $CURRENT_PORT, RPC: $CURRENT_RPC)..."
+  echo "🚀 Launching vLLM on GPU $i (API: $CURRENT_PORT)..."
 
-  # We set VLLM_RPC_PORT via environment variable to avoid the "unrecognized arguments" error
-  VLLM_RPC_PORT=$CURRENT_RPC CUDA_VISIBLE_DEVICES=$i python -m vllm.entrypoints.openai.api_server \
+  CUDA_VISIBLE_DEVICES=$i python -m vllm.entrypoints.openai.api_server \
       --model "$BASE_MODEL" \
       --port "$CURRENT_PORT" \
       --tensor-parallel-size 1 \
@@ -86,7 +80,8 @@ for i in $(seq 0 $((NUM_GPUS - 1))); do
       --trust-remote-code \
       --enable-lora \
       --lora-modules finetune="$LORA_PATH" \
-      --max-lora-rank "$MAX_LORA_RANK" > "$LOG_FILE" 2>&1 &
+      --max-lora-rank "$MAX_LORA_RANK" \
+      --disable-frontend-multiprocessing > "$LOG_FILE" 2>&1 &
 
   PIDS+=($!)
 done
@@ -109,8 +104,6 @@ done
 for dataset in "${!DATASETS[@]}"; do
   echo "🧠 Running reasoning on $dataset..."
 
-  # NOTE: This currently only points to the FIRST GPU port ($PORT_BASE).
-  # If your 'run_experiment' script supports multiple URLs, you should list them here.
   AGENT_CMD="python -m exps_research.unified_framework.run_experiment \
     --experiment_type \"$EXP_TYPE\" \
     --data_path \"${DATASETS[$dataset]}\" \
