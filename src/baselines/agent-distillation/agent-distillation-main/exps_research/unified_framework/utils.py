@@ -64,7 +64,9 @@ def load_dataset(file_path: str) -> List[Dict]:
     Returns:
         List of examples
     """
-    return pd.read_json(file_path).to_dict(orient='records')
+    df = pd.read_json(file_path)
+    df = df['id'].astype(str)
+    return df.to_dict(orient='records')
 
     '''with open(file_path, 'r', encoding='utf-8') as f:
         return json.load(f)["examples"]'''
