@@ -1251,6 +1251,8 @@ class VLLMServerModel(ApiModel):
         # Preprocess messages for VLLM server
         messages = remove_tool_call_from_messages(messages)
         kwargs["extra_body"] = {"chat_template": self.chat_template}
+        print(f"DEBUG chat_template is None: {self.chat_template is None}")
+        print(f"DEBUG chat_template first 100 chars: {str(self.chat_template)[:100]}")
 
         completion_kwargs = self._prepare_completion_kwargs(
             messages=messages,
