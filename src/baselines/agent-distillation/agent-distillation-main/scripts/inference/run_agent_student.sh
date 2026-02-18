@@ -15,7 +15,7 @@ BASE_DATA_DIR="../../../../sampled_data"
 DATASET_NAME=$1
 
 # Inference Config
-PORT=49135
+PORT=49112
 GPU_UTIL=0.7      # High util for 80GB A100 (vLLM on GPU 0)
 MAX_LORA_RANK=64
 WORKERS=32         # High concurrency for 500 samples
