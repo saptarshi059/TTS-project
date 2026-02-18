@@ -82,7 +82,7 @@ for i in $(seq 0 $((NUM_GPUS - 1))); do
       --model "$BASE_MODEL" \
       --port "$CURRENT_PORT" \
       --tensor-parallel-size 1 \
-      --gpu-memory-utilization "$GPU_UTIL" \
+      --gpu-memory-utilization "$GPU_MEMORY_UTILIZATION" \
       --max-model-len 8192 \
       --disable-log-requests \
       --trust-remote-code \
