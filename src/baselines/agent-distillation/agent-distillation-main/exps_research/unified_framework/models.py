@@ -60,11 +60,20 @@ def setup_model(
                     **kwargs
                 )
             else:
+                # Read chat template from base model
+                import json
+                chat_template = None
+                tokenizer_config = os.path.join(model_id, "tokenizer_config.json")
+                if os.path.exists(tokenizer_config):
+                    with open(tokenizer_config) as f:
+                        chat_template = json.load(f).get("chat_template")
+
                 return VLLMServerModel(
                     model_id=model_id,
                     # api_base="http://0.0.0.0:8000/v1",
                     # api_key="token-abc",
                     lora_name="finetune",
+                    chat_template=chat_template,  # <-- add this
                     **kwargs
                 )
         else:

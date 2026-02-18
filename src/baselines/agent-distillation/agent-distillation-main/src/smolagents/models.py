@@ -1213,6 +1213,7 @@ class VLLMServerModel(ApiModel):
         custom_role_conversions: Optional[Dict[str, str]] = None,
         flatten_messages_as_text: bool = True,
         lora_name: str = None,
+        chat_template: str = None,
         **kwargs,
     ):
         if importlib.util.find_spec("openai") is None:
@@ -1228,6 +1229,7 @@ class VLLMServerModel(ApiModel):
         }
         self.client = self.create_client()
         self.lora_name = lora_name
+        self.chat_template = chat_template
 
     def create_client(self):
         import openai
@@ -1248,7 +1250,7 @@ class VLLMServerModel(ApiModel):
     ) -> ChatMessage:
         # Preprocess messages for VLLM server
         messages = remove_tool_call_from_messages(messages)
-        kwargs["extra_body"] = {}
+        kwargs["extra_body"] = {"chat_template": self.chat_template}
 
         completion_kwargs = self._prepare_completion_kwargs(
             messages=messages,

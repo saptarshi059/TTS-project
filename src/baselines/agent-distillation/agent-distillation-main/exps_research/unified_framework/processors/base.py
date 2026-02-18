@@ -152,7 +152,12 @@ class ExperimentProcessor(ABC):
                 if use_single_endpoint:
                     model_kwargs["api_base"] = "http://0.0.0.0:8000/v1"
                 else:
-                    model_kwargs["api_base"] = f"http://0.0.0.0:{8000 + worker_id}/v1"
+                    # Replace only the port, keeping the host from the original api_base
+                    base = model_kwargs.get("api_base", "http://localhost:8000/v1")
+                    # Extract base URL and replace port
+                    import re
+                    base_port = int(re.search(r':(\d+)', base).group(1))
+                    model_kwargs["api_base"] = re.sub(r':\d+/', f':{base_port + worker_id}/', base)
         
         return setup_model(**model_kwargs)
     
