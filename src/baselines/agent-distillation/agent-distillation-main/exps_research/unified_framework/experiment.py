@@ -115,6 +115,8 @@ def process_qa_experiment(
     # Load system prompt for reasoning experiments
     if experiment_type == "reasoning" and "system_prompt" not in kwargs:
         kwargs["system_prompt"] = load_prompt("teacher_model")
+    else:
+        kwargs["system_prompt"] = load_prompt("code_agent")
     
     # Get the appropriate processor class and instantiate it
     processor_class = get_experiment_processor(experiment_type)

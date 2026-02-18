@@ -75,8 +75,9 @@ python -m exps_research.unified_framework.run_experiment \
     --max_tokens 1024 \
     --multithreading \
     --use_process_pool \
-    --debug \
     --parallel_workers $WORKERS \
+    --use_single_endpoint \
+    --debug \
     --n 1 --temperature 0.4 --top_p 0.8 --seed 42 \
     $( [[ -n "$LORA_PATH" ]] && echo "--fine_tuned --lora_folder $LORA_PATH" )
 

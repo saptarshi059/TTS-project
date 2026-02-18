@@ -197,7 +197,6 @@ class ExperimentProcessor(ABC):
         # Limit entries in debug mode
         if debug:
             entries = entries[:10]
-            print(entries)
             # max_workers = 1
         
         # Process sequentially if single worker or debug mode
