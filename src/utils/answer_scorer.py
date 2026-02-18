@@ -11,7 +11,7 @@ def main(prediction_dataset_path: str, predicted_answer_field: str, ground_truth
     predictions, references = [], []
     for idx, row in tqdm(enumerate(prediction_dataset)):
         pred = "" if row[predicted_answer_field] is None else row[predicted_answer_field]
-        predictions.append({'prediction_text': pred, 'id': str(idx), 'no_answer_probability': 0.})
+        predictions.append({'prediction_text': pred, 'id': str(idx)})
         references.append({'answers': {'answer_start': [0], 'text': [row[ground_truth_field]]}, 'id': str(idx)})
 
     results = squad_metric.compute(predictions=predictions, references=references)
