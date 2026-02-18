@@ -64,7 +64,12 @@ def process_entry_in_process(
         if use_single_endpoint:
             model_kwargs_copy["api_base"] = "http://0.0.0.0:8000/v1"
         else:
-            model_kwargs_copy["api_base"] = f"http://0.0.0.0:{8000 + worker_id}/v1"
+            # Replace only the port, keeping the host from the original api_base
+            base = model_kwargs_copy.get("api_base", "http://localhost:8000/v1")
+            # Extract base URL and replace port
+            import re
+            base_port = int(re.search(r':(\d+)', base).group(1))
+            model_kwargs_copy["api_base"] = re.sub(r':\d+/', f':{base_port + worker_id}/', base)
     
     # Create model with the modified parameters
     model = setup_model(**model_kwargs_copy)
