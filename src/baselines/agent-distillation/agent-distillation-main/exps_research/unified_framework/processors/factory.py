@@ -23,7 +23,7 @@ def get_experiment_processor(experiment_type: str) -> Type[ExperimentProcessor]:
         ValueError: If experiment_type is not recognized
     """
     processors: Dict[str, Type[ExperimentProcessor]] = {
-        "reasoning": ReasoningExperimentProcessor,
+        #"reasoning": ReasoningExperimentProcessor,
         "agent": AgentExperimentProcessor
     }
     
