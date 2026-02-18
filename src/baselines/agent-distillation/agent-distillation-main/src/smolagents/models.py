@@ -1274,6 +1274,15 @@ class VLLMServerModel(ApiModel):
         if self.lora_name:
             completion_kwargs["model"] = self.lora_name
 
+        import json
+        print("DEBUG completion_kwargs:", json.dumps({
+            k: v for k, v in completion_kwargs.items()
+            if k != 'messages'
+        }, indent=2, default=str))
+        print("DEBUG messages:", json.dumps(completion_kwargs.get('messages', []), indent=2, default=str))
+
+
+
         response = self.client.chat.completions.create(**completion_kwargs)
         self.last_input_token_count = response.usage.prompt_tokens
         self.last_output_token_count = response.usage.completion_tokens
