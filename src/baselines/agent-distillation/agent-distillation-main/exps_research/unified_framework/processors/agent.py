@@ -87,17 +87,7 @@ class AgentExperimentProcessor(ExperimentProcessor):
                 "max_steps": max_steps + 1
             }
 
-        # 1. Extract the system prompt string that was loaded in process_qa_experiment
-        system_prompt_str = kwargs.get("system_prompt")
 
-        # 2. Prepare the prompt templates dictionary
-        # If system_prompt_str is None, vLLM will crash, so we provide a safe fallback
-        if not system_prompt_str:
-            system_prompt_str = "You are a helpful AI agent."
-
-        custom_templates = {
-            "system_prompt": system_prompt_str,
-        }
 
         agent = CodeAgent(
             tools=tools,
