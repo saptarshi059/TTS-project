@@ -6,7 +6,7 @@ export MKL_NUM_THREADS=1
 export OPENBLAS_NUM_THREADS=1
 export VLLM_ATTENTION_BACKEND=FLASH_ATTN
 export NCCL_IGNORE_DISABLED_P2P=1
-
+export VLLM_USE_V1=0
 
 # ===================== User setting ===================== #
 BASE_MODEL="/gpuhome/sks6765/.cache/huggingface/hub/models--Qwen--Qwen2.5-7B-Instruct/snapshots/a09a35458c702b33eeacc393d103063234e8bc28/"
@@ -17,16 +17,16 @@ DATASET_NAME="2wikimultihopqa"
 
 EXP_TYPE="agent"
 PORT_BASE=13579
+RPC_PORT_BASE=12340  # Base for internal RPC ports
 GPU_MEMORY_UTILIZATION=0.6
 MAX_LORA_RANK=64
 N=8
 TEMP=0.4
-
 MAX_TOKENS=1024
 
-RETRIEVER_CONDA_ENV="retriever"          # retriever conda
-RETRIEVER_GPU_DEVICES="2,3"              # retriever GPU
-RETRIEVER_LOG="retriever_server.log"     # retriever path
+RETRIEVER_CONDA_ENV="retriever"
+RETRIEVER_GPU_DEVICES="2,3"
+RETRIEVER_LOG="retriever_server.log"
 # ===================================================== #
 
 declare -A DATASETS=(
@@ -35,28 +35,26 @@ declare -A DATASETS=(
 
 PIDS=()
 
-# 종료 핸들러 정의
 cleanup() {
   echo ""
-  echo "🧹 Cleaning up vLLM servers..."
-  kill ${PIDS[*]} 2>/dev/null
-  # If the process is not cleaned well
-  ps -u $USER -o pid,command | grep 'vllm serve' | grep -v grep | awk '{print $1}' | xargs kill
+  echo "🧹 Cleaning up servers..."
+  # Kill specific PIDs collected
+  for pid in "${PIDS[@]}"; do
+    kill "$pid" 2>/dev/null
+  done
 
+  # Extra safety for vLLM and Retriever
+  pkill -f 'vllm.entrypoints.openai.api_server'
   pgrep -f 'retriever_server.py' | xargs -r kill
-  wait
-  echo "✅ All vLLM servers stopped."
+  echo "✅ All servers stopped."
 }
 
-# Ctrl-C 처리
 trap 'echo ""; echo "❌ Interrupted!"; cleanup; exit 1' SIGINT SIGTERM
-export VLLM_USE_V1=0
 
 # ===================================================== #
-# 0. Run retriever server (background)
+# 0. Run retriever server
 # ===================================================== #
-echo "🔍 Launching retriever server in Conda env \"$RETRIEVER_CONDA_ENV\" …"
-# Conda initialization
+echo "🔍 Launching retriever server..."
 CUDA_VISIBLE_DEVICES=$RETRIEVER_GPU_DEVICES \
   python search/retriever_server.py \
   --index_path "${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}_index.index" \
@@ -64,23 +62,23 @@ CUDA_VISIBLE_DEVICES=$RETRIEVER_GPU_DEVICES \
   --retriever_model "Qwen/Qwen3-Embedding-0.6B" \
   > "$RETRIEVER_LOG" 2>&1 &
 RETRIEVER_PID=$!
-echo "🛰️  Retriever server started (PID: $RETRIEVER_PID, GPUs: $RETRIEVER_GPU_DEVICES)"
-
 PIDS+=($RETRIEVER_PID)
 
+# ===================================================== #
+# 1. Run 4 vLLM instances (one per GPU)
+# ===================================================== #
 NUM_GPUS=4
 for i in $(seq 0 $((NUM_GPUS - 1))); do
   CURRENT_PORT=$((PORT_BASE + i))
-  # Give each GPU its own internal RPC port to avoid the ZMQError
-  CURRENT_RPC_PORT=$((RPC_PORT_BASE + i))
+  CURRENT_RPC=$((RPC_PORT_BASE + i))
   LOG_FILE="vllm_gpu${i}.log"
 
-  echo "🚀 Launching vLLM on GPU $i (API Port: $CURRENT_PORT, RPC Port: $CURRENT_RPC_PORT)..."
+  echo "🚀 Launching vLLM on GPU $i (API: $CURRENT_PORT, RPC: $CURRENT_RPC)..."
 
-  CUDA_VISIBLE_DEVICES=$i python -m vllm.entrypoints.openai.api_server \
+  # We set VLLM_RPC_PORT via environment variable to avoid the "unrecognized arguments" error
+  VLLM_RPC_PORT=$CURRENT_RPC CUDA_VISIBLE_DEVICES=$i python -m vllm.entrypoints.openai.api_server \
       --model "$BASE_MODEL" \
       --port "$CURRENT_PORT" \
-      --rpc-port "$CURRENT_RPC_PORT" \
       --tensor-parallel-size 1 \
       --gpu-memory-utilization "$GPU_MEMORY_UTILIZATION" \
       --max-model-len 8192 \
@@ -93,28 +91,32 @@ for i in $(seq 0 $((NUM_GPUS - 1))); do
   PIDS+=($!)
 done
 
-# Wait for GPU 3 (the last one) to be ready
+# Wait for the LAST GPU to finish loading
 LAST_LOG="vllm_gpu$((NUM_GPUS - 1)).log"
 echo "⏳ Monitoring $LAST_LOG for startup..."
-
 tail -n 0 -f "$LAST_LOG" | while read -r line; do
   echo "$line"
   if [[ "$line" == *"Uvicorn running on"* ]] || [[ "$line" == *"Application startup complete."* ]]; then
-    echo "✅ All GPUs initialized without port conflicts!"
+    echo "✅ All GPUs initialized!"
     pkill -P $$ tail
     break
   fi
 done
 
+# ===================================================== #
+# 2. Run experiment
+# ===================================================== #
 for dataset in "${!DATASETS[@]}"; do
-  # 4. run experiment
-  echo "🧠 Running reasoning..."
+  echo "🧠 Running reasoning on $dataset..."
+
+  # NOTE: This currently only points to the FIRST GPU port ($PORT_BASE).
+  # If your 'run_experiment' script supports multiple URLs, you should list them here.
   AGENT_CMD="python -m exps_research.unified_framework.run_experiment \
     --experiment_type \"$EXP_TYPE\" \
     --data_path \"${DATASETS[$dataset]}\" \
     --model_type vllm \
-    --api_base "http://localhost:$PORT_BASE/v1" \
-    --api_key "token-abc" \
+    --api_base \"http://localhost:$PORT_BASE/v1\" \
+    --api_key \"token-abc\" \
     --model_id \"$BASE_MODEL\" \
     --max_tokens $MAX_TOKENS \
     --multithreading \
@@ -132,15 +134,5 @@ for dataset in "${!DATASETS[@]}"; do
 done
 
 RUN_EXIT_CODE=$?
-
-# 5. clean up server
 cleanup
-
-# 6. check exit code
-if [ $RUN_EXIT_CODE -ne 0 ]; then
-  echo "⚠️ Agent script failed with exit code $RUN_EXIT_CODE"
-  exit $RUN_EXIT_CODE
-else
-  echo "✅ Agent script completed successfully"
-  exit 0
-fi
+exit $RUN_EXIT_CODE
