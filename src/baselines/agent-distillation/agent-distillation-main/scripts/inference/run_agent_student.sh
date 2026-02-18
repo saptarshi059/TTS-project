@@ -18,7 +18,7 @@ DATASET_NAME=$1
 PORT=49135
 GPU_UTIL=0.7      # High util for 80GB A100 (vLLM on GPU 0)
 MAX_LORA_RANK=64
-WORKERS=1         # High concurrency for 500 samples
+WORKERS=32         # High concurrency for 500 samples
 # ========================================================= #
 
 PIDS=()
