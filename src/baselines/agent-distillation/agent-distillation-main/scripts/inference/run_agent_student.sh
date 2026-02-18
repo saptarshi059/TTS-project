@@ -90,7 +90,7 @@ LOG_FILE="vllm_gpu${i}.log"
 echo "🚀 Launching vLLM on GPU 0 (TP=1)..."
 CUDA_VISIBLE_DEVICES=0 python -m vllm.entrypoints.openai.api_server \
     --model "$BASE_MODEL" \
-    --port $PORT \
+    --port $PORT_BASE \
     --tensor-parallel-size 1 \
     --gpu-memory-utilization $GPU_UTIL \
     --max-model-len 8192 \
@@ -115,7 +115,7 @@ for dataset in "${!DATASETS[@]}"; do
     --experiment_type \"$EXP_TYPE\" \
     --data_path \"${DATASETS[$dataset]}\" \
     --model_type vllm \
-    --api_base "http://localhost:$PORT/v1" \
+    --api_base "http://localhost:$PORT_BASE/v1" \
     --api_key "token-abc" \
     --model_id \"$BASE_MODEL\" \
     --max_tokens $MAX_TOKENS \
