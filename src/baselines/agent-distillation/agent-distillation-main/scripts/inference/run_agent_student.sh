@@ -65,8 +65,6 @@ CUDA_VISIBLE_DEVICES=$RETRIEVER_GPU_DEVICES \
   > "$RETRIEVER_LOG" 2>&1 &
 RETRIEVER_PID=$!
 echo "🛰️  Retriever server started (PID: $RETRIEVER_PID, GPUs: $RETRIEVER_GPU_DEVICES)"
-conda deactivate
-
 
 PIDS+=($RETRIEVER_PID)
 
