@@ -74,11 +74,7 @@ class AgentExperimentProcessor(ExperimentProcessor):
             self.console.rule(f"[bold blue]Processing Agent Question")
             self.console.print(Panel(entry['question'], title="Question", border_style="green"))
 
-        # Configure tools based on search engine type
-        if search_engine_type == "duckduckgo":
-            tools = [DuckDuckGoSearchTool()]
-        else:  # Default to Wikipedia
-            tools = [WikipediaRetrieverTool()]
+        tools = [WikipediaRetrieverTool()]
 
         # Create agent with specified configuration
         agent_kwargs = {
