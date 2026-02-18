@@ -75,27 +75,6 @@ def main():
         help="Disable stats logging"
     )
     parser.add_argument(
-        "--enforce-eager",
-        action="store_true",
-        help="Whether to enforce eager execution (disables CUDA graphs)"
-    )
-    parser.add_argument(
-        "--enable-prefix-caching",
-        action="store_true"
-    )
-    parser.add_argument(
-        "--max-num-seqs",
-        type=int
-    )
-    parser.add_argument(
-        "--kv-cache-dtype",
-        type=str
-    )
-    parser.add_argument(
-        "--swap-space",
-        type=int
-    )
-    parser.add_argument(
         "--lora-modules",
         type=str,
         help="lora modeul in format {name}={path}"
@@ -125,8 +104,8 @@ def main():
         cmd.extend(["--tensor-parallel-size", str(args.tensor_parallel_size)])
     if args.trust_remote_code:
         cmd.append("--trust-remote-code")
-    '''if args.generation_config:
-        cmd.extend(["--generation-config", args.generation_config])'''
+    if args.generation_config:
+        cmd.extend(["--generation-config", args.generation_config])
     if args.disable_log_requests:
         cmd.append("--disable-log-requests")
     if args.disable_log_stats:
@@ -135,16 +114,6 @@ def main():
         cmd.extend(["--enable-lora", "--lora-modules", str(args.lora_modules)])
     if args.max_lora_rank:
         cmd.extend(["--max-lora-rank", str(args.max_lora_rank)])
-    if args.enforce_eager:
-        cmd.append("--enforce-eager")
-    if args.enable_prefix_caching:
-        cmd.append("--enable-prefix-caching")
-    if args.kv_cache_dtype:
-        cmd.extend(["--kv-cache-dtype", str(args.kv_cache_dtype)])
-    if args.swap_space:
-        cmd.extend(["--swap-space", str(args.swap_space)])
-    if args.max_num_seqs:
-        cmd.extend(["--max-num-seqs", str(args.max_num_seqs)])
 
     # Print the command that will be executed
     print("Executing command:", " ".join(cmd))

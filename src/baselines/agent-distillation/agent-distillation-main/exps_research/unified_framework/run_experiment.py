@@ -114,7 +114,14 @@ def run_experiment():
     if args.fine_tuned and not args.lora_folder:
         parser.error("--lora_folder is required when --fine_tuned is set")
 
-    args.task_type = "fact"
+    if not args.task_type:
+        # Auto-set task type for reasoning experiments if not provided
+        if "math" in args.data_path:
+            args.task_type = "math"
+        elif "qa" in args.data_path:
+            args.task_type = "fact"
+        else:
+            parser.error("--task_type is required for experiments when it cannot be inferred from data_path")
 
     # Set up log folder
     model_name = args.model_id.replace("/", "_") if args.model_id else "default"
@@ -283,8 +290,8 @@ def run_experiment():
         )
         console.print(accuracy_panel)
     else:
-        print(f"EM: {score_stats['em']:.2%}")
-        print(f"F1: {score_stats['f1']:.2%}")
+        print(f"Accuracy: {score_stats['accuracy']:.2%}")
+        print(f"Correct: {score_stats['correct_answers']}/{score_stats['total_questions']}")
 
     # Apply filtering if applicable
     if args.do_filtering:

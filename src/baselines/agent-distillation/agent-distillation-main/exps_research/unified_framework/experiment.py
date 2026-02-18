@@ -102,10 +102,20 @@ def process_qa_experiment(
     print("Output file:", output_file)
     
     # Initialize experiment-specific parameters
-    kwargs = {'track_cost': track_cost, 'cost_threshold': cost_threshold, 'fine_tuned': fine_tuned, 'verbose': verbose,
-              'use_process_pool': use_process_pool, 'use_single_endpoint': use_single_endpoint, **extra_kwargs,
-              "system_prompt": load_prompt("code_agent")}
-
+    kwargs = {
+        'track_cost': track_cost,
+        'cost_threshold': cost_threshold,
+        'fine_tuned': fine_tuned,
+        'verbose': verbose,
+        'use_process_pool': use_process_pool,
+        'use_single_endpoint': use_single_endpoint,
+        **extra_kwargs
+    }
+    
+    # Load system prompt for reasoning experiments
+    if experiment_type == "reasoning" and "system_prompt" not in kwargs:
+        kwargs["system_prompt"] = load_prompt("teacher_model")
+    
     # Get the appropriate processor class and instantiate it
     processor_class = get_experiment_processor(experiment_type)
     processor = processor_class(model_kwargs, **kwargs)

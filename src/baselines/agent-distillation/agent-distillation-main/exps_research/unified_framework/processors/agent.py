@@ -12,8 +12,6 @@ try:
 except ImportError:
     RICH_AVAILABLE = False
 
-import yaml
-
 from .base import ExperimentProcessor
 from smolagents import (
     CodeAgent,
@@ -76,7 +74,11 @@ class AgentExperimentProcessor(ExperimentProcessor):
             self.console.rule(f"[bold blue]Processing Agent Question")
             self.console.print(Panel(entry['question'], title="Question", border_style="green"))
 
-        tools = [WikipediaRetrieverTool()]
+        # Configure tools based on search engine type
+        if search_engine_type == "duckduckgo":
+            tools = [DuckDuckGoSearchTool()]
+        else:  # Default to Wikipedia
+            tools = [WikipediaRetrieverTool()]
 
         # Create agent with specified configuration
         agent_kwargs = {
@@ -88,15 +90,9 @@ class AgentExperimentProcessor(ExperimentProcessor):
                 "planning_interval": 10,
                 "max_steps": max_steps + 1
             }
-
-        prompt_path = f"/gpuhome/sks6765/TTS-project/src/baselines/agent-distillation/agent-distillation-main/src/smolagents/prompts/code_agent.yaml"
-        with open(prompt_path, 'r') as f:
-            system_prompt = yaml.safe_load(f)["system_prompt"]
-
         agent = CodeAgent(
             tools=tools,
             model=model,
-            prompt_templates=system_prompt,  # ADD THIS LINE
             additional_authorized_imports=["numpy", "sympy", "numpy.linalg"],
             verbosity_level=verbosity_level,  # Set based on should_show_output
             **agent_kwargs
