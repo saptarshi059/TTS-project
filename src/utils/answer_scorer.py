@@ -10,6 +10,7 @@ def main(prediction_dataset_path: str, predicted_answer_field: str, ground_truth
     prediction_dataset = load_dataset('json', data_files=prediction_dataset_path)
     predictions, references = [], []
     for idx, row in tqdm(enumerate(prediction_dataset)):
+        print(row)
         predictions.append({'prediction_text': row.predicted_answer_field, 'id': row[str(idx)]})
         references.append({'answers': {'answer_start': [0], 'text': [row.ground_truth_field]}, 'id': row[str(idx)]})
 
