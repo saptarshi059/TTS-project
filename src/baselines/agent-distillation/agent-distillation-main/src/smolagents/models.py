@@ -1250,9 +1250,8 @@ class VLLMServerModel(ApiModel):
     ) -> ChatMessage:
         # Preprocess messages for VLLM server
         messages = remove_tool_call_from_messages(messages)
-        kwargs["extra_body"] = {"chat_template": self.chat_template}
-        print(f"DEBUG chat_template is None: {self.chat_template is None}")
-        print(f"DEBUG chat_template first 100 chars: {str(self.chat_template)[:100]}")
+        kwargs["extra_body"] = {}
+        kwargs["chat_template"] = self.chat_template  # top level, not in extra_body
 
         completion_kwargs = self._prepare_completion_kwargs(
             messages=messages,
@@ -1278,7 +1277,6 @@ class VLLMServerModel(ApiModel):
         if self.lora_name:
             completion_kwargs["model"] = self.lora_name
 
-        print(f"DEBUG extra_body in completion_kwargs: {completion_kwargs.get('extra_body')}")
         response = self.client.chat.completions.create(**completion_kwargs)
         self.last_input_token_count = response.usage.prompt_tokens
         self.last_output_token_count = response.usage.completion_tokens
