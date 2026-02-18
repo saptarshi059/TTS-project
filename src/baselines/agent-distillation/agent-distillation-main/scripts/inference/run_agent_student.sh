@@ -87,7 +87,8 @@ done
 # 2. GPU 3 execute + log monitoring
 i=3
 LOG_FILE="vllm_gpu${i}.log"
-CMD="CUDA_VISIBLE_DEVICES=$i python -m vllm.entrypoints.openai.api_server \
+echo "🚀 Launching vLLM on GPU 0 (TP=1)..."
+CUDA_VISIBLE_DEVICES=0 python -m vllm.entrypoints.openai.api_server \
     --model "$BASE_MODEL" \
     --port $PORT \
     --tensor-parallel-size 1 \
@@ -95,15 +96,8 @@ CMD="CUDA_VISIBLE_DEVICES=$i python -m vllm.entrypoints.openai.api_server \
     --max-model-len 8192 \
     --disable-log-requests \
     --trust-remote-code \
-    --enable-lora --lora-modules finetune="$LORA_PATH" --max-lora-rank $MAX_LORA_RANK"
-
-if [ -n "$LORA_PATH" ]; then
-  CMD="$CMD --lora-modules finetune=$LORA_PATH --max-lora-rank $MAX_LORA_RANK"
-fi
-
-eval $CMD > "$LOG_FILE" 2>&1 &
+    --enable-lora --lora-modules finetune="$LORA_PATH" --max-lora-rank $MAX_LORA_RANK > vllm.log 2>&1 &
 PIDS+=($!)
-echo "📺 Started final vLLM on GPU $i (port $((PORT_BASE + i))), watching for startup completion..."
 
 # 3. wait until "Application startup complete." detected
 ( tail -n 0 -f "$LOG_FILE" & ) | while read line; do
