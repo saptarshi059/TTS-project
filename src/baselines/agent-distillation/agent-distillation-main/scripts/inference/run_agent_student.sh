@@ -68,42 +68,42 @@ echo "🛰️  Retriever server started (PID: $RETRIEVER_PID, GPUs: $RETRIEVER_G
 
 PIDS+=($RETRIEVER_PID)
 
-# 1. GPU 0~2 background
-for i in 0 1 2; do
-  CMD="CUDA_VISIBLE_DEVICES=$i python serve_vllm.py \
-    --model \"$BASE_MODEL\" \
-    --port $((PORT_BASE + i)) \
-    --gpu-memory-utilization $GPU_MEMORY_UTILIZATION"
+NUM_GPUS=4
+# 1. Loop to launch 4 independent OpenAI-compatible servers
+for i in $(seq 0 $((NUM_GPUS - 1))); do
+  CURRENT_PORT=$((PORT_BASE + i))
+  LOG_FILE="vllm_gpu${i}.log"
 
-  if [ -n "$LORA_PATH" ]; then
-    CMD="$CMD --lora-modules finetune=$LORA_PATH --max-lora-rank $MAX_LORA_RANK"
-  fi
+  echo "🚀 Launching vLLM OpenAI Server on GPU $i (Port: $CURRENT_PORT)..."
 
-  eval $CMD > vllm_gpu${i}.log 2>&1 &
+  # Constructing the command
+  # Note: TP=1 because we are running 1 instance per GPU
+  CUDA_VISIBLE_DEVICES=$i python -m vllm.entrypoints.openai.api_server \
+      --model "$BASE_MODEL" \
+      --port "$CURRENT_PORT" \
+      --tensor-parallel-size 1 \
+      --gpu-memory-utilization "$GPU_UTIL" \
+      --max-model-len 8192 \
+      --disable-log-requests \
+      --trust-remote-code \
+      --enable-lora \
+      --lora-modules finetune="$LORA_PATH" \
+      --max-lora-rank "$MAX_LORA_RANK" > "$LOG_FILE" 2>&1 &
+
   PIDS+=($!)
-  echo "🚀 Started vLLM on GPU $i (port $((PORT_BASE + i)))"
 done
 
-# 2. GPU 3 execute + log monitoring
-i=3
-LOG_FILE="vllm_gpu${i}.log"
-echo "🚀 Launching vLLM on GPU 0 (TP=1)..."
-CUDA_VISIBLE_DEVICES=0 python -m vllm.entrypoints.openai.api_server \
-    --model "$BASE_MODEL" \
-    --port $PORT_BASE \
-    --tensor-parallel-size 1 \
-    --gpu-memory-utilization $GPU_UTIL \
-    --max-model-len 8192 \
-    --disable-log-requests \
-    --trust-remote-code \
-    --enable-lora --lora-modules finetune="$LORA_PATH" --max-lora-rank $MAX_LORA_RANK > vllm.log 2>&1 &
-PIDS+=($!)
+# 2. Wait until the LAST GPU (GPU 3) is ready
+LAST_LOG="vllm_gpu$((NUM_GPUS - 1)).log"
+echo "⏳ Monitoring $LAST_LOG for startup..."
 
-# 3. wait until "Application startup complete." detected
-( tail -n 0 -f "$LOG_FILE" & ) | while read line; do
+# Tail the log and wait for the success message
+tail -n 0 -f "$LAST_LOG" | while read -r line; do
   echo "$line"
-  if [[ "$line" == *"Application startup complete."* ]]; then
-    echo "✅ vLLM fully started, launching reasoning agent!"
+  if [[ "$line" == *"Uvicorn running on"* ]] || [[ "$line" == *"Application startup complete."* ]]; then
+    echo "✅ All 4 GPUs are ready! Launching reasoning agent..."
+    # Kill the tail process to stop the loop
+    pkill -P $$ tail
     break
   fi
 done
