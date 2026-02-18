@@ -12,6 +12,8 @@ try:
 except ImportError:
     RICH_AVAILABLE = False
 
+import yaml
+
 from .base import ExperimentProcessor
 from smolagents import (
     CodeAgent,
@@ -87,12 +89,14 @@ class AgentExperimentProcessor(ExperimentProcessor):
                 "max_steps": max_steps + 1
             }
 
-
+        prompt_path = f"/gpuhome/sks6765/TTS-project/src/baselines/agent-distillation/agent-distillation-main/src/smolagents/prompts/code_agent.yaml"
+        with open(prompt_path, 'r') as f:
+            system_prompt = yaml.safe_load(f)["system_prompt"]
 
         agent = CodeAgent(
             tools=tools,
             model=model,
-            prompt_templates=custom_templates,  # ADD THIS LINE
+            prompt_templates=system_prompt,  # ADD THIS LINE
             additional_authorized_imports=["numpy", "sympy", "numpy.linalg"],
             verbosity_level=verbosity_level,  # Set based on should_show_output
             **agent_kwargs
