@@ -43,8 +43,12 @@ def main():
         else:
             sampled_ds = dataset.sample(n=500, random_state=42)
 
+        sampled_ds.rename(columns={'Prompt':'question',
+                                   'Answer': 'answer',
+                                   'Index': 'id',
+                                   'Unnamed: 0': 'id'}, inplace=True)
 
-        sampled_ds.rename(columns={'Prompt': 'question', 'Answer': 'answer'}, inplace=True)
+        sampled_ds = sampled_ds.astype({'id': str})
         sampled_ds.to_json(f"../../sampled_data/{dataset_name}/sampled_ds.json", index=False)
 
 if __name__ == "__main__":
