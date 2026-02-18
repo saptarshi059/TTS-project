@@ -70,7 +70,8 @@ def process_entry_in_process(
             import re
             base_port = int(re.search(r':(\d+)', base).group(1))
             model_kwargs_copy["api_base"] = re.sub(r':\d+/', f':{base_port + worker_id}/', base)
-    
+
+
     # Create model with the modified parameters
     model = setup_model(**model_kwargs_copy)
     
