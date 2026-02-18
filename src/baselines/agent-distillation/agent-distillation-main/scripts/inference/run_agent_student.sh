@@ -75,7 +75,6 @@ python -m exps_research.unified_framework.run_experiment \
     --max_tokens 1024 \
     --multithreading \
     --use_process_pool \
-    --use_single_endpoint \
     --debug \
     --parallel_workers $WORKERS \
     --n 1 --temperature 0.4 --top_p 0.8 --seed 42 \

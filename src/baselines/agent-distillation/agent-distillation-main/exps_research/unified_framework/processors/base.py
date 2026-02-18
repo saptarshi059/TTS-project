@@ -64,7 +64,7 @@ def process_entry_in_process(
         if use_single_endpoint:
             model_kwargs_copy["api_base"] = model_kwargs["api_base"]
         else:
-            model_kwargs_copy["api_base"] = f"http://localhost:{8000 + worker_id}/v1"
+            model_kwargs_copy["api_base"] = model_kwargs["api_base"]
     
     # Create model with the modified parameters
     model = setup_model(**model_kwargs_copy)
@@ -144,9 +144,9 @@ class ExperimentProcessor(ABC):
             # Only modify API base if it's not explicitly set
             if not model_kwargs.get('api_base'):
                 if use_single_endpoint:
-                    model_kwargs["api_base"] = "http://localhost:8000/v1"
+                    model_kwargs["api_base"] = model_kwargs["api_base"]
                 else:
-                    model_kwargs["api_base"] = f"http://localhost:{8000 + worker_id}/v1"
+                    model_kwargs["api_base"] = model_kwargs["api_base"]
         
         return setup_model(**model_kwargs)
     
@@ -197,6 +197,7 @@ class ExperimentProcessor(ABC):
         # Limit entries in debug mode
         if debug:
             entries = entries[:10]
+            print(entries)
             # max_workers = 1
         
         # Process sequentially if single worker or debug mode
