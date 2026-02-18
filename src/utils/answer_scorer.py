@@ -6,7 +6,7 @@ from evaluate import load
 
 def main(prediction_dataset_path: str, predicted_answer_field: str, ground_truth_field: str) -> None:
 
-    squad_metric = load("squad_v2")
+    squad_metric = load("squad")
     prediction_dataset = load_dataset('json', data_files=prediction_dataset_path, split='train')
     predictions, references = [], []
     for idx, row in tqdm(enumerate(prediction_dataset)):
