@@ -5,7 +5,7 @@ Factory module for creating experiment processors
 from typing import Type, Dict
 
 from .base import ExperimentProcessor
-from .reasoning import ReasoningExperimentProcessor
+#from .reasoning import ReasoningExperimentProcessor
 from .agent import AgentExperimentProcessor
 
 
