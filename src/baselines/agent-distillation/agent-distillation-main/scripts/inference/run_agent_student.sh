@@ -1,10 +1,22 @@
 #!/bin/bash
 
+ulimit -n 65535
+export OMP_NUM_THREADS=1
+export MKL_NUM_THREADS=1
+export OPENBLAS_NUM_THREADS=1
+export VLLM_ATTENTION_BACKEND=FLASH_ATTN
+export NCCL_IGNORE_DISABLED_P2P=1
+
+
 # ===================== User setting ===================== #
-BASE_MODEL=$1
-LORA_PATH=$2 # set lora path here
+BASE_MODEL="/gpuhome/sks6765/.cache/huggingface/hub/models--Qwen--Qwen2.5-7B-Instruct/snapshots/a09a35458c702b33eeacc393d103063234e8bc28/"
+LORA_PATH="/gpuhome/sks6765/.cache/huggingface/hub/models--agent-distillation--agent_distilled_Qwen2.5-7B-Instruct/snapshots/816cf2f90baa7948ddb29cd0667b1d83567b0707/"
+
+BASE_DATA_DIR="../../../../sampled_data"
+DATASET_NAME="2wikimultihopqa"
+
 EXP_TYPE="agent"
-PORT_BASE=8000
+PORT_BASE=13579
 GPU_MEMORY_UTILIZATION=0.6
 MAX_LORA_RANK=64
 N=8
@@ -18,14 +30,7 @@ RETRIEVER_LOG="retriever_server.log"     # retriever path
 # ===================================================== #
 
 declare -A DATASETS=(
-  ["hotpotqa"]="data_processor/qa_dataset/test/hotpotqa_500_20250422.json"
-  ["math"]="data_processor/math_dataset/test/math_500_20250414.json"
-  ["aime"]="data_processor/math_dataset/test/aime_90_20250504.json"
-  ["musique"]="data_processor/qa_dataset/test/musique_500_20250504.json"
-  ["bamboogle"]="data_processor/qa_dataset/test/bamboogle_125_20250507.json"
-  ["gsm"]="data_processor/math_dataset/test/gsm_hard_500_20250507.json"
-  ["2wiki"]="data_processor/qa_dataset/test/2wikimultihopqa_500_20250511.json"
-  ["olymath"]="data_processor/math_dataset/test/olymath_200_20250511.json"
+  ["2wiki"]="data_processor/qa_dataset/test/2wikimultihopqa.json"
 )
 
 PIDS=()
@@ -52,18 +57,16 @@ export VLLM_USE_V1=0
 # ===================================================== #
 echo "🔍 Launching retriever server in Conda env \"$RETRIEVER_CONDA_ENV\" …"
 # Conda initialization
-source "$(conda info --base)/etc/profile.d/conda.sh"
+CUDA_VISIBLE_DEVICES=$RETRIEVER_GPU_DEVICES \
+  python search/retriever_server.py \
+  --index_path "${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}_index.index" \
+  --corpus_path "${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}-chunks.jsonl" \
+  --retriever_model "Qwen/Qwen3-Embedding-0.6B" \
+  > "$RETRIEVER_LOG" 2>&1 &
+RETRIEVER_PID=$!
+echo "🛰️  Retriever server started (PID: $RETRIEVER_PID, GPUs: $RETRIEVER_GPU_DEVICES)"
+conda deactivate
 
-(
-  conda activate "$RETRIEVER_CONDA_ENV"
-  # retriever background
-  CUDA_VISIBLE_DEVICES=$RETRIEVER_GPU_DEVICES \
-    python search/retriever_server.py \
-    > "$RETRIEVER_LOG" 2>&1 &
-  RETRIEVER_PID=$!
-  echo "🛰️  Retriever server started (PID: $RETRIEVER_PID, GPUs: $RETRIEVER_GPU_DEVICES)"
-  conda deactivate
-)&
 
 PIDS+=($RETRIEVER_PID)
 
@@ -86,10 +89,15 @@ done
 # 2. GPU 3 execute + log monitoring
 i=3
 LOG_FILE="vllm_gpu${i}.log"
-CMD="CUDA_VISIBLE_DEVICES=$i python serve_vllm.py \
-  --model \"$BASE_MODEL\" \
-  --port $((PORT_BASE + i)) \
-  --gpu-memory-utilization $GPU_MEMORY_UTILIZATION"
+CMD="CUDA_VISIBLE_DEVICES=$i python -m vllm.entrypoints.openai.api_server \
+    --model "$BASE_MODEL" \
+    --port $PORT \
+    --tensor-parallel-size 1 \
+    --gpu-memory-utilization $GPU_UTIL \
+    --max-model-len 8192 \
+    --disable-log-requests \
+    --trust-remote-code \
+    --enable-lora --lora-modules finetune="$LORA_PATH" --max-lora-rank $MAX_LORA_RANK"
 
 if [ -n "$LORA_PATH" ]; then
   CMD="$CMD --lora-modules finetune=$LORA_PATH --max-lora-rank $MAX_LORA_RANK"
@@ -115,9 +123,12 @@ for dataset in "${!DATASETS[@]}"; do
     --experiment_type \"$EXP_TYPE\" \
     --data_path \"${DATASETS[$dataset]}\" \
     --model_type vllm \
+    --api_base "http://localhost:$PORT/v1" \
+    --api_key "token-abc" \
     --model_id \"$BASE_MODEL\" \
     --max_tokens $MAX_TOKENS \
     --multithreading \
+    --debug \
     --use_process_pool \
     --n $N --temperature $TEMP --top_p 0.8 \
     --seed 42 \
