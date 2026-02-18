@@ -122,7 +122,7 @@ for dataset in "${!DATASETS[@]}"; do
     --model_type vllm \
     --api_base \"http://localhost:$PORT_BASE/v1\" \
     --api_key \"token-abc\" \
-    --model_id "finetune" \
+    --model_id \"finetune\" \
     --max_tokens $MAX_TOKENS \
     --multithreading \
     --debug \
