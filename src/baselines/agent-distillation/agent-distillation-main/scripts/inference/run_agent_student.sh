@@ -79,6 +79,7 @@ for i in $(seq 0 $((NUM_GPUS - 1))); do
       --disable-log-requests \
       --trust-remote-code \
       --enable-lora \
+      --chat-template "$BASE_MODEL/tokenizer_config.json" \
       --lora-modules finetune="$LORA_PATH" \
       --max-lora-rank "$MAX_LORA_RANK" \
       --disable-frontend-multiprocessing > "$LOG_FILE" 2>&1 &
@@ -122,7 +123,7 @@ for dataset in "${!DATASETS[@]}"; do
     --model_type vllm \
     --api_base \"http://localhost:$PORT_BASE/v1\" \
     --api_key \"token-abc\" \
-    --model_id \"finetune\" \
+    --model_id \"$BASE_MODEL\" \
     --max_tokens $MAX_TOKENS \
     --multithreading \
     --debug \
