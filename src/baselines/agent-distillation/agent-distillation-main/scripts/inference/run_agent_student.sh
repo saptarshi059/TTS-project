@@ -98,6 +98,18 @@ tail -n 0 -f "$LAST_LOG" | while read -r line; do
   fi
 done
 
+# Extra: wait until all ports are actually responding
+echo "⏳ Waiting for all vLLM servers to respond..."
+for i in $(seq 0 $((NUM_GPUS - 1))); do
+  CURRENT_PORT=$((PORT_BASE + i))
+  echo -n "  Checking GPU $i (port $CURRENT_PORT)..."
+  until curl -s "http://localhost:$CURRENT_PORT/health" > /dev/null 2>&1; do
+    sleep 2
+  done
+  echo " ✅"
+done
+echo "🟢 All vLLM servers are up!"
+
 # ===================================================== #
 # 2. Run experiment
 # ===================================================== #
