@@ -15,11 +15,10 @@ BASE_DATA_DIR="../../../../sampled_data"
 DATASET_NAME=$1
 
 # Inference Config
-PORT=49152
-GPU_UTIL=0.90      # High util since model is small vs 80GB A100
+PORT=49135
+GPU_UTIL=0.90      # High util for 80GB A100 (vLLM on GPU 0)
 MAX_LORA_RANK=64
-MAX_TOKENS=1024
-WORKERS=32         # Increased concurrency for 500 samples
+WORKERS=32         # High concurrency for 500 samples
 # ========================================================= #
 
 PIDS=()
@@ -34,17 +33,17 @@ trap 'cleanup; exit 1' SIGINT SIGTERM
 
 DATA_PATH="${BASE_DATA_DIR}/${DATASET_NAME}/sampled_ds.json"
 
-# 1. Start Retriever on CPU (Hidden from CUDA to save VRAM)
-echo "🔍 Launching Retriever on CPU..."
-CUDA_VISIBLE_DEVICES="" python search/retriever_server.py \
+# 1. Start Retriever on GPU 1
+echo "🔍 Launching Retriever on GPU 1..."
+CUDA_VISIBLE_DEVICES=1 python search/retriever_server.py \
     --index_path "${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}_index.index" \
     --corpus_path "${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}-chunks.jsonl" \
     --retriever_model "Qwen/Qwen3-Embedding-0.6B" > retriever.log 2>&1 &
 PIDS+=($!)
+sleep 5 # Brief pause to let Retriever initialize its CUDA context
 
-# 2. Start vLLM on 1 GPU
-# Note: --tensor-parallel-size 1 is faster for 7B models than splitting across 4 GPUs
-echo "🚀 Launching vLLM on GPU 0..."
+# 2. Start vLLM on GPU 0
+echo "🚀 Launching vLLM on GPU 0 (TP=1)..."
 CUDA_VISIBLE_DEVICES=0 python -m vllm.entrypoints.openai.api_server \
     --model "$BASE_MODEL" \
     --port $PORT \
@@ -58,7 +57,11 @@ PIDS+=($!)
 
 # 3. Wait for Readiness
 echo "📺 Waiting for vLLM startup..."
-timeout 25s grep -q "Application startup complete." <(tail -f vllm.log) || { echo "❌ vLLM failed to start. Check vllm.log"; cleanup; exit 1; }
+timeout 300s grep -q "Application startup complete." <(tail -f vllm.log) || {
+    echo "❌ vLLM failed to start. Last 10 lines of vllm.log:";
+    tail -n 10 vllm.log;
+    cleanup; exit 1;
+}
 
 # 4. Run Experiment
 echo "🧠 Running Reasoning Agent (Workers: $WORKERS)..."
@@ -69,10 +72,9 @@ python -m exps_research.unified_framework.run_experiment \
     --api_key "token-abc" \
     --model_type vllm \
     --model_id "$BASE_MODEL" \
-    --max_tokens $MAX_TOKENS \
+    --max_tokens 1024 \
     --multithreading \
     --use_process_pool \
-    --debug \
     --parallel_workers $WORKERS \
     --n 1 --temperature 0.4 --top_p 0.8 --seed 42 \
     $( [[ -n "$LORA_PATH" ]] && echo "--fine_tuned --lora_folder $LORA_PATH" )
