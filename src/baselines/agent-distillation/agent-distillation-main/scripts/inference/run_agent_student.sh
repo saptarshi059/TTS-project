@@ -69,20 +69,20 @@ echo "🛰️  Retriever server started (PID: $RETRIEVER_PID, GPUs: $RETRIEVER_G
 PIDS+=($RETRIEVER_PID)
 
 NUM_GPUS=4
-# 1. Loop to launch 4 independent OpenAI-compatible servers
 for i in $(seq 0 $((NUM_GPUS - 1))); do
   CURRENT_PORT=$((PORT_BASE + i))
+  # Give each GPU its own internal RPC port to avoid the ZMQError
+  CURRENT_RPC_PORT=$((RPC_PORT_BASE + i))
   LOG_FILE="vllm_gpu${i}.log"
 
-  echo "🚀 Launching vLLM OpenAI Server on GPU $i (Port: $CURRENT_PORT)..."
+  echo "🚀 Launching vLLM on GPU $i (API Port: $CURRENT_PORT, RPC Port: $CURRENT_RPC_PORT)..."
 
-  # Constructing the command
-  # Note: TP=1 because we are running 1 instance per GPU
   CUDA_VISIBLE_DEVICES=$i python -m vllm.entrypoints.openai.api_server \
       --model "$BASE_MODEL" \
       --port "$CURRENT_PORT" \
+      --rpc-port "$CURRENT_RPC_PORT" \
       --tensor-parallel-size 1 \
-      --gpu-memory-utilization "$GPU_MEMORY_UTILIZATION" \
+      --gpu-memory-utilization "$GPU_UTIL" \
       --max-model-len 8192 \
       --disable-log-requests \
       --trust-remote-code \
@@ -93,16 +93,14 @@ for i in $(seq 0 $((NUM_GPUS - 1))); do
   PIDS+=($!)
 done
 
-# 2. Wait until the LAST GPU (GPU 3) is ready
+# Wait for GPU 3 (the last one) to be ready
 LAST_LOG="vllm_gpu$((NUM_GPUS - 1)).log"
 echo "⏳ Monitoring $LAST_LOG for startup..."
 
-# Tail the log and wait for the success message
 tail -n 0 -f "$LAST_LOG" | while read -r line; do
   echo "$line"
   if [[ "$line" == *"Uvicorn running on"* ]] || [[ "$line" == *"Application startup complete."* ]]; then
-    echo "✅ All 4 GPUs are ready! Launching reasoning agent..."
-    # Kill the tail process to stop the loop
+    echo "✅ All GPUs initialized without port conflicts!"
     pkill -P $$ tail
     break
   fi
