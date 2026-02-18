@@ -283,8 +283,8 @@ def run_experiment():
         )
         console.print(accuracy_panel)
     else:
-        print(f"Accuracy: {score_stats['accuracy']:.2%}")
-        print(f"Correct: {score_stats['correct_answers']}/{score_stats['total_questions']}")
+        print(f"EM: {score_stats['em']:.2%}")
+        print(f"F1: {score_stats['f1']:.2%}")
 
     # Apply filtering if applicable
     if args.do_filtering:

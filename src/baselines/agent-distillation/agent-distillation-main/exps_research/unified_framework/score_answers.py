@@ -9,6 +9,8 @@ from copy import deepcopy
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
 from pydantic import BaseModel
+from evaluate import load
+import re
 
 try:
     from .math_utils.qwen_math_parser import extract_answer
@@ -23,11 +25,12 @@ class ResponseFormat(BaseModel):
 
 def load_api_key() -> str:
     """Load OpenAI API key from file"""
-    return ""
+    with open("keys/openai-key/key.env") as f:
+        return f.read().strip()
 
 def setup_scoring_model() -> OpenAIServerModel:
     """Initialize the OpenAI model for scoring"""
-    api_key = load_api_key()
+    api_key = "does not matter"
     return OpenAIServerModel(
         model_id="gpt-4o-mini",
         api_key=api_key
@@ -54,45 +57,24 @@ def evaluate_factual_answer(
     Evaluate if the predicted answer matches the gold answer using the model
     Returns dict with score and explanation
     """
-    if len(str(predicted)) > 1000:
-        predicte = predicted[:1000]
-    prompt = f"""Compare the following predicted answer with the gold (correct) answer and determine if they match in meaning given the question.
-Be reasonable - phrasing differences are okay if the core meaning is the same. You should accept the aliases and the answer conveying the same conclusion.
-If the predicted answer is overly verbose and fails to capture the key information found in the gold answer (i.e., low recall), consider it a false answer.
+    squad_metric = load("squad")
+    if predicted is None:
+        predicted = ""
+    else:
+        match = re.search(r'Answer: (.*)', predicted)
+        predicted = match.group(1) if match else ""
 
-Question: {question}
-Predicted answer: {predicted}
-Gold answer: {gold}
-
-Output your evaluation as a JSON object with two fields:
-- explanation: Brief explanation of your scoring decision
-- score: 0 or 1 indicating if answers match
-"""
-
-    response = model(
-        messages=[{
-            "role": "user",
-            "content": prompt
-        }],
-        response_format=ResponseFormat
-    )
-
-    # Parse JSON response
-    result = json.loads(response.content)
-
-    # Get token counts and calculate cost
-    token_counts = model.get_token_counts()
-    cost = calculate_cost(
-        token_counts["input_token_count"],
-        token_counts["output_token_count"]
-    )
+    predictions = [{'prediction_text': predicted, 'id': '1'}]
+    references = [{'answers': {'answer_start': [0], 'text': [gold]}, 'id': '1'}]
+    result = squad_metric.compute(predictions=predictions, references=references)
 
     return {
-        "score": result["score"],
-        "explanation": result["explanation"],
-        "input_tokens": token_counts["input_token_count"],
-        "output_tokens": token_counts["output_token_count"],
-        "cost": cost
+        "em": result['exact_match'] / 100,
+        "f1": result['f1'] / 100,
+        "explanation": "",
+        "input_tokens": 1,
+        "output_tokens": 1,
+        "cost": 1
     }
 
 def evaluate_math_answer(
@@ -166,7 +148,8 @@ def process_entry(args):
     )
 
     result = deepcopy(entry)
-    result["score"] = evaluation["score"]
+    result["em"] = evaluation["em"]
+    result["f1"] = evaluation["f1"]
     result["explanation"] = evaluation["explanation"]
     result["cost"] = evaluation["cost"]
     return result
@@ -244,12 +227,13 @@ def score_qa_results(
                         total_cost += result['cost']
 
     # Calculate statistics
-    scores = [r['score'] for r in results]
+    em = [r['em'] for r in results]
+    f1 = [r['f1'] for r in results]
     stats = {
         "log_file": log_file,
         'total_questions': len(results),
-        'correct_answers': sum(scores),
-        'accuracy': sum(scores) / len(scores) if scores else 0,
+        'em': sum(em) / len(em) if em else 0,
+        'f1': sum(f1) / len(f1) if f1 else 0,
         # 'detailed_results': results, # to reduce the memory :)
         'costs': {
             'total_cost': total_cost,
@@ -294,7 +278,5 @@ if __name__ == "__main__":
             single_thread=args.single_thread,
             do_extract_answer=args.do_extract_answer
         )
-        print(f"Accuracy: {stats['accuracy']:.2%}")
-        print(f"Correct: {stats['correct_answers']}/{stats['total_questions']}")
-        print(f"\nCost Summary:")
-        print(f"Total Cost: ${stats['costs']['total_cost']:.4f}")
+        print(f"EM: {stats['em']:.2%}")
+        print(f"F1: {stats['f1']:.2%}")
