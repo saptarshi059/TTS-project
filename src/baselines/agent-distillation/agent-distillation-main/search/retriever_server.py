@@ -279,6 +279,9 @@ class DenseRetriever(BaseRetriever):
         idxs = idxs[0]
         scores = scores[0]
         results = load_docs(self.corpus, idxs)
+
+        torch.cuda.empty_cache()  # add this
+
         if return_score:
             return results, scores.tolist()
         else:
@@ -427,4 +430,4 @@ def retrieve_endpoint(request: QueryRequest):
 
 if __name__ == "__main__":
     # 3) Launch the server. By default, it listens on http://127.0.0.1:8000
-    uvicorn.run(app, host="0.0.0.0", port=8005, workers=1, timeout_keep_alive=30)
+    uvicorn.run(app, host="0.0.0.0", port=8005, workers=1, timeout_keep_alive=30, log_level="debug")
