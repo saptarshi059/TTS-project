@@ -72,7 +72,7 @@ def process_qa_experiment(
         Dictionary with experiment statistics
     """
     # Load dataset
-    entries = load_dataset(dataset_file)[:20]
+    entries = load_dataset(dataset_file)[20:70]
 
     # Check whether question in prefix memory, if prefix memory is enabled
     if prefix_memory := extra_kwargs.get("prefix_memory", None):
