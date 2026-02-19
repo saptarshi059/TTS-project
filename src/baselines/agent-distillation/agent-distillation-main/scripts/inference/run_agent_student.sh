@@ -1,6 +1,7 @@
 #!/bin/bash
 
 ulimit -n 65535
+ulimit -u 65535  # max user processes
 export OMP_NUM_THREADS=1
 export MKL_NUM_THREADS=1
 export OPENBLAS_NUM_THREADS=1
@@ -52,6 +53,7 @@ trap 'echo ""; echo "❌ Interrupted!"; cleanup; exit 1' SIGINT SIGTERM
 # ===================================================== #
 echo "🔍 Launching retriever server..."
 CUDA_VISIBLE_DEVICES=$RETRIEVER_GPU_DEVICES \
+  RAYON_NUM_THREADS=1 \
   python search/retriever_server.py \
   --index_path "${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}_index.index" \
   --corpus_path "${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}-chunks.jsonl" \
