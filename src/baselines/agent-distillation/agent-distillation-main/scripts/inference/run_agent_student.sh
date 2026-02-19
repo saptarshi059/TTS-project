@@ -81,7 +81,6 @@ for i in $(seq 0 $((NUM_GPUS - 1))); do
       --disable-log-requests \
       --trust-remote-code \
       --enable-lora \
-      --chat-template "$BASE_MODEL/chat_template.jinja" \
       --lora-modules finetune="$LORA_PATH" \
       --max-lora-rank "$MAX_LORA_RANK" \
       --disable-frontend-multiprocessing > "$LOG_FILE" 2>&1 &
