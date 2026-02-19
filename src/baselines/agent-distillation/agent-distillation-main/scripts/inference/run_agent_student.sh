@@ -126,7 +126,7 @@ for dataset in "${!DATASETS[@]}"; do
     --api_key \"token-abc\" \
     --model_id \"$BASE_MODEL\" \
     --max_tokens $MAX_TOKENS \
-    --multithreading \
+    --parallel_workers 1 \
     --use_process_pool \
     --n $N --temperature $TEMP --top_p 0.8 \
     --seed 42 \
