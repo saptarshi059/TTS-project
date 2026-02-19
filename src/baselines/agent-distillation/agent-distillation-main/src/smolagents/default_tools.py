@@ -414,18 +414,21 @@ class WikipediaRetrieverTool(Tool):
 
     def forward(self, query: str) -> str:
         import requests
+        from requests.adapters import HTTPAdapter
+        from urllib3.util.retry import Retry
 
         assert isinstance(query, str), "Your search query must be a string"
+        session = requests.Session()
+        retry = Retry(total=5, backoff_factor=2, status_forcelist=[500, 502, 503, 504])
+        session.mount('http://', HTTPAdapter(max_retries=retry))
+
         payload = {
             "queries": [query],
             "topk": self.max_results,
             "return_scores": True
         }
 
-        # Send POST request
-        response = requests.post(self.url, json=payload)
-
-        # Raise an exception if the request failed
+        response = session.post(self.url, json=payload, timeout=60)
         response.raise_for_status()
 
         # Get the JSON response
