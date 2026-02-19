@@ -14,6 +14,9 @@ def main(prediction_dataset_path: str, predicted_answer_field: str, ground_truth
         predictions.append({'prediction_text': pred, 'id': str(idx), 'no_answer_probability': 0.})
         references.append({'answers': {'answer_start': [0], 'text': [row[ground_truth_field]]}, 'id': str(idx)})
 
+        print(predictions, references)
+        break
+
     results = squad_metric.compute(predictions=predictions, references=references)
     print(results)
 
