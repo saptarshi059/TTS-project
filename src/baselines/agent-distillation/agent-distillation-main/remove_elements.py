@@ -4,6 +4,5 @@ path = '/gpuhome/sks6765/.cache/huggingface/hub/models--agent-distillation--agen
 
 s = pd.read_json(path, lines=True)
 s = s[s['error'] != 'Error in generating model output:\nConnection error.']
-valid_answer_mask = (s['true_answer'].notna()) & (s['true_answer'].astype(str).str.strip() != '')
-s = s[valid_answer_mask]
+s = s[s['true_answer'].notna()]
 s.to_json(path, orient='records', lines=True)
