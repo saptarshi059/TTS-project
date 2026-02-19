@@ -15,6 +15,9 @@ import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
 
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
+
 parser = argparse.ArgumentParser(description="Launch the local faiss retriever.")
 parser.add_argument("--index_path", type=str, default="search/database/wikipedia/e5_Flat.index",
                     help="Corpus indexing file.")
@@ -392,9 +395,10 @@ config = Config(
 # 2) Instantiate a global retriever so it is loaded once and reused.
 retriever = get_retriever(config)
 
+executor = ThreadPoolExecutor(max_workers=1)
 
 @app.post("/retrieve")
-def retrieve_endpoint(request: QueryRequest):
+async def retrieve_endpoint(request: QueryRequest):
     """
     Endpoint that accepts queries and performs retrieval.
     Input format:
@@ -405,13 +409,16 @@ def retrieve_endpoint(request: QueryRequest):
     }
     """
     if not request.topk:
-        request.topk = config.retrieval_topk  # fallback to default
+        request.topk = config.retrieval_topk
 
-    # Perform batch retrieval
-    results, scores = retriever.batch_search(
-        query_list=request.queries,
-        num=request.topk,
-        return_score=request.return_scores
+    loop = asyncio.get_event_loop()
+    results, scores = await loop.run_in_executor(
+        executor,
+        lambda: retriever.batch_search(
+            query_list=request.queries,
+            num=request.topk,
+            return_score=request.return_scores
+        )
     )
 
     # Format response
@@ -430,4 +437,4 @@ def retrieve_endpoint(request: QueryRequest):
 
 if __name__ == "__main__":
     # 3) Launch the server. By default, it listens on http://127.0.0.1:8000
-    uvicorn.run(app, host="0.0.0.0", port=8005, workers=1, timeout_keep_alive=30, log_level="debug")
+    uvicorn.run(app, host="0.0.0.0", port=8005, workers=4, timeout_keep_alive=30, log_level="debug")
