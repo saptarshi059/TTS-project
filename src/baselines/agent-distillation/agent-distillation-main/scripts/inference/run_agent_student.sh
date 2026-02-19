@@ -14,7 +14,7 @@ BASE_MODEL="/gpuhome/sks6765/.cache/huggingface/hub/models--Qwen--Qwen2.5-7B-Ins
 LORA_PATH="/gpuhome/sks6765/.cache/huggingface/hub/models--agent-distillation--agent_distilled_Qwen2.5-7B-Instruct/snapshots/816cf2f90baa7948ddb29cd0667b1d83567b0707"
 
 BASE_DATA_DIR="../../../../sampled_data"
-DATASET_NAME="hotpotqa"
+DATASET_NAME="musique"
 
 EXP_TYPE="agent"
 PORT_BASE=13134
@@ -30,7 +30,7 @@ RETRIEVER_LOG="retriever_server.log"
 # ===================================================== #
 
 declare -A DATASETS=(
-  ["hotpotqa"]="data_processor/qa_dataset/test/hotpotqa.json"
+  ["musique"]="data_processor/qa_dataset/test/musique.json"
 )
 
 PIDS=()
