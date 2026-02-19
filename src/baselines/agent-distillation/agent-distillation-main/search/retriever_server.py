@@ -34,7 +34,7 @@ def load_corpus(corpus_path: str):
         'json',
         data_files=corpus_path,
         split="train",
-        num_proc=4
+        num_proc=1
     )
     return corpus
 
