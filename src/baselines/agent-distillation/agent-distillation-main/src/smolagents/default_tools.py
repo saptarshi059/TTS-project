@@ -414,6 +414,23 @@ class WikipediaRetrieverTool(Tool):
 
     def forward(self, query: str) -> str:
         import requests
+        import time
+
+        print(f"DEBUG: Sending retrieval request for query: {query[:50]}")
+        start = time.time()
+
+        try:
+            response = requests.post(self.url, json=payload, timeout=30)
+            print(f"DEBUG: Got response in {time.time() - start:.2f}s, status: {response.status_code}")
+            response.raise_for_status()
+        except requests.exceptions.Timeout:
+            print(f"DEBUG: Request TIMED OUT after {time.time() - start:.2f}s")
+            raise
+        except requests.exceptions.ConnectionError as e:
+            print(f"DEBUG: CONNECTION ERROR after {time.time() - start:.2f}s: {e}")
+            raise
+
+
         from requests.adapters import HTTPAdapter
         from urllib3.util.retry import Retry
 

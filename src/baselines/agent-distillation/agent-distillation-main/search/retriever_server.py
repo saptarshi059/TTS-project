@@ -408,6 +408,9 @@ async def retrieve_endpoint(request: QueryRequest):
       "return_scores": true
     }
     """
+    import time
+    start = time.time()
+    print(f"RETRIEVER: Received request for {len(request.queries)} queries")
     if not request.topk:
         request.topk = config.retrieval_topk
 
@@ -432,6 +435,9 @@ async def retrieve_endpoint(request: QueryRequest):
             resp.append(combined)
         else:
             resp.append(single_result)
+
+    print(f"RETRIEVER: Completed in {time.time() - start:.2f}s")
+
     return {"result": resp}
 
 
