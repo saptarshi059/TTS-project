@@ -408,6 +408,10 @@ async def retrieve_endpoint(request: QueryRequest):
       "return_scores": true
     }
     """
+    print(f"RETRIEVER received: queries={request.queries}, topk={request.topk}")
+    import sys
+    sys.stdout.flush()
+
     import time
     start = time.time()
     print(f"RETRIEVER: Received request for {len(request.queries)} queries")

@@ -434,6 +434,7 @@ class WikipediaRetrieverTool(Tool):
         start = time.time()
 
         try:
+            print(f"DEBUG payload: {payload}")
             response = session.post(self.url, json=payload, timeout=60)
             print(f"DEBUG: Got response in {time.time() - start:.2f}s, status: {response.status_code}")
             response.raise_for_status()
