@@ -413,28 +413,13 @@ class WikipediaRetrieverTool(Tool):
         self.url = f"http://127.0.0.1:{self.port}/retrieve"
 
     def forward(self, query: str) -> str:
+        from requests.adapters import HTTPAdapter
+        from urllib3.util.retry import Retry
         import requests
         import time
 
-        print(f"DEBUG: Sending retrieval request for query: {query[:50]}")
-        start = time.time()
-
-        try:
-            response = requests.post(self.url, json=payload, timeout=30)
-            print(f"DEBUG: Got response in {time.time() - start:.2f}s, status: {response.status_code}")
-            response.raise_for_status()
-        except requests.exceptions.Timeout:
-            print(f"DEBUG: Request TIMED OUT after {time.time() - start:.2f}s")
-            raise
-        except requests.exceptions.ConnectionError as e:
-            print(f"DEBUG: CONNECTION ERROR after {time.time() - start:.2f}s: {e}")
-            raise
-
-
-        from requests.adapters import HTTPAdapter
-        from urllib3.util.retry import Retry
-
         assert isinstance(query, str), "Your search query must be a string"
+
         session = requests.Session()
         retry = Retry(total=5, backoff_factor=2, status_forcelist=[500, 502, 503, 504])
         session.mount('http://', HTTPAdapter(max_retries=retry))
@@ -445,10 +430,20 @@ class WikipediaRetrieverTool(Tool):
             "return_scores": True
         }
 
-        response = session.post(self.url, json=payload, timeout=60)
-        response.raise_for_status()
+        print(f"DEBUG: Sending retrieval request for query: {query[:50]}")
+        start = time.time()
 
-        # Get the JSON response
+        try:
+            response = session.post(self.url, json=payload, timeout=60)
+            print(f"DEBUG: Got response in {time.time() - start:.2f}s, status: {response.status_code}")
+            response.raise_for_status()
+        except requests.exceptions.Timeout:
+            print(f"DEBUG: Request TIMED OUT after {time.time() - start:.2f}s")
+            raise
+        except requests.exceptions.ConnectionError as e:
+            print(f"DEBUG: CONNECTION ERROR after {time.time() - start:.2f}s: {e}")
+            raise
+
         retrieved_data = response.json()
         docs = retrieved_data["result"][0]
 
