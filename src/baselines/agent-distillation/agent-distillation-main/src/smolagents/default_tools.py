@@ -430,30 +430,20 @@ class WikipediaRetrieverTool(Tool):
             "return_scores": True
         }
 
-        print(f"DEBUG: Sending retrieval request for query: {query[:50]}")
-        start = time.time()
-
         try:
-            print(f"DEBUG payload: {payload}")
             response = session.post(self.url, json=payload, timeout=60)
-            print(f"DEBUG: Got response in {time.time() - start:.2f}s, status: {response.status_code}")
             response.raise_for_status()
-        except requests.exceptions.Timeout:
-            print(f"DEBUG: Request TIMED OUT after {time.time() - start:.2f}s")
-            raise
-        except requests.exceptions.ConnectionError as e:
-            print(f"DEBUG: CONNECTION ERROR after {time.time() - start:.2f}s: {e}")
-            raise
-
-        retrieved_data = response.json()
-        docs = retrieved_data["result"][0]
-
-        return "\nRetrieved documents:" + "".join(
-            [
-                f"\n\n===== Document {str(i)}, similarity: {doc['score']:.2f} =====\n" + doc["document"]["contents"]
-                for i, doc in enumerate(docs)
-            ]
-        )
+            retrieved_data = response.json()
+            docs = retrieved_data["result"][0]
+            return "\nRetrieved documents:" + "".join(
+                [
+                    f"\n\n===== Document {str(i)}, similarity: {doc['score']:.2f} =====\n" + doc["document"]["contents"]
+                    for i, doc in enumerate(docs)
+                ]
+            )
+        except Exception as e:
+            print(f"DEBUG: Retrieval failed, returning empty: {e}")
+            return "No documents retrieved due to server error. Please try to answer from your own knowledge."
 
 TOOL_MAPPING = {
     tool_class.name: tool_class

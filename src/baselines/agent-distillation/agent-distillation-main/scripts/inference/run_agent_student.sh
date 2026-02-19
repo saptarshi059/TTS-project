@@ -52,15 +52,17 @@ trap 'echo ""; echo "❌ Interrupted!"; cleanup; exit 1' SIGINT SIGTERM
 # 0. Run retriever server
 # ===================================================== #
 echo "🔍 Launching retriever server..."
-CUDA_VISIBLE_DEVICES=$RETRIEVER_GPU_DEVICES \
-  RAYON_NUM_THREADS=1 \
-  python search/retriever_server.py \
-  --index_path "${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}_index.index" \
-  --corpus_path "${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}-chunks.jsonl" \
-  --retriever_model "Qwen/Qwen3-Embedding-0.6B" \
-  > "$RETRIEVER_LOG" 2>&1 &
+while true; do
+    CUDA_VISIBLE_DEVICES=$RETRIEVER_GPU_DEVICES RAYON_NUM_THREADS=1 \
+    python search/retriever_server.py \
+        --index_path "${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}_index.index" \
+        --corpus_path "${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}-chunks.jsonl" \
+        --retriever_model "Qwen/Qwen3-Embedding-0.6B" \
+        >> "$RETRIEVER_LOG" 2>&1
+    echo "Retriever crashed, restarting in 3s..."
+    sleep 3
+done &
 RETRIEVER_PID=$!
-PIDS+=($RETRIEVER_PID)
 
 # ===================================================== #
 # 1. Run 4 vLLM instances (one per GPU)
