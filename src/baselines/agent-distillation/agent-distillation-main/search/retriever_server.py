@@ -53,11 +53,11 @@ def load_model(model_path: str, use_fp16: bool = False):
     model_config = AutoConfig.from_pretrained(model_path, trust_remote_code=True)
     if "qwen" in model_path.lower():
         model = AutoModel.from_pretrained(model_path, attn_implementation="flash_attention_2", torch_dtype="auto",
-                                          device_map="auto", trust_remote_code=True)
+                                          device_map="cuda:0", trust_remote_code=True)
     else:
         model = AutoModel.from_pretrained(model_path, trust_remote_code=True)
     model.eval()
-    model.cuda()
+    #model.cuda()
     if use_fp16:
         model = model.half()
 
