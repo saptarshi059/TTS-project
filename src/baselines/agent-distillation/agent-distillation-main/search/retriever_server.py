@@ -408,25 +408,24 @@ async def retrieve_endpoint(request: QueryRequest):
       "return_scores": true
     }
     """
-    print(f"RETRIEVER received: queries={request.queries}, topk={request.topk}")
-    import sys
-    sys.stdout.flush()
-
     import time
+    import sys
+    print(f"RETRIEVER received: {request.queries[0][:50]}")
+    sys.stdout.flush()
     start = time.time()
-    print(f"RETRIEVER: Received request for {len(request.queries)} queries")
-    if not request.topk:
-        request.topk = config.retrieval_topk
 
     loop = asyncio.get_event_loop()
-    results, scores = await loop.run_in_executor(
-        executor,
-        lambda: retriever.batch_search(
+    results, scores = await asyncio.wait_for(
+        loop.run_in_executor(executor, lambda: retriever.batch_search(
             query_list=request.queries,
             num=request.topk,
             return_score=request.return_scores
-        )
+        )),
+        timeout=30.0  # fail fast instead of hanging forever
     )
+
+    print(f"RETRIEVER completed in {time.time() - start:.2f}s")
+    sys.stdout.flush()
 
     # Format response
     resp = []
