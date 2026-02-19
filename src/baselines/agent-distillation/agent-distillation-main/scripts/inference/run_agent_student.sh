@@ -127,7 +127,6 @@ for dataset in "${!DATASETS[@]}"; do
     --model_id \"$BASE_MODEL\" \
     --max_tokens $MAX_TOKENS \
     --multithreading \
-    --debug \
     --use_process_pool \
     --n $N --temperature $TEMP --top_p 0.8 \
     --seed 42 \
