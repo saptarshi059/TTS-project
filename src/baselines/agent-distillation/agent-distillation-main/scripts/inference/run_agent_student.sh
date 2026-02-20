@@ -1,7 +1,6 @@
 #!/bin/bash
 
 ulimit -n 65535
-ulimit -u 65535  # max user processes
 export OMP_NUM_THREADS=1
 export MKL_NUM_THREADS=1
 export OPENBLAS_NUM_THREADS=1
@@ -17,7 +16,7 @@ BASE_DATA_DIR="../../../../sampled_data"
 DATASET_NAME="frames"
 
 EXP_TYPE="agent"
-PORT_BASE=13134
+PORT_BASE=14189
 GPU_MEMORY_UTILIZATION=0.6
 MAX_LORA_RANK=64
 N=1
