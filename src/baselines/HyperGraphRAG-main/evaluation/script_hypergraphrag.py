@@ -21,7 +21,10 @@ async def query_with_semaphore(sem, q):
 async def main():
     with open(f"datasets/{data_source}/questions.json") as f:
         data = json.load(f)
-    questions = [item['question'] for item in data]
+
+    # Since we are using qwen for retrieval, I'm using its instruction prompt.
+    instruction = "Instruct: Given a web search query, retrieve relevant passages that answer the query\nQuery:"
+    questions = [instruction + item['question'] for item in data]
 
     sem = asyncio.Semaphore(32)
     tasks = [query_with_semaphore(sem, q) for q in questions]
