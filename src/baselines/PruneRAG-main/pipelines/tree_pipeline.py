@@ -234,7 +234,10 @@ class Generator:
         self.start_time = datetime.now()
         self.config = config
 
-        
+        self.subquery_first_template = None
+        self.subquery_template = None
+        self.answer_template = None
+        self.logprobs_size = None
 
         self.retrieval_num = 0
         self.total_time = 0
@@ -262,34 +265,11 @@ class Generator:
         self.root_node = ContextTreeNode("ROOT")
         self.current_nodes = [self.root_node]
 
-        if 'qwen' in self.config.model_name:
-            self.subquery_first_template = get_subqueries_qwen3_8b_first()
-            self.subquery_template = get_subqueries_qwen3_8b()
-            self.answer_template = get_final_answer_qwen3_8b()
-            self.config.max_tokens = 4096 # qwen3-8b的最大token数为4096
-            self.logprobs_size = 100
-            if self.config.dataset_name in ['gpqa','math500','aime','amc','livecode']:
-                self.answer_template = get_final_answer_qwen3_8b_multi_choice()
-                self.config.max_tokens = 20480
-        elif 'llama' in self.config.model_name:
-            self.subquery_first_template = get_subqueries_llama3_8b_first()
-            self.subquery_template = get_subqueries_llama3_8b()
-            self.answer_template = get_final_answer_llama3_8b()
-            self.config.max_tokens = 4096 # llama3-8b的最大token数为4096
-            self.logprobs_size = 100
-            if self.config.dataset_name in ['gpqa','math500','aime','amc','livecode']:
-                self.answer_template = get_final_answer_llama3_8b_multi_choice()
-                self.config.max_tokens = 8192
-
-        if self.config.dataset_name in ['gpqa','math500','aime','amc','livecode']:
-            if 'llama' in self.config.model_name:
-                self.config.max_tokens = 8192 # llama3-8b的最大token数为8192
-            if 'qwen' in self.config.model_name:
-                self.config.max_tokens = 20480 # qwen3-8b的最大token数为20480
-
-
-
-    # --- 核心函数：从完整文本和 logprobs 中提取特定字符串的 logprobs ---
+        self.subquery_first_template = get_subqueries_qwen3_8b_first()
+        self.subquery_template = get_subqueries_qwen3_8b()
+        self.answer_template = get_final_answer_qwen3_8b()
+        self.config.max_tokens = 4096
+        self.logprobs_size = 100
 
     def get_logprobs_for_matched_string(self, model_output_data: Dict[str, Any], target_string: str) -> List[Dict[str, Any]]:
         full_text = model_output_data["text"]
