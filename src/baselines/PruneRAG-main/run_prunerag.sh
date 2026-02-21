@@ -37,7 +37,7 @@ trap cleanup EXIT
 
 # --- Start Retriever ---
 echo "[1/3] Starting retriever server on GPU 5..."
-CUDA_VISIBLE_DEVICES=$RETRIEVER_GPU python search/retriever_server.py \
+CUDA_VISIBLE_DEVICES=$RETRIEVER_GPU python scripts/search/retriever_server.py \
     --index_path "${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}_index.index" \
     --corpus_path "${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}-chunks.jsonl" \
     --retriever_model "Qwen/Qwen3-Embedding-0.6B" \
