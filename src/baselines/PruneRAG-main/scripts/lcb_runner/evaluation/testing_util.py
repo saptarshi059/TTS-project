@@ -18,9 +18,17 @@ from io import StringIO
 # used for testing the code that reads from input
 from unittest.mock import patch, mock_open
 
-from pyext import RuntimeModule
+import types  # Add this
+# from pyext import RuntimeModule  <-- Remove or comment this out
 
 from enum import Enum
+
+def create_runtime_module(name, source_code):
+    """Replacement for pyext.RuntimeModule.from_string"""
+    new_module = types.ModuleType(name)
+    # This executes the string code inside the new module's namespace
+    exec(source_code, new_module.__dict__)
+    return new_module
 
 
 def truncatefn(s, length=300):
@@ -122,7 +130,11 @@ def run_test(sample, test=None, debug=False, timeout=6):
                 print(f"sol = {sol}")
             signal.alarm(timeout)
             try:
-                tmp_sol = RuntimeModule.from_string("tmp_sol", "", sol)
+                # Change this:
+                # tmp_sol = RuntimeModule.from_string("tmp_sol", "", sol)
+
+                # To this:
+                tmp_sol = create_runtime_module("tmp_sol", sol)
                 if "class Solution" not in test:
                     tmp = tmp_sol
                 else:
@@ -187,7 +199,11 @@ def run_test(sample, test=None, debug=False, timeout=6):
             method_name = "code"
             signal.alarm(timeout)
             try:
-                tmp_sol = RuntimeModule.from_string("tmp_sol", "", sol)
+                # Change this:
+                # tmp_sol = RuntimeModule.from_string("tmp_sol", "", sol)
+
+                # To this:
+                tmp_sol = create_runtime_module("tmp_sol", sol)
                 tmp = tmp_sol
                 signal.alarm(0)
             except Exception as e:
