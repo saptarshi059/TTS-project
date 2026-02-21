@@ -1,10 +1,9 @@
 #!/bin/bash
 
 # --- Configuration ---
-# Mask GPUs for the main pipeline so it doesn't touch the retriever's card (GPU 5)
-# In our 3,4,5 world: 0=GPU3, 1=GPU4, 2=GPU5
-PIPELINE_GPUS="0,1"
-RETRIEVER_GPU="2"
+
+PIPELINE_GPUS="3,4"
+RETRIEVER_GPU="5"
 export VLLM_WORKER_MULTIPROC_METHOD=spawn
 export VLLM_ATTENTION_BACKEND=FLASH_ATTN
 export VLLM_USE_V1=0
