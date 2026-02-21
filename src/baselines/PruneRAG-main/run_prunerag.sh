@@ -11,7 +11,7 @@ export VLLM_ATTENTION_BACKEND=FLASH_ATTN
 export NCCL_IGNORE_DISABLED_P2P=1
 export VLLM_USE_V1=0
 
-BASE_DATA_DIR="../../../../sampled_data"
+BASE_DATA_DIR="../../../sampled_data"
 DATASET_NAME=$1
 DATA_PATH="${BASE_DATA_DIR}/${DATASET_NAME}/sampled_ds.json"
 
