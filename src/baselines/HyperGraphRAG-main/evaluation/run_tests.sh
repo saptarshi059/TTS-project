@@ -25,8 +25,8 @@ fi
 #python -u script_insert.py --cls musique
 
 # --- 3. Retrieve Knowledge of HyperGraphRAG ---
-python -u script_hypergraphrag.py --data_source 2wikimultihopqa
-python -u script_hypergraphrag.py --data_source hotpotqa
+#python -u script_hypergraphrag.py --data_source 2wikimultihopqa
+#python -u script_hypergraphrag.py --data_source hotpotqa
 python -u script_hypergraphrag.py --data_source musique
 
 # --- 4. Generate Based on Retrieved Knowledge ---

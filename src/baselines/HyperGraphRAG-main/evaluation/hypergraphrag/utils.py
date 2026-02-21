@@ -2,6 +2,9 @@ import asyncio
 import html
 import io
 import csv
+import sys
+csv.field_size_limit(sys.maxsize)
+
 import json
 import logging
 import os
