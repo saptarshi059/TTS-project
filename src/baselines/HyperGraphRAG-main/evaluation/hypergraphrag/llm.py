@@ -319,7 +319,7 @@ async def ollama_model_if_cache(
     host = kwargs.pop("host", None)
     timeout = kwargs.pop("timeout", None)
     kwargs.pop("hashing_kv", None)
-    ollama_client = ollama.AsyncClient(host=host, timeout=timeout)
+    ollama_client = ollama.AsyncClient(host=host, timeout=300.0)
     messages = []
     if system_prompt:
         messages.append({"role": "system", "content": system_prompt})
