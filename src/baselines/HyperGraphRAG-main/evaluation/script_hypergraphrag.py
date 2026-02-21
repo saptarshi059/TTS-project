@@ -26,7 +26,7 @@ async def main():
     instruction = "Instruct: Given a web search query, retrieve relevant passages that answer the query\nQuery:"
     questions = [instruction + item['question'] for item in data]
 
-    sem = asyncio.Semaphore(8)
+    sem = asyncio.Semaphore(1)
     tasks = [query_with_semaphore(sem, q) for q in questions]
     results = await tqdm_asyncio.gather(*tasks)
 
