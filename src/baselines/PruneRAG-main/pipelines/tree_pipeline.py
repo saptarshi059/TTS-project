@@ -78,7 +78,7 @@ def parse_args():
         '--dataset_name',
         type=str,
         required=True,
-        choices=['gpqa', 'math500', 'aime', 'amc', 'livecode', 'nq', 'triviaqa', 'hotpotqa', '2wiki', 'musique', 'bamboogle','example','popqa','fever'],
+        #choices=['gpqa', 'math500', 'aime', 'amc', 'livecode', 'nq', 'triviaqa', 'hotpotqa', '2wiki', 'musique', 'bamboogle','example','popqa','fever'],
         help="数据集名称"
     )
 
@@ -819,44 +819,21 @@ if __name__ == "__main__":
     
     setup_seed(3407)
 
-
-
-    # args = parse_args()
-    # config = Config(
-    #     model_path=args.model_path,
-    #     data_path=args.data_path,
-    #     retriever_name=args.retriever_name,
-    #     retrieval_url=args.retrieval_url,
-    #     dataset_name=args.dataset_name,
-    #     split=args.split,
-    #     topk=args.topk,
-    #     max_depth=args.max_depth,
-    #     all_decom_depth=args.all_decom_depth,
-    #     threshold=args.threshold,
-    #     output_dir=args.output_dir,
-    #     log_dir=args.log_dir,
-    #     seed = 3407)
-
-    os.environ['CUDA_VISIBLE_DEVICES'] = '2,3'
-    os.environ['VLLM_WORKER_MULTIPROC_METHOD'] = 'spawn'
-
+    args = parse_args()
     config = Config(
-        model_path="./models/llama-3.1-8b-instruct",
-        data_path="./config/dataset_paths.json",
-        retriever_name="e5",
-        retrieval_url="http://localhost:8000",
-        dataset_name="2wiki",
-        split="test",
-        topk=5,
-        max_depth=3,
-        all_decom_depth=0,
-        threshold=0.95,
-        output_dir="./outputs",
-        log_dir="./logs",
-        seed = 3407
-
-    )
-
+         model_path=args.model_path,
+         data_path=args.data_path,
+         retriever_name=args.retriever_name,
+         retrieval_url=args.retrieval_url,
+         dataset_name=args.dataset_name,
+         split=args.split,
+         topk=args.topk,
+         max_depth=args.max_depth,
+         all_decom_depth=args.all_decom_depth,
+         threshold=args.threshold,
+         output_dir=args.output_dir,
+         log_dir=args.log_dir,
+         seed = 3407)
 
     generator = Generator(config)
 
