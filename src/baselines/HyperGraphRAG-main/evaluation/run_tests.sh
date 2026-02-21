@@ -1,9 +1,7 @@
 #!/bin/bash
 
-# Allow multiple requests to be processed at once
-export OLLAMA_NUM_PARALLEL=8
-# Keep both models loaded in VRAM (don't unload one to start the other)
-export OLLAMA_MAX_LOADED_MODELS=2
+export OLLAMA_NUM_PARALLEL=16
+export OLLAMA_MAX_LOADED_MODELS=4
 
 source hgrag_venv/bin/activate
 
