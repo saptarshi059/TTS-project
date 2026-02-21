@@ -1,7 +1,10 @@
 #!/bin/bash
 
 # --- Configuration ---
-export CUDA_VISIBLE_DEVICES=3,4,5
+# Mask GPUs for the main pipeline so it doesn't touch the retriever's card (GPU 5)
+# In our 3,4,5 world: 0=GPU3, 1=GPU4, 2=GPU5
+PIPELINE_GPUS="0,1"
+RETRIEVER_GPU="2"
 export VLLM_WORKER_MULTIPROC_METHOD=spawn
 export VLLM_ATTENTION_BACKEND=FLASH_ATTN
 export VLLM_USE_V1=0
@@ -26,32 +29,45 @@ mkdir -p "./logs" "./outputs"
 # --- THE TRAP ---
 # This function runs automatically on script exit (success, error, or Ctrl+C)
 cleanup() {
-    echo -e "\n[CLEANUP] Shutting down retriever server (PID: $RETRIEVER_PID)..."
+    echo -e "\n[CLEANUP] Killing retriever (PID: $RETRIEVER_PID)..."
     kill "$RETRIEVER_PID" 2>/dev/null
     wait "$RETRIEVER_PID" 2>/dev/null
-    echo "[CLEANUP] Done."
 }
 trap cleanup EXIT
 
-# --- Start Retriever Server ---
-# We use device 2 (physical GPU 5)
-echo "[1/2] Starting retriever server on GPU 5..."
-CUDA_VISIBLE_DEVICES=2 RAYON_NUM_THREADS=1 \
-    python search/retriever_server.py \
-        --index_path "${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}_index.index" \
-        --corpus_path "${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}-chunks.jsonl" \
-        --retriever_model "Qwen/Qwen3-Embedding-0.6B" \
-        >> "$RETRIEVER_LOG" 2>&1 &
-
+# --- Start Retriever ---
+echo "[1/3] Starting retriever server on GPU 5..."
+CUDA_VISIBLE_DEVICES=$RETRIEVER_GPU python search/retriever_server.py \
+    --index_path "${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}_index.index" \
+    --corpus_path "${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}-chunks.jsonl" \
+    --retriever_model "Qwen/Qwen3-Embedding-0.6B" \
+    >> "$RETRIEVER_LOG" 2>&1 &
 RETRIEVER_PID=$!
 
-# Wait for the server to be ready (Adjust sleep if your index is huge)
-echo "Waiting 15s for retriever to initialize..."
-sleep 15
+# --- Health Check Loop ---
+echo "[2/3] Waiting for retriever to be healthy at $RETRIEVER_URL..."
+MAX_RETRIES=30
+RETRY_COUNT=0
+# Loop until curl returns a successful exit code (0)
+until curl -s "$RETRIEVER_URL" > /dev/null; do
+    RETRY_COUNT=$((RETRY_COUNT + 1))
+    if [ $RETRY_COUNT -ge $MAX_RETRIES ]; then
+        echo "ERROR: Retriever failed to start after $MAX_RETRIES seconds."
+        exit 1
+    fi
+    # Check if the process died early
+    if ! kill -0 $RETRIEVER_PID 2>/dev/null; then
+        echo "ERROR: Retriever process crashed. Check $RETRIEVER_LOG"
+        exit 1
+    fi
+    echo -n "."
+    sleep 2
+done
+echo -e "\n[SUCCESS] Retriever is UP."
 
 # --- Run Pipeline ---
-echo "[2/2] Launching tree pipeline..."
-CUDA_VISIBLE_DEVICES=0,1 python -m pipelines.tree_pipeline \
+echo "[3/3] Launching tree pipeline..."
+CUDA_VISIBLE_DEVICES=$PIPELINE_GPUS python -m pipelines.tree_pipeline \
     --model_path "$MODEL_PATH" \
     --retriever_name "qwen0.6b" \
     --retrieval_url "http://localhost:8005" \
