@@ -241,9 +241,10 @@ class Generator:
 
         self.llm = LLM(
             model=config.model_path,
-            tensor_parallel_size=torch.cuda.device_count(),
-            gpu_memory_utilization=0.90,
-            max_model_len=40960,
+            tensor_parallel_size=getattr(config, 'tensor_parallel_size',
+                                         torch.cuda.device_count() if torch.cuda.is_available() else 1),
+            gpu_memory_utilization=getattr(config, 'gpu_memory_utilization', 0.85),  # 0.90 is very tight
+            max_model_len=getattr(config, 'max_model_len', 4096),  # 40960 is massive for a 7B model
             max_logprobs=100,
             seed = config.seed)
 
