@@ -244,7 +244,7 @@ class Generator:
             tensor_parallel_size=getattr(config, 'tensor_parallel_size',
                                          torch.cuda.device_count() if torch.cuda.is_available() else 1),
             gpu_memory_utilization=getattr(config, 'gpu_memory_utilization', 0.85),  # 0.90 is very tight
-            max_model_len=getattr(config, 'max_model_len', 4096),  # 40960 is massive for a 7B model
+            max_model_len=getattr(config, 'max_model_len', 8192),  # 40960 is massive for a 7B model
             max_logprobs=100,
             seed = config.seed)
 
@@ -257,7 +257,7 @@ class Generator:
             self.tokenizer.pad_token = self.tokenizer.eos_token
         
         self.retrieval_client = RetrievalClient(base_url=config.retrieval_url)
-        self.dataset_loader = DatasetLoader(self.config.data_path)
+        self.dataset_loader = DatasetLoader(self.config.dataset_name)
 
         self.root_node = ContextTreeNode("ROOT")
         self.current_nodes = [self.root_node]
@@ -559,7 +559,7 @@ class Generator:
 
     def generate(self, **sampling_params) -> List[str]:
 
-        data,data_path = self.dataset_loader.load_dataset(self.config.dataset_name, self.config.split)
+        data,data_path = self.dataset_loader.load_dataset()
 
         queries = [item['Question'] for item in data]
 
@@ -823,7 +823,7 @@ if __name__ == "__main__":
     args = parse_args()
     config = Config(
          model_path=args.model_path,
-         data_path=args.data_path,
+         #data_path=args.data_path,
          retriever_name=args.retriever_name,
          retrieval_url=args.retrieval_url,
          dataset_name=args.dataset_name,

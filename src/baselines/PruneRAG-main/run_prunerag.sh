@@ -19,7 +19,6 @@ ulimit -n 65535
 # --- Paths & Vars ---
 BASE_DATA_DIR="../../../sampled_data"
 DATASET_NAME=$1
-DATA_PATH="${BASE_DATA_DIR}/${DATASET_NAME}/sampled_ds.json"
 RETRIEVER_LOG="./logs/retriever_${DATASET_NAME}.log"
 MODEL_PATH="/gpuhome/sks6765/.cache/huggingface/hub/models--Qwen--Qwen2.5-7B-Instruct/snapshots/a09a35458c702b33eeacc393d103063234e8bc28"
 RETRIEVER_URL="http://localhost:8005"
@@ -71,7 +70,6 @@ CUDA_VISIBLE_DEVICES=$PIPELINE_GPUS python -m pipelines.tree_pipeline \
     --model_path "$MODEL_PATH" \
     --retriever_name "qwen0.6b" \
     --retrieval_url $RETRIEVER_URL \
-    --data_path "$DATA_PATH" \
     --dataset_name "$DATASET_NAME" \
     --split "test" \
     --topk 5 \
