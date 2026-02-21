@@ -21,7 +21,7 @@ class QueryParam:
     response_type: str = "Multiple Paragraphs"
     stream: bool = False
     # Number of top-k items to retrieve; corresponds to entities in "local" mode and relationships in "global" mode.
-    top_k: int = 10
+    top_k: int = 60
     # Number of document chunks to retrieve.
     # top_n: int = 10
     # Number of tokens for the original chunks.

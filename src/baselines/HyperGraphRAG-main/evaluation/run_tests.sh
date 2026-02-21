@@ -26,8 +26,8 @@ fi
 
 # --- 3. Retrieve Knowledge of HyperGraphRAG ---
 python -u script_hypergraphrag.py --data_source 2wikimultihopqa
-#python -u script_hypergraphrag.py --data_source hotpotqa
-#python -u script_hypergraphrag.py --data_source musique
+python -u script_hypergraphrag.py --data_source hotpotqa
+python -u script_hypergraphrag.py --data_source musique
 
 # --- 4. Generate Based on Retrieved Knowledge ---
 #python -u get_generation.py --data_sources 2wikimultihopqa --methods HyperGraphRAG
