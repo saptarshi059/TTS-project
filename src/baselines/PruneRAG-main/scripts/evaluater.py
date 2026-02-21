@@ -218,23 +218,9 @@ class GeneralEvaluationStrategy(BaseEvaluationStrategy):
         }
         self.filtered_data = []
     def _get_info(self, item):
-        if self.dataset_name in ['gpqa', 'medmcqa']:
-                labeled_answer = item["Correct Choice"]
-                labeled_context = item["golden_context"]
-                # labeled_choice_answer = item["Correct Answer"]
-                mode = 'choose'
-        elif self.dataset_name in ['math500', 'aime', 'amc']:
-            labeled_answer = item["answer"]
-            mode = 'gen'
-        elif self.dataset_name in ['nq', 'triviaqa', 'hotpotqa', 'musique', 'bamboogle', '2wiki', 'example', 'popqa', 'fever']:
-            labeled_answer = item["answer"]
-            labeled_context = item["golden_context"]
-            mode = 'qa'
-        elif self.dataset_name in ['pubhealth']:
-            labeled_answer = item["answer"]
-            mode = 'choose'
-        else:
-            raise ValueError(f"Unknown dataset_name: {self.dataset_name}")
+        labeled_answer = item["answer"]
+        labeled_context = item["golden_context"]
+        mode = 'qa'
         return labeled_context, labeled_answer, mode
 
     

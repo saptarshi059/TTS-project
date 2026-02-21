@@ -602,7 +602,7 @@ class Generator:
                         node.query_answer = answer
                         node.subqueries = []
                     else:
-                        print(f"低置信度答案{answer},置信度为{confidence}")
+                        print(f"{answer}, {confidence}")
                         node.type = "answer"  # 如果置信度较低，仍然标记为节点
                         node.answer_again = "In the last round, the action you chose was to answer directly, but the confidence of your answer is very low, so please rethink your action."
                         node_queue.append(node)  # 如果置信度较低，保留节点以便后续处理
@@ -665,6 +665,9 @@ class Generator:
         output_list = []
         for output in outputs:
             output_list.append(output.outputs[0].text)
+
+
+        print(output_list[:5])
 
 
         # 计算总耗时
