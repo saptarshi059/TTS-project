@@ -51,7 +51,7 @@ sleep 15
 
 # --- Run Pipeline ---
 echo "[2/2] Launching tree pipeline..."
-python -m pipelines.tree_pipeline \
+CUDA_VISIBLE_DEVICES=0,1 python -m pipelines.tree_pipeline \
     --model_path "$MODEL_PATH" \
     --retriever_name "qwen0.6b" \
     --retrieval_url "http://localhost:8005" \
