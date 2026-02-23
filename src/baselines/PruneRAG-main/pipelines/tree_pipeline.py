@@ -657,6 +657,12 @@ class Generator:
         print("final generation finished")
 
         def save_to_jsonl(all_outputs, filename="results.jsonl"):
+            def clean_latex_text(text):
+                text = re.sub(r'\\+text\{', '', text)
+                text = text.replace(r'\ ', ' ')
+                text = text.replace('}', '').replace('\\', '')
+                return text.strip()
+
             with open(filename, "a", encoding="utf-8") as f:
                 for request_output in all_outputs:
                     prompt = request_output.prompt
@@ -674,15 +680,13 @@ class Generator:
                     # 3. Optional: Extract content from \boxed{...}
                     # This turns "\boxed{Paris}" into "Paris"
                     boxed_match = re.search(r"\\boxed\{(.*?)}", raw_response)
-                    extracted_answer = boxed_match.group(1).strip() if boxed_match else raw_response
+                    extracted_answer = clean_latex_text(boxed_match.group(1).strip()) if boxed_match else raw_response
 
                     # 4. Package it up
                     data = {
                         "request_id": request_output.request_id,
                         "question": question,
-                        "full_response": raw_response,
-                        "extracted_answer": extracted_answer,
-                        "raw_prompt": prompt
+                        "final_answer": extracted_answer if extracted_answer != "" else raw_response
                     }
 
                     f.write(json.dumps(data) + "\n")
