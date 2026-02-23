@@ -656,33 +656,36 @@ class Generator:
 
         print("final generation finished")
 
-        def save_to_jsonl(request_output, filename="results.jsonl"):
-            prompt = request_output.prompt
-
-            # 1. Grab the actual final question (The one the model is actually answering)
-            # We look for the text between "### Question:" and "### Answer:"
-            question_match = re.search(r"### Question:\n(.*?)\n\n### Answer:", prompt, re.DOTALL)
-            question = question_match.group(1).strip() if question_match else "Unknown"
-
-            # 2. Grab the model's generated response
-            # Index 0 is the standard first completion
-            try:
-                response = request_output.outputs[0].text.strip()
-            except (IndexError, AttributeError):
-                response = ""
-
-            # 3. Package it up
-            data = {
-                "request_id": request_output.request_id,
-                "question": question,
-                "response": response,
-                # Optional: Save the raw prompt just in case you need it later
-                "raw_prompt": prompt
-            }
-
-            # 4. Append to JSONL (the 'a' mode is key for not overwriting)
+        def save_to_jsonl(all_outputs, filename="results.jsonl"):
             with open(filename, "a", encoding="utf-8") as f:
-                f.write(json.dumps(data) + "\n")
+                for request_output in all_outputs:
+                    prompt = request_output.prompt
+
+                    # 1. Grab the question from the prompt footer
+                    question_match = re.search(r"### Question:\n(.*?)\n\n### Answer:", prompt, re.DOTALL)
+                    question = question_match.group(1).strip() if question_match else "Unknown"
+
+                    # 2. Grab the full model response
+                    try:
+                        raw_response = request_output.outputs[0].text.strip()
+                    except (IndexError, AttributeError):
+                        raw_response = ""
+
+                    # 3. Optional: Extract content from \boxed{...}
+                    # This turns "\boxed{Paris}" into "Paris"
+                    boxed_match = re.search(r"\\boxed\{(.*?)}", raw_response)
+                    extracted_answer = boxed_match.group(1).strip() if boxed_match else raw_response
+
+                    # 4. Package it up
+                    data = {
+                        "request_id": request_output.request_id,
+                        "question": question,
+                        "full_response": raw_response,
+                        "extracted_answer": extracted_answer,
+                        "raw_prompt": prompt
+                    }
+
+                    f.write(json.dumps(data) + "\n")
 
 
         save_to_jsonl(outputs, f"outputs/{self.config.dataset_name}_outputs.jsonl")
