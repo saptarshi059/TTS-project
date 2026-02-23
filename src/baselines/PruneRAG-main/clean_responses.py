@@ -7,7 +7,7 @@ def main(dataset_path):
 
     def clean_latex_text(text):
         text = rf'{text}'
-        return re.sub(r'\\+text\{', '', text)
+        return re.sub(r'\\+text\{', '', text).strip()
 
     df['extracted_answer'] = df['extracted_answer'].apply(clean_latex_text)
 
