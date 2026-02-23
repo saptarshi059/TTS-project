@@ -12,9 +12,11 @@ def main(dataset_path):
         if s1 is not None:
             final_answers.append(s1.group(1).strip())
         else:
-            # try s2
-            s2 = re.search(r"<answer>(.*)", row.generation, re.DOTALL)
-            final_answers.append(s2.group(1).split('<answer>')[0].strip())
+            try:
+                s2 = re.search(r"<answer>(.*)", row.generation, re.DOTALL)
+                final_answers.append(s2.group(1).split('<answer>')[0].strip())
+            except: # There's just 1 edge case in hotpotqa that needs to be handled like this.
+                final_answers.append(re.search(r"</think>(.*?)</answer>", row.generation, re.DOTALL).group(1).strip())
 
     df["final_answer"] = final_answers
     df.to_json(dataset_path)
