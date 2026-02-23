@@ -6,7 +6,6 @@ def main(dataset_path):
     df = pd.read_json(dataset_path, lines=True)
 
     def clean_latex_text(text):
-        text = rf'{text}'
         return re.sub(r'\\+text\{', '', text).strip()
 
     df['extracted_answer'] = df['extracted_answer'].apply(clean_latex_text)
