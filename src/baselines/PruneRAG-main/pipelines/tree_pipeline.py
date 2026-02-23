@@ -666,10 +666,6 @@ class Generator:
         for output in outputs:
             output_list.append(output.outputs[0].text)
 
-
-        print(output_list[:5])
-        exit()
-
         # 计算总耗时
         # total_time = (datetime.now() - self.start_time).total_seconds()
             

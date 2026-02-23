@@ -331,7 +331,7 @@ class GeneralEvaluationStrategy(BaseEvaluationStrategy):
 class EvaluationStrategyFactory:
     STRATEGY_MAP = {
         'gpqa': lambda: GeneralEvaluationStrategy('gpqa'),
-        '2wiki': lambda: GeneralEvaluationStrategy('2wiki'),
+        '2wikimultihopqa': lambda: GeneralEvaluationStrategy('2wikimultihopqa'),
         'example': lambda: GeneralEvaluationStrategy('example'),
         'math500': lambda: GeneralEvaluationStrategy('math500'),
         'aime': lambda: GeneralEvaluationStrategy('aime'),
