@@ -74,7 +74,7 @@ class RetrievalClient:
             print(response.raise_for_status())
             print(response.status_code)
             res_json = self._parse_response(response.json())
-            # print(res_json)
+            #print(res_json)
 
             
             return res_json

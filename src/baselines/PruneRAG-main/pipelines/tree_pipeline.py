@@ -628,9 +628,6 @@ class Generator:
                     logger.warning(f"未知处理类型: {processed_results[idx]}")
                     node.subqueries = []
 
-
-            # 批量处理当前层级的子节点获取上下文
-            #获取当前层级中有子节点的节点
             current_level_nodes_child = [node for node in current_level_nodes if node.children]
             self._process_nodes_context(current_level_nodes_child)
             print("retrieval finished.")
@@ -659,8 +656,39 @@ class Generator:
 
         print("final generation finished")
 
-        print(outputs[:10])
+        def save_to_jsonl(request_output, filename="results.jsonl"):
+            prompt = request_output.prompt
+
+            # 1. Grab the actual final question (The one the model is actually answering)
+            # We look for the text between "### Question:" and "### Answer:"
+            question_match = re.search(r"### Question:\n(.*?)\n\n### Answer:", prompt, re.DOTALL)
+            question = question_match.group(1).strip() if question_match else "Unknown"
+
+            # 2. Grab the model's generated response
+            # Index 0 is the standard first completion
+            try:
+                response = request_output.outputs[0].text.strip()
+            except (IndexError, AttributeError):
+                response = ""
+
+            # 3. Package it up
+            data = {
+                "request_id": request_output.request_id,
+                "question": question,
+                "response": response,
+                # Optional: Save the raw prompt just in case you need it later
+                "raw_prompt": prompt
+            }
+
+            # 4. Append to JSONL (the 'a' mode is key for not overwriting)
+            with open(filename, "a", encoding="utf-8") as f:
+                f.write(json.dumps(data) + "\n")
+
+
+        save_to_jsonl(outputs, f"outputs/{self.config.dataset_name}_outputs.jsonl")
+        print("Saving results...")
         exit()
+
         retrieval_info = self.collect_contexts_per_level(root_nodes)
         output_list = []
         for output in outputs:
