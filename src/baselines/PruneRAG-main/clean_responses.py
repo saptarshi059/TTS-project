@@ -1,18 +1,20 @@
 from argparse import ArgumentParser
 import pandas as pd
+import re
 
 def main(dataset_path):
-    ds = pd.read_json(dataset_path, lines=True)
-    for row in ds.itertuples():
-        if '\text{' in row.extracted_answer:
-            row.extracted_answer = row.extracted_answer.rstrip('\text{')
-        elif '\\text{' in row.extracted_answer:
-            row.extracted_answer = row.extracted_answer.rstrip('\\text{')
+    df = pd.read_json(dataset_path, lines=True)
 
-    ds.to_json(dataset_path, index=False)
+    def clean_latex_text(text):
+        text = rf'{text}'
+        return re.sub(r'\\+text\{', '', text)
+
+    df['extracted_answer'] = df['extracted_answer'].apply(clean_latex_text)
+
+    df.to_json(dataset_path, orient='records', lines=True)
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("--response_file", type=str)
+    parser.add_argument("--response_file", type=str, required=True)
     args = parser.parse_args()
     main(dataset_path=args.response_file)
