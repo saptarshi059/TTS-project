@@ -677,16 +677,22 @@ class Generator:
                     except (IndexError, AttributeError):
                         raw_response = ""
 
-                    # 3. Optional: Extract content from \boxed{...}
-                    # This turns "\boxed{Paris}" into "Paris"
                     boxed_match = re.search(r"\\boxed\{(.*?)}", raw_response)
-                    extracted_answer = clean_latex_text(boxed_match.group(1).strip()) if boxed_match else raw_response
+
+                    # Try to get the boxed content
+                    boxed_content = boxed_match.group(1).strip() if boxed_match else None
+
+                    # Decide what to clean: the boxed content OR the full response if no box exists
+                    text_to_clean = boxed_content if boxed_content is not None else raw_response
+
+                    # Clean it
+                    final_answer = clean_latex_text(text_to_clean)
 
                     # 4. Package it up
                     data = {
                         "request_id": request_output.request_id,
                         "question": question,
-                        "final_answer": extracted_answer if extracted_answer != "" else raw_response
+                        "final_answer": final_answer if final_answer != "" else raw_response
                     }
 
                     f.write(json.dumps(data) + "\n")
