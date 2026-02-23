@@ -13,6 +13,6 @@ def main(dataset_path):
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("--responses_file", type=str)
+    parser.add_argument("--response_file", type=str)
     args = parser.parse_args()
     main(dataset_path=args.response_file)
