@@ -659,8 +659,8 @@ class Generator:
 
         print("final generation finished")
 
-
-
+        print(outputs[:10])
+        exit()
         retrieval_info = self.collect_contexts_per_level(root_nodes)
         output_list = []
         for output in outputs:
