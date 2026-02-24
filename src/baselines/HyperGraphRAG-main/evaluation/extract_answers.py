@@ -5,8 +5,8 @@ import re
 
 
 def main(dataset):
-    base_path = Path("results/HyperGraphRAG")
-    df = pd.read_json(base_path / f"{dataset}/test_result.json")
+    base_path = Path(f"results/HyperGraphRAG/{dataset}")
+    df = pd.read_json(base_path / "test_result.json")
 
     '''final_answers = []
     for row in df.itertuples():
@@ -21,7 +21,7 @@ def main(dataset):
                 final_answers.append(re.search(r"</think>(.*?)</answer>", row.generation, re.DOTALL).group(1).strip())
 
     df["final_answer"] = final_answers'''
-    df.to_json(base_path / f"{dataset}_parsed.jsonl", orient='records', lines=True)
+    df.to_json(base_path / "test_parsed.jsonl", orient='records', lines=True)
 
 
 if __name__ == "__main__":
