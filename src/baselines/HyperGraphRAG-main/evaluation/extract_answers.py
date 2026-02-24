@@ -8,7 +8,7 @@ def main(dataset):
     base_path = Path(f"results/HyperGraphRAG/{dataset}")
     df = pd.read_json(base_path / "test_result.json")
 
-    '''final_answers = []
+    final_answers = []
     for row in df.itertuples():
         s1 = re.search(r"<answer>(.*?)</answer>", row.generation, re.DOTALL)
         if s1 is not None:
@@ -20,7 +20,7 @@ def main(dataset):
             except: # There's just 1 edge case in hotpotqa that needs to be handled like this.
                 final_answers.append(re.search(r"</think>(.*?)</answer>", row.generation, re.DOTALL).group(1).strip())
 
-    df["final_answer"] = final_answers'''
+    df["final_answer"] = final_answers
     df.to_json(base_path / "test_parsed.jsonl", orient='records', lines=True)
 
 
