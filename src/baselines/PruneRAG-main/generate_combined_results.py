@@ -9,7 +9,6 @@ def main(dataset):
     combined_df = pd.merge(original_ds, generated_ds)
     combined_df = Dataset.from_pandas(combined_df)
     combined_df.to_json(f"outputs/{dataset}_parsed.jsonl")
-    combined_df.to_json(f"outputs/{dataset}_parsed.jsonl", lines=True, orient='records')
 
 
 if __name__ == "__main__":
