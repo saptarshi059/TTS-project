@@ -13,6 +13,8 @@ LLM_MODEL="Qwen/Qwen2.5-7B-Instruct"  # Change to your preferred LLM
 EMBED_MODEL="Qwen/Qwen3-Embedding-0.6B"
 export LLM_PORT=14321
 export EMBED_PORT=11432
+export DATASET=$1
+PYTHON_SCRIPT="load_data.py"
 
 echo "🚀 Starting vLLM Servers..."
 
@@ -26,7 +28,8 @@ LLM_PID=$!
 # 2. Start the Embedding Server (Background)
 CUDA_VISIBLE_DEVICES=1 vllm serve "$EMBED_MODEL" \
     --port $EMBED_PORT \
-    --runner pooling > embed_server.log 2>&1 &
+    --runner pooling \
+    --gpu-memory-utilization 0.55 > embed_server.log 2>&1 &
 EMBED_PID=$!
 
 # Function to check if a server is ready
@@ -43,3 +46,12 @@ wait_for_server() {
 # 3. Validate Health
 wait_for_server $LLM_PORT "LLM Server"
 wait_for_server $EMBED_PORT "Embedding Server"
+
+echo "🏁 Both servers are ready. Starting Python script..."
+
+# 4. Run the Python Script
+python -u "$PYTHON_SCRIPT"
+
+# 5. Cleanup (Optional: Kills the servers when the Python script finishes)
+echo "Stopping servers..."
+kill $LLM_PID $EMBED_PID

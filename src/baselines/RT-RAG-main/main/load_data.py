@@ -119,8 +119,8 @@ async def main():
     semaphore = asyncio.Semaphore(max_concurrent)
 
     print(f"Loading dataset: {dataset_name}")
-    data = pd.read_json(data_path).drop(columns=['_1', 'type', 'context', 'entity_ids', 'supporting_facts',
-                                                    'evidences', 'evidences_id', 'answer_id'])
+    # We just need these 3 columns for the dataset.
+    data = pd.read_json(data_path)[['id', 'question', 'answer']]
     data = Dataset.from_pandas(data, preserve_index=False)
     print(f"Successfully loaded dataset with {len(data)} examples")
 

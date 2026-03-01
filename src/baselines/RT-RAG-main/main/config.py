@@ -16,7 +16,7 @@ MAX_VARIANTS = 2
 
 # Retrieval configuration
 RETRIEVE_TEMPERATURE = 0.3
-DATASET = "2wikimultihopqa"             # Dataset name (e.g., "musique", "hotpotqa", etc.)
+DATASET = os.environ.get('DATASET') # Dataset name (e.g., "musique", "hotpotqa", etc.)
 METHOD = "dense"                # Retrieval method: "dense" or "bm25"
 CHUNK_SIZE = 200                # Max number of words per chunk
 MIN_SENTENCE = 2                # Minimum number of sentences per chunk
