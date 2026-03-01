@@ -43,9 +43,3 @@ wait_for_server() {
 # 3. Validate Health
 wait_for_server $LLM_PORT "LLM Server"
 wait_for_server $EMBED_PORT "Embedding Server"
-
-echo "🏁 Both servers are ready. Starting Python script..."
-
-# 5. Cleanup (Optional: Kills the servers when the Python script finishes)
-echo "Stopping servers..."
-kill $LLM_PID $EMBED_PID
