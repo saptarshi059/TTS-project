@@ -3,10 +3,11 @@ import random
 import os
 import asyncio
 from tqdm.asyncio import tqdm_asyncio
-from datasets import load_dataset
+from datasets import load_dataset, Dataset
 from tree_decompose import decompose_and_answer_with_variants
 import aiofiles
 import config  # Import config.py
+import pandas as pd
 
 # Set random seed for reproducibility
 random.seed(42)
@@ -118,7 +119,9 @@ async def main():
     semaphore = asyncio.Semaphore(max_concurrent)
 
     print(f"Loading dataset: {dataset_name}")
-    data = load_dataset('json', data_files=data_path, split='train')
+    data = pd.DataFrame(data_path).drop(columns=['_1', 'type', 'context', 'entity_ids', 'supporting_facts',
+                                                    'evidences', 'evidences_id', 'answer_id'])
+    data = Dataset.from_pandas(data, preserve_index=False)
     print(f"Successfully loaded dataset with {len(data)} examples")
 
     os.makedirs(output_dir, exist_ok=True)
