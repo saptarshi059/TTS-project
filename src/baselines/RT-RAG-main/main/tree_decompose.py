@@ -13,6 +13,7 @@ from retrieve import answer_question, direct_answer
 client = OpenAI(base_url=BASE_URL, api_key=API_KEY)
 import os
 import datetime
+import re
 
 
 # Add this function to save tree statistics to a file

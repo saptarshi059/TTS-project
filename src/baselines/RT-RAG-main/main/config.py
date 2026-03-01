@@ -1,3 +1,5 @@
+import os
+
 # Tree generation parameters for hierarchical QA
 TREES_PER_QUESTION = 5           # Number of trees to generate per question (for consensus-based QA)
 MAX_TOKENS = 2000                # Maximum number of tokens allowed per tree
@@ -37,12 +39,12 @@ DATA_PATH = f"../../../../sampled_data/{DATASET}/sampled_ds.json"
 STATS_FILE_PATH = "output/statistics_log.txt"
 
 # OpenAI-compatible language model API settings
-BASE_URL = "http://localhost:12345/v1"
+BASE_URL = f"http://localhost:{os.environ.get('LLM_PORT')}/v1"
 API_KEY = "your-api-key-string"
 
 # Path to save generated dense embeddings
 EMBEDDING_DATA = f"../../../../sampled_data"
 
 # External reranker service settings (optional)
-RANKER_URL = "http://localhost:14432/v1"
+RANKER_URL = f"http://localhost:{os.environ.get('EMBED_PORT')}/v1"
 RANKER_KEY = "your-ranker-api-key"
