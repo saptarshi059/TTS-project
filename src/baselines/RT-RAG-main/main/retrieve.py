@@ -1,20 +1,18 @@
-import re
-import os
-import uuid
-import numpy as np
+import argparse
 import json
-import math
-from typing import List, Dict, Tuple, Any
+import os
+import re
+from typing import List, Dict, Any
+
+import faiss
+import numpy as np
 import spacy
-from datetime import datetime
-import requests
+import torch
 # from elasticsearch import Elasticsearch
 from openai import OpenAI
-import argparse
-import faiss
-import torch
-from config import BASE_URL,API_KEY,RANKER_URL,RANKER_KEY,RETRIEVE_TEMPERATURE,SAMPLING_ITERATIONS,EMBEDDING_DATA
-from transformers import AutoModelForSequenceClassification, AutoTokenizer
+
+from config import BASE_URL, API_KEY, RANKER_URL, RANKER_KEY, RETRIEVE_TEMPERATURE, SAMPLING_ITERATIONS, EMBEDDING_DATA
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 #global_tokenizer = AutoTokenizer.from_pretrained('BAAI/bge-reranker-base')
 #global_model = AutoModelForSequenceClassification.from_pretrained('BAAI/bge-reranker-base').to(device)

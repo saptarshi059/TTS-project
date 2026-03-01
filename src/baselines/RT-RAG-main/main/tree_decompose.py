@@ -1,21 +1,19 @@
-import os
-import numpy as np
-import requests
+from typing import List, Tuple, Counter
+
+from openai import OpenAI
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-import re
-import argparse
-import json
-from typing import List, Tuple, Dict, Counter
-from collections import Counter, defaultdict
-from openai import OpenAI
+
+from config import DATASET, METHOD, CHUNK_SIZE, MIN_SENTENCE, OVERLAP, TOPK1, TOPK2, MAX_ITERATIONS, BASE_URL, API_KEY, \
+    TREES_PER_QUESTION, MAX_TOKENS, DECOMPOSE_TEMPERATURE, TOP_P, FREQUENCY_PENALTY, PRESENCE_PENALTY, NUM_EXAMPLES, \
+    MAX_HEIGHT, RIGHT_SUBTREE_VARIANTS, RIGHT_SUBTREE_TREES_PER_VARIANT, MAX_VARIANTS, STATS_FILE_PATH, \
+    ENHANCED_RIGHT_SUBTREE
 from retrieve import answer_question, direct_answer
 
-from config import  DATASET, METHOD, CHUNK_SIZE, MIN_SENTENCE, OVERLAP, TOPK1, TOPK2, MAX_ITERATIONS, BASE_URL, API_KEY, TREES_PER_QUESTION, MAX_TOKENS,                        DECOMPOSE_TEMPERATURE, TOP_P,FREQUENCY_PENALTY, PRESENCE_PENALTY, NUM_EXAMPLES, MAX_HEIGHT, RIGHT_SUBTREE_VARIANTS, RIGHT_SUBTREE_TREES_PER_VARIANT, MAX_VARIANTS, STATS_FILE_PATH,ENHANCED_RIGHT_SUBTREE
 client = OpenAI(base_url=BASE_URL, api_key=API_KEY)
 import os
 import datetime
-from pathlib import Path
+
 
 # Add this function to save tree statistics to a file
 def save_tree_stats(question, answer, original_height, final_height, file_path, success=True):
