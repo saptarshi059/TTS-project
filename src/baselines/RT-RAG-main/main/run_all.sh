@@ -1,5 +1,13 @@
 #!/bin/bash
 
+ulimit -n 65535
+export OMP_NUM_THREADS=1
+export MKL_NUM_THREADS=1
+export OPENBLAS_NUM_THREADS=1
+export VLLM_ATTENTION_BACKEND=FLASH_ATTN
+export NCCL_IGNORE_DISABLED_P2P=1
+export VLLM_USE_V1=0
+
 # Configuration
 LLM_MODEL="Qwen/Qwen2.5-7B-Instruct"  # Change to your preferred LLM
 EMBED_MODEL="Qwen/Qwen3-Embedding-0.6B"
@@ -13,16 +21,14 @@ echo "🚀 Starting vLLM Servers..."
 # Adjusted GPU memory to leave room for the embedding model
 vllm serve "$LLM_MODEL" \
     --port $LLM_PORT \
-    --gpu-memory-utilization 0.85 \
-    --trust-remote-code > llm_server.log 2>&1 &
+    --gpu-memory-utilization 0.85 > llm_server.log 2>&1 &
 LLM_PID=$!
 
 # 2. Start the Embedding Server (Background)
 vllm serve "$EMBED_MODEL" \
     --port $EMBED_PORT \
     --runner="pooling" \
-    --gpu-memory-utilization 0.1 \
-    --trust-remote-code > embed_server.log 2>&1 &
+    --gpu-memory-utilization 0.1 > embed_server.log 2>&1 &
 EMBED_PID=$!
 
 # Function to check if a server is ready
