@@ -27,7 +27,8 @@ LLM_PID=$!
 # 2. Start the Embedding Server (Background)
 CUDA_VISIBLE_DEVICES=1 vllm serve "$EMBED_MODEL" \
     --port $EMBED_PORT \
-    --runner pooling > embed_server.log 2>&1 &
+    --runner pooling \
+    --gpu-memory-utilization 0.45 > embed_server.log 2>&1 &
 EMBED_PID=$!
 
 # Function to check if a server is ready
