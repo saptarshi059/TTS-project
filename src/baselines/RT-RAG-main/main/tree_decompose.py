@@ -52,7 +52,7 @@ def generate_response(messages, max_tokens=800, temperature=0.2, top_p=1.0, freq
     """Generic API call function to replace original requests.post call"""
     try:#"Qwen/Qwen2.5-14B-Instruct"
         completion = client.chat.completions.create(
-            model="gpt-4o-mini",  # Can be changed as needed
+            model="Qwen/Qwen2.5-7B-Instruct",  # Can be changed as needed
             messages=messages,
             max_tokens=max_tokens,
             temperature=temperature,
