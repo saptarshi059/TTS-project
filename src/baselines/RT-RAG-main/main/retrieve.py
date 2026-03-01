@@ -34,7 +34,7 @@ def generate_response(messages, max_tokens=2000, temperature=0, top_p=1.0, top_k
     try:
       
         params = {
-            "model": "gpt-4o-mini", 
+            "model": "Qwen/Qwen2.5-7B-Instruct",
             "messages": messages,
             "max_tokens": max_tokens,
             "temperature": temperature,
