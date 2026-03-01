@@ -426,7 +426,7 @@ def retrieve_documents(query, dataset, method="bm25", chunk_size=200, min_senten
         if method.lower() == "bm25":
             text = result['text']
         else:  # dense method
-            text = result.get('content', '')
+            text = result['content']['contents']
             
         # Split text by paragraphs
         paragraphs = text.split("\n\n")
