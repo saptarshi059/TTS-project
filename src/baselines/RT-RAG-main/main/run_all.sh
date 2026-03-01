@@ -19,16 +19,15 @@ echo "🚀 Starting vLLM Servers..."
 
 # 1. Start the LLM Server (Background)
 # Adjusted GPU memory to leave room for the embedding model
-vllm serve "$LLM_MODEL" \
+CUDA_VISIBLE_DEVICES=0 vllm serve "$LLM_MODEL" \
     --port $LLM_PORT \
     --gpu-memory-utilization 0.85 > llm_server.log 2>&1 &
 LLM_PID=$!
 
 # 2. Start the Embedding Server (Background)
-vllm serve "$EMBED_MODEL" \
+CUDA_VISIBLE_DEVICES=1 vllm serve "$EMBED_MODEL" \
     --port $EMBED_PORT \
-    --runner pooling \
-    --gpu-memory-utilization 0.1 > embed_server.log 2>&1 &
+    --runner pooling > embed_server.log 2>&1 &
 EMBED_PID=$!
 
 # Function to check if a server is ready
