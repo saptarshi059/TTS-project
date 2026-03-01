@@ -265,7 +265,6 @@ def retrieve_and_rerank_chunks(dataset: str, query: str, chunk_size: int = 200, 
                     "content": chunks[idx]
                 })
 
-        print(coarse_results)
         return coarse_results
 
         # I'm not using the reranker to be consistent with everything else.
