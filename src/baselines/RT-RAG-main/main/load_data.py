@@ -70,9 +70,9 @@ async def write_result_to_file(result, file_path):
 async def process_example(example, idx):
     async with semaphore:
         try:
-            qid = example["_id"] if "_id" in example else f"unknown_id_{idx}"
-            question = example["input"]
-            golden_answers = example["answers"]
+            qid = example["id"] if "id" in example else f"unknown_id_{idx}"
+            question = example["question"]
+            golden_answers = example["answer"]
 
             loop = asyncio.get_event_loop()
             try:

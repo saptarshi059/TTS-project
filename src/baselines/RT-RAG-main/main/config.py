@@ -12,23 +12,9 @@ RIGHT_SUBTREE_VARIANTS = 1
 RIGHT_SUBTREE_TREES_PER_VARIANT = 3
 MAX_VARIANTS = 2
 
-# Path to save run-time statistics and logs
-STATS_FILE_PATH = "/path/to/save/statistics_log.txt"
-
-# OpenAI-compatible language model API settings
-BASE_URL = "https://your-openai-compatible-api-url/v1"
-API_KEY = "your-api-key-string"
-
-# Path to save generated dense embeddings
-EMBEDDING_DATA = "/path/to/embedding_data_output"
-
-# External reranker service settings (optional)
-RANKER_URL = "https://your-ranker-service-url/v1"
-RANKER_KEY = "your-ranker-api-key"
-
 # Retrieval configuration
 RETRIEVE_TEMPERATURE = 0.3
-DATASET = "musique"             # Dataset name (e.g., "musique", "hotpotqa", etc.)
+DATASET = "2wikimultihopqa"             # Dataset name (e.g., "musique", "hotpotqa", etc.)
 METHOD = "dense"                # Retrieval method: "dense" or "bm25"
 CHUNK_SIZE = 200                # Max number of words per chunk
 MIN_SENTENCE = 2                # Minimum number of sentences per chunk
@@ -39,10 +25,24 @@ SAMPLING_ITERATIONS = 5        # Number of sampling iterations for consensus
 MAX_ITERATIONS = 4             # Maximum number of iterations for query rewriting
 
 # Root output directory for saving predictions/results
-OUTPUT_DIR_ROOT = "/path/to/output/results"
+OUTPUT_DIR_ROOT = "output/results"
 
 # Concurrency control
 MAX_CONCURRENT = 4              # Maximum number of concurrent QA jobs
 
 # Path to evaluation dataset (in .jsonl format)
-DATA_PATH = "/path/to/dataset.jsonl"
+DATA_PATH = f"../../../../sampled_data/{DATASET}/sampled_ds.json"
+
+# Path to save run-time statistics and logs
+STATS_FILE_PATH = "output/statistics_log.txt"
+
+# OpenAI-compatible language model API settings
+BASE_URL = "http://localhost:12345/v1"
+API_KEY = "your-api-key-string"
+
+# Path to save generated dense embeddings
+EMBEDDING_DATA = f"../../../../sampled_data"
+
+# External reranker service settings (optional)
+RANKER_URL = "http://localhost:14432/v1"
+RANKER_KEY = "your-ranker-api-key"

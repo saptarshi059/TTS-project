@@ -16,9 +16,9 @@ import torch
 from config import BASE_URL,API_KEY,RANKER_URL,RANKER_KEY,RETRIEVE_TEMPERATURE,SAMPLING_ITERATIONS,EMBEDDING_DATA
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-global_tokenizer = AutoTokenizer.from_pretrained('BAAI/bge-reranker-base')
-global_model = AutoModelForSequenceClassification.from_pretrained('BAAI/bge-reranker-base').to(device)
-global_model.eval()
+#global_tokenizer = AutoTokenizer.from_pretrained('BAAI/bge-reranker-base')
+#global_model = AutoModelForSequenceClassification.from_pretrained('BAAI/bge-reranker-base').to(device)
+#global_model.eval()
 
 client = OpenAI(base_url=BASE_URL, api_key=API_KEY)
 try:
@@ -240,14 +240,14 @@ def retrieve_and_rerank_chunks(dataset: str, query: str, chunk_size: int = 200, 
                              min_sentence: int = 2, coarse_top_k: int = 45, fine_top_k: int = 15) -> List[Dict[str, Any]]:
    
     try:
-        base_path = f"{EMBEDDING_DATA}/{dataset}/{chunk_size}_{min_sentence}_{overlap}"
+        base_path = f"{EMBEDDING_DATA}/{dataset}/"
         index_files = [f for f in os.listdir(base_path) if f.endswith("_index")]
         if not index_files:
             raise FileNotFoundError(f"No index file found in {base_path}")
         index_file = os.path.join(base_path, index_files[0])
         index = faiss.read_index(index_file)
 
-        with open(os.path.join(base_path, "chunks.json"), "r", encoding="utf-8") as f:
+        with open(os.path.join(base_path, f"{dataset}-chunks.jsonl"), "r", encoding="utf-8") as f:
             chunks = json.load(f)
         
         embedding_client =OpenAI(
@@ -256,7 +256,7 @@ def retrieve_and_rerank_chunks(dataset: str, query: str, chunk_size: int = 200, 
         )
         response = embedding_client.embeddings.create(
             input=query,
-            model="text-embedding-3-small"
+            model="Qwen/Qwen3-Embedding-0.6B"
         )
         query_embedding = np.array(response.data[0].embedding).astype('float32').reshape(1, -1)
         distances, indices = index.search(query_embedding, coarse_top_k)
@@ -270,9 +270,11 @@ def retrieve_and_rerank_chunks(dataset: str, query: str, chunk_size: int = 200, 
                     "content": chunks[idx]
                 })
 
-        if not coarse_results:
-            return []
+        return coarse_results
 
+        # I'm not using the reranker to be consistent with everything else.
+        '''if not coarse_results:
+            return []
         
         tokenizer = global_tokenizer
         model = global_model
@@ -293,7 +295,7 @@ def retrieve_and_rerank_chunks(dataset: str, query: str, chunk_size: int = 200, 
             coarse_results[i]["rerank_score"] = score
 
         sorted_results = sorted(coarse_results, key=lambda x: x["rerank_score"], reverse=True)
-        return sorted_results[:fine_top_k]
+        return sorted_results[:fine_top_k]'''
 
     except Exception as e:
         print(f"Dense retrieval failed: {e}")
@@ -376,7 +378,9 @@ def retrieve_documents(query, dataset, method="bm25", chunk_size=200, min_senten
         Formatted document string
     """
     print(f"Using parameters: dataset={dataset}, method={method}, chunk_size={chunk_size}, min_sentence={min_sentence}, overlap={overlap}, topk1={topk1}, topk2={topk2}")
-    
+
+    # Augmenting the query for qwen
+    query = f"Instruct: Given a web search query, retrieve relevant passages that answer the query\nQuery:{query}"
     raw_results = []
     
     if method.lower() == "bm25":
