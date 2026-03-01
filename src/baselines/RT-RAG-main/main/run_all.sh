@@ -3,8 +3,8 @@
 # Configuration
 LLM_MODEL="Qwen/Qwen2.5-7B-Instruct"  # Change to your preferred LLM
 EMBED_MODEL="Qwen/Qwen3-Embedding-0.6B"
-LLM_PORT=12345
-EMBED_PORT=14432
+LLM_PORT=14321
+EMBED_PORT=11432
 PYTHON_SCRIPT="load_data.py" # <--- Update this to your filename
 
 echo "🚀 Starting vLLM Servers..."
