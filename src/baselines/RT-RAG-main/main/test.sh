@@ -13,7 +13,6 @@ LLM_MODEL="Qwen/Qwen2.5-7B-Instruct"  # Change to your preferred LLM
 EMBED_MODEL="Qwen/Qwen3-Embedding-0.6B"
 export LLM_PORT=14321
 export EMBED_PORT=11432
-PYTHON_SCRIPT="load_data.py"
 
 echo "🚀 Starting vLLM Servers..."
 
@@ -46,9 +45,6 @@ wait_for_server $LLM_PORT "LLM Server"
 wait_for_server $EMBED_PORT "Embedding Server"
 
 echo "🏁 Both servers are ready. Starting Python script..."
-
-# 4. Run the Python Script
-python "$PYTHON_SCRIPT"
 
 # 5. Cleanup (Optional: Kills the servers when the Python script finishes)
 echo "Stopping servers..."

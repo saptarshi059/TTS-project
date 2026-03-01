@@ -27,7 +27,7 @@ except:
     nlp = spacy.load("en_core_web_sm")
 
 
-def generate_response(messages, max_tokens=2000, temperature=0, top_p=1.0, top_k=None, frequency_penalty=0.0, presence_penalty=0.0):
+def generate_response(messages, max_tokens=2000, temperature=0., top_p=1.0, top_k=None, frequency_penalty=0.0, presence_penalty=0.0):
     
     try:
       
@@ -239,10 +239,7 @@ def retrieve_and_rerank_chunks(dataset: str, query: str, chunk_size: int = 200, 
    
     try:
         base_path = f"{EMBEDDING_DATA}/{dataset}/"
-        index_files = [f for f in os.listdir(base_path) if f.endswith("_index")]
-        if not index_files:
-            raise FileNotFoundError(f"No index file found in {base_path}")
-        index_file = os.path.join(base_path, index_files[0])
+        index_file = os.path.join(base_path, f"{dataset}_index.index")
         index = faiss.read_index(index_file)
 
         with open(os.path.join(base_path, f"{dataset}-chunks.jsonl"), "r", encoding="utf-8") as f:
