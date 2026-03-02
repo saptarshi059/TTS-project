@@ -30,7 +30,7 @@ MAX_ITERATIONS = 1             # Maximum number of iterations for query rewritin
 OUTPUT_DIR_ROOT = "output/results"
 
 # Concurrency control
-MAX_CONCURRENT = 10              # Maximum number of concurrent QA jobs
+MAX_CONCURRENT = 4              # Maximum number of concurrent QA jobs
 
 # Path to evaluation dataset (in .jsonl format)
 DATA_PATH = f"../../../../sampled_data/{DATASET}/sampled_ds.json"
