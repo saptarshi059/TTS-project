@@ -2,7 +2,7 @@ import os
 
 # Tree generation parameters for hierarchical QA
 TREES_PER_QUESTION = 1           # Number of trees to generate per question (for consensus-based QA)
-MAX_TOKENS = 1000                # Maximum number of tokens allowed per tree
+MAX_TOKENS = 500                # Maximum number of tokens allowed per tree
 DECOMPOSE_TEMPERATURE = 0.8
 TOP_P = 1.0
 FREQUENCY_PENALTY = 0.0
@@ -21,7 +21,7 @@ METHOD = "dense"                # Retrieval method: "dense" or "bm25"
 CHUNK_SIZE = 200                # Max number of words per chunk
 MIN_SENTENCE = 2                # Minimum number of sentences per chunk
 OVERLAP = 2                     # Number of overlapping sentences between chunks
-TOPK1 = 20                      # Top-K candidates from initial retrieval
+TOPK1 = 10                      # Top-K candidates from initial retrieval
 TOPK2 = 10                      # Top-K reranked candidates
 SAMPLING_ITERATIONS = 1        # Number of sampling iterations for consensus
 MAX_ITERATIONS = 1             # Maximum number of iterations for query rewriting
