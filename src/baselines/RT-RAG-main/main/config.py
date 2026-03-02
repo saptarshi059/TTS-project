@@ -1,17 +1,17 @@
 import os
 
 # Tree generation parameters for hierarchical QA
-TREES_PER_QUESTION = 3           # Number of trees to generate per question (for consensus-based QA)
-MAX_TOKENS = 2000                # Maximum number of tokens allowed per tree
+TREES_PER_QUESTION = 1           # Number of trees to generate per question (for consensus-based QA)
+MAX_TOKENS = 1000                # Maximum number of tokens allowed per tree
 DECOMPOSE_TEMPERATURE = 0.8
 TOP_P = 1.0
 FREQUENCY_PENALTY = 0.0
 PRESENCE_PENALTY = 0.0
 NUM_EXAMPLES = 3                # Number of few-shot examples
-MAX_HEIGHT = 3                   # Maximum depth of the generated tree
+MAX_HEIGHT = 1                   # Maximum depth of the generated tree
 ENHANCED_RIGHT_SUBTREE = False
 RIGHT_SUBTREE_VARIANTS = 1
-RIGHT_SUBTREE_TREES_PER_VARIANT = 3
+RIGHT_SUBTREE_TREES_PER_VARIANT = 1
 MAX_VARIANTS = 1
 
 # Retrieval configuration
@@ -24,7 +24,7 @@ OVERLAP = 2                     # Number of overlapping sentences between chunks
 TOPK1 = 20                      # Top-K candidates from initial retrieval
 TOPK2 = 10                      # Top-K reranked candidates
 SAMPLING_ITERATIONS = 1        # Number of sampling iterations for consensus
-MAX_ITERATIONS = 3             # Maximum number of iterations for query rewriting
+MAX_ITERATIONS = 1             # Maximum number of iterations for query rewriting
 
 # Root output directory for saving predictions/results
 OUTPUT_DIR_ROOT = "output/results"
