@@ -12,7 +12,7 @@ MAX_HEIGHT = 3                   # Maximum depth of the generated tree
 ENHANCED_RIGHT_SUBTREE = False
 RIGHT_SUBTREE_VARIANTS = 1
 RIGHT_SUBTREE_TREES_PER_VARIANT = 3
-MAX_VARIANTS = 2
+MAX_VARIANTS = 1
 
 # Retrieval configuration
 RETRIEVE_TEMPERATURE = 0.3
@@ -23,8 +23,8 @@ MIN_SENTENCE = 2                # Minimum number of sentences per chunk
 OVERLAP = 2                     # Number of overlapping sentences between chunks
 TOPK1 = 20                      # Top-K candidates from initial retrieval
 TOPK2 = 10                      # Top-K reranked candidates
-SAMPLING_ITERATIONS = 2        # Number of sampling iterations for consensus
-MAX_ITERATIONS = 4             # Maximum number of iterations for query rewriting
+SAMPLING_ITERATIONS = 1        # Number of sampling iterations for consensus
+MAX_ITERATIONS = 3             # Maximum number of iterations for query rewriting
 
 # Root output directory for saving predictions/results
 OUTPUT_DIR_ROOT = "output/results"
