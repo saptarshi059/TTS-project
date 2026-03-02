@@ -4,7 +4,7 @@
 > [!NOTE] 
 > ALL sampled datasets and indices can be downloaded from 
 > `https://drive.google.com/drive/folders/1dsn6ky7HFN8piqjnXkGc1RjHis4NA1re?usp=sharing`. Use the `download_data.py`
-> script for this. Keep the folder in the root of the repository.
+> script for this. Keep the downloaded folder in the root of the repository.
 
 The datasets were sampled and their indices were created using,
 1. `src/utils/sample_datasets.py`
