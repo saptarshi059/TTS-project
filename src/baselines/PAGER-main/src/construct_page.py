@@ -2,7 +2,6 @@ import argparse
 import json
 import os
 import time
-import gc
 
 import pandas as pd
 import requests
@@ -10,7 +9,7 @@ from tqdm import tqdm
 from typing import List, Dict, Any
 from vllm import LLM, SamplingParams
 from transformers import AutoTokenizer
-#import ray
+import ray
 from copy import deepcopy
 import torch
 
@@ -61,8 +60,7 @@ class DirectBatchPageGenerator:
             in_len = len(input_ids)
             
         available_output = self.max_model_len - in_len
-        #sp = deepcopy(base_params)
-        sp = base_params
+        sp = deepcopy(base_params)
         if sp.max_tokens > available_output:
             sp.max_tokens = available_output
             print(f"----------------- max_tokens is too long ----------------------")
@@ -111,27 +109,9 @@ class DirectBatchPageGenerator:
             chunk_questions = questions[i : i + chunk_size]
             chunk_questions = [make_qwen_ret_prompt(q) for q in chunk_questions]
 
-            try:
-                response = requests.post(
-                    f"{self.retrieval_url}/search",
-                    json={"model": "qwen3-emb", "queries": chunk_questions, "topk": topk},
-                    timeout=60  # <-- ADD THIS, was None (infinite)
-                )
-                response.raise_for_status()
-                result = response.json()
-                response.close()
-                del response
-            except requests.exceptions.Timeout:
-                print(f"Retrieval timeout on chunk {i}, returning empty docs")
-                all_doc_lists.append([])
-                all_id_list.append([])
-                continue
-            except requests.exceptions.RequestException as e:
-                print(f"Retrieval request failed: {e}")
-                all_doc_lists.append([])
-                all_id_list.append([])
-                continue
-
+            response = requests.post(
+                f"{self.retrieval_url}/search", json={"model": "qwen3-emb", "queries": chunk_questions, "topk": topk})
+            result = response.json()
             chunk_doc_lists = []
             chunk_id_lists = []
             
@@ -342,20 +322,18 @@ Task Steps:
             # Update results for active items
             for i, active_idx in enumerate(active_indices):
                 batch_items[active_idx]["doc_list"].append(doc_lists[i])
-                #batch_items[active_idx]["page_list"].append(new_pages[i])
-                batch_items[active_idx]["page_list"] = new_pages[i]
+                batch_items[active_idx]["page_list"].append(new_pages[i])
                 batch_items[active_idx]["subquestion_list"].append(sub_questions[i])
                 batch_items[active_idx]["doc_id_list"].append(id_lists[i])
                 current_pages[active_idx] = new_pages[i]
-
-            gc.collect()  # <-- ADD at end of each iteration
 
         return batch_items
 
 
 def load_questions_from_file(input_file: str) -> list:
-    data_list = pd.read_json(input_file, lines=True).to_dict('records')
-    return data_list
+    """Load JSON objects line by line from a file and return a list."""
+    data = pd.read_json(input_file, lines=True).to_dict('records')
+    return data
 
 
 def save_json(data_list: list, out_file: str):
@@ -423,7 +401,12 @@ def main():
         default=66,
         help="Random seed for reproducibility",
     )
-    
+    parser.add_argument(
+        "--resume",
+        action="store_true",
+        help="Resume from existing output file, skipping already-processed items",
+    )
+
     args = parser.parse_args()
     print(args)
     # Set environment variables
@@ -436,7 +419,6 @@ def main():
         tensor_parallel_size=len(args.gpu_ids.split(",")),
         trust_remote_code=True,
         seed=args.seed,
-        gpu_memory_utilization=0.75
     )
     tokenizer = AutoTokenizer.from_pretrained(
         args.model_name,
@@ -450,6 +432,29 @@ def main():
         data_list = data_list[: args.sample_limit]
     print(f"Total of {len(data_list)} records to process")
 
+    # --- RESUME LOGIC ---
+    done_questions = set()
+    if args.resume and os.path.exists(args.out_file):
+        with open(args.out_file, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    obj = json.loads(line)
+                    done_questions.add(obj["question"])
+                except json.JSONDecodeError:
+                    continue
+        print(f"Resuming: {len(done_questions)} already processed, skipping them")
+
+    data_list = [d for d in data_list if d["question"] not in done_questions]
+    print(f"{len(data_list)} remaining to process")
+
+    if not data_list:
+        print("Nothing to do!")
+        return
+    # --- END RESUME LOGIC ---
+
     # Initialize DirectBatchPageGenerator
     page_generator = DirectBatchPageGenerator(
         llm=llm,
@@ -461,7 +466,7 @@ def main():
     )
 
     # Process in batches and write output
-    with open(args.out_file, "w", encoding="utf-8") as fout:
+    with open(args.out_file, "a", encoding="utf-8") as fout:
         for i in tqdm(range(0, len(data_list), args.batch_size)):
             batch = data_list[i : i + args.batch_size]
             print(
