@@ -22,6 +22,8 @@ RETRIEVER_PORT=14325
 cleanup() {
     echo -e "\n🛑 Interrupted! Shutting down background servers..."
     kill "$(jobs -p)" 2>/dev/null
+    pkill -u "$(whoami)" -9 python
+    pkill -u "$(whoami)" -9 VLLM
     exit 1
 }
 trap cleanup SIGINT SIGTERM
