@@ -40,7 +40,7 @@ def parse_qa_file(file_path):
     return qa_pairs
 
 def main(dataset):
-    base_path = f"output/results/{dataset}/dense_chunk200_topk1_20_topk2_10"
+    base_path = f"output/results/{dataset}/dense_chunk200_topk1_10_topk2_10"
     response_file = base_path + "/1.txt"
     parsed_file = base_path + f"/{dataset}_parsed.jsonl"
 
