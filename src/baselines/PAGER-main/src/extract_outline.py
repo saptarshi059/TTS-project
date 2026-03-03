@@ -54,17 +54,26 @@ def process_json_file(json_file):
     with open(json_file, 'r', encoding='utf-8') as file:
         for line in file:
             data_list.append(json.loads(line.strip()))
-        
+
     for entry in data_list:
         result = extract_after_outline(entry['init_page'])
-        
+
+        # Original logic for the first failure case
         if result == "No single '#' found whose neighbors are not '#'":
             entry['init_page'] = 'None'
-        else:
-            result = remove_after_last_to_be_filled(result)
+            continue
+
+        result = remove_after_last_to_be_filled(result)
+
+        # New "Safety Net" for the remaining format checks
+        try:
             check_string_format(result)
             entry['init_page'] = result
-    
+        except SystemExit:
+            # Instead of the script dying, we just mark this entry as 'None'
+            print(f"Format mismatch detected. Setting entry to 'None'.")
+            entry['init_page'] = 'None'
+
     return data_list
 
 
