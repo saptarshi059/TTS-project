@@ -13,7 +13,7 @@ torch.cuda.manual_seed(66)
 torch.cuda.manual_seed_all(66) 
 
 def load_questions_from_file(input_file):
-    data_list = pd.read_json(input_file).to_dict('records')
+    data_list = pd.read_json(input_file, lines=True).to_dict('records')
     return data_list
 
 def build_prompt(item):

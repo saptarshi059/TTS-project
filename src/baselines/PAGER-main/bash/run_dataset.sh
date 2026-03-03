@@ -68,6 +68,16 @@ wait_for_server "http://localhost:$RETRIEVER_PORT/health" "Retriever Service" "\
 # --- 3. Pipeline Execution (Using LLM() internally) ---
 
 # Construct Outline (GPUs 2, 3)
+CUDA_VISIBLE_DEVICES=2,3 python ../src/construct_outline.py \
+    --model_name "Qwen/Qwen2.5-7B-Instruct" \
+    --input_file "${DATA_PATH}" \
+    --out_file "output_data/outline_${DATASET_NAME}.jsonl" \
+    --max_iters 10 --batch_size 32 --seed 66
+
+# Extract Outline (CPU Task)
+python ../src/extract_outline.py \
+    --json_file "output_data/outline_${DATASET_NAME}.jsonl" \
+    --out_file "output_data/new_outline_${DATASET_NAME}.jsonl"
 
 # Construct Page (GPUs 2, 3)
 CUDA_VISIBLE_DEVICES=2,3 python ../src/construct_page.py \

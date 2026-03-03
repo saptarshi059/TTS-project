@@ -331,7 +331,7 @@ Task Steps:
 
 
 def load_questions_from_file(input_file: str) -> list:
-    data_list = pd.read_json(input_file).to_dict('records')
+    data_list = pd.read_json(input_file, lines=True).to_dict('records')
     return data_list
 
 
