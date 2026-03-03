@@ -1,10 +1,10 @@
 --extra-index-url https://download.pytorch.org/whl/cu121
 
-# vLLM and its required Torch version (pinned to resolve your first error)
+# Let uv pick the best Torch +cu121 match for vLLM
 vllm==0.16.0
-torch==2.9.1+cu121
+torch>=2.6.0+cu121
 
-# Transformers must be < 5.0.0 for vLLM compatibility
+# vLLM requires Transformers < 5.0
 transformers>=4.56.0,<5.0.0
 
 # GPU-accelerated Faiss
