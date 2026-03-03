@@ -1,11 +1,17 @@
 --extra-index-url https://download.pytorch.org/whl/cu121
 
-# Let vllm 0.16.0 pull its required torch (2.9.1) from the cu121 index
+# vLLM and its required Torch version (pinned to resolve your first error)
 vllm==0.16.0
 torch==2.9.1+cu121
+
+# Transformers must be < 5.0.0 for vLLM compatibility
+transformers>=4.56.0,<5.0.0
+
+# GPU-accelerated Faiss
 faiss-gpu-cu12>=1.13.0
-transformers>=5.2.0
-fastapi>=0.116.1
-uvicorn>=0.35.0
-scikit-learn>=1.7.1
-tqdm>=4.67.1
+
+# Supporting stack
+fastapi==0.116.1
+uvicorn==0.35.0
+scikit-learn==1.7.1
+tqdm==4.67.1
