@@ -4,8 +4,7 @@ import asyncio
 import numpy as np
 from typing import List, Dict, Any
 from tqdm import tqdm
-import json
-from tqdm import tqdm
+import pandas as pd
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field, validator
 from openai import AsyncOpenAI
@@ -118,36 +117,23 @@ SEARCH_SEMAPHORE = asyncio.Semaphore(16)
 
 def _load_corpus_jsonl(path: str) -> List[Dict[str, str]]:
     corpus: List[Dict[str, str]] = []
-    file_size = os.path.getsize(path)
-    with open(path, "rb") as f:
-        with tqdm(
-            total=file_size,
-            desc="Loading corpus",
-            unit="B",
-            unit_scale=True,
-            ncols=100,
-        ) as pbar:
-            for raw_line in f:
-                pbar.update(len(raw_line))
-                line_data = json.loads(raw_line)
+    corpus_file = pd.read_json(path)
+    for row in corpus_file.itertuples():
+        _id = str(row.id)
+        _contents = row.contents
 
-                _id = str(line_data.get("id", ""))
-                _contents = line_data.get("contents", "")
-                if not isinstance(_contents, str):
-                    _contents = str(_contents)
+        parts = _contents.split("\n", 1)
+        title = parts[0].strip()
+        text = parts[1] if len(parts) > 1 else ""
 
-                parts = _contents.split("\n", 1)
-                title = parts[0].strip()
-                text = parts[1] if len(parts) > 1 else ""
-
-                corpus.append(
-                    {
-                        "id": _id,
-                        "title": title,
-                        "text": text,
-                        "contents": _contents,
-                    }
-                )
+        corpus.append(
+            {
+                "id": _id,
+                "title": title,
+                "text": text,
+                "contents": _contents,
+            }
+        )
     return corpus
 
 
