@@ -146,8 +146,6 @@ def _load_faiss_index(path: str) -> faiss.Index:
 
 async def _get_embeddings(queries: List[str]) -> np.ndarray:
     async with EMB_SEMAPHORE:
-        # Updating
-        queries = [f"Instruct: Given a web search query, retrieve relevant passages that answer the query\nQuery:{query}" for query in queries]
         resp = await CLIENT.embeddings.create(model=EMB_MODEL, input=queries)
         embs = [np.array(item.embedding, dtype=np.float32) for item in resp.data]
         return np.vstack(embs)

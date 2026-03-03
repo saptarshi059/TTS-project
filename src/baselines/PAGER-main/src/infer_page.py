@@ -1,6 +1,8 @@
 import argparse
 import json
 import os
+
+import pandas as pd
 from tqdm import tqdm
 from vllm import LLM, SamplingParams
 from transformers import AutoTokenizer
@@ -11,9 +13,8 @@ torch.cuda.manual_seed(66)
 torch.cuda.manual_seed_all(66) 
 
 def load_questions_from_file(input_file):
-    with open(input_file, "r", encoding="utf-8") as f:
-        data = [json.loads(line) for line in f]
-    return data
+    data_list = pd.read_json(input_file).to_dict('records')
+    return data_list
 
 def build_prompt(item):
     question = item.get("question", "")
