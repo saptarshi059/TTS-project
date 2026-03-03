@@ -2,6 +2,7 @@ import argparse
 import json
 import os
 import time
+import gc
 
 import pandas as pd
 import requests
@@ -9,7 +10,7 @@ from tqdm import tqdm
 from typing import List, Dict, Any
 from vllm import LLM, SamplingParams
 from transformers import AutoTokenizer
-import ray
+#import ray
 from copy import deepcopy
 import torch
 
@@ -60,7 +61,8 @@ class DirectBatchPageGenerator:
             in_len = len(input_ids)
             
         available_output = self.max_model_len - in_len
-        sp = deepcopy(base_params)
+        #sp = deepcopy(base_params)
+        sp = base_params
         if sp.max_tokens > available_output:
             sp.max_tokens = available_output
             print(f"----------------- max_tokens is too long ----------------------")
@@ -112,6 +114,8 @@ class DirectBatchPageGenerator:
             response = requests.post(
                 f"{self.retrieval_url}/search", json={"model": "qwen3-emb", "queries": chunk_questions, "topk": topk})
             result = response.json()
+            response.close()  # <-- ADD THIS
+            del response  # <-- AND THIS
             chunk_doc_lists = []
             chunk_id_lists = []
             
@@ -322,10 +326,13 @@ Task Steps:
             # Update results for active items
             for i, active_idx in enumerate(active_indices):
                 batch_items[active_idx]["doc_list"].append(doc_lists[i])
-                batch_items[active_idx]["page_list"].append(new_pages[i])
+                #batch_items[active_idx]["page_list"].append(new_pages[i])
+                batch_items[active_idx]["page_list"] = new_pages[i]
                 batch_items[active_idx]["subquestion_list"].append(sub_questions[i])
                 batch_items[active_idx]["doc_id_list"].append(id_lists[i])
                 current_pages[active_idx] = new_pages[i]
+
+            gc.collect()  # <-- ADD at end of each iteration
 
         return batch_items
 
