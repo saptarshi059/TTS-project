@@ -466,7 +466,7 @@ def main():
     )
 
     # Process in batches and write output
-    with open(args.out_file, "w", encoding="utf-8") as fout:
+    with open(args.out_file, "w+", encoding="utf-8") as fout:
         for i in tqdm(range(0, len(data_list), args.batch_size)):
             batch = data_list[i : i + args.batch_size]
             print(
