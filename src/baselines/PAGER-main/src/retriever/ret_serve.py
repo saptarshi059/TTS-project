@@ -4,7 +4,7 @@ import asyncio
 import numpy as np
 from typing import List, Dict, Any
 from tqdm import tqdm
-import orjson
+import json
 from tqdm import tqdm
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field, validator
@@ -129,7 +129,7 @@ def _load_corpus_jsonl(path: str) -> List[Dict[str, str]]:
         ) as pbar:
             for raw_line in f:
                 pbar.update(len(raw_line))
-                line_data = orjson.loads(raw_line)
+                line_data = json.loads(raw_line)
 
                 _id = str(line_data.get("id", ""))
                 _contents = line_data.get("contents", "")
