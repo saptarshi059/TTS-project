@@ -2,6 +2,8 @@ import argparse
 import json
 import os
 import time
+
+import pandas as pd
 import requests
 from tqdm import tqdm
 from typing import List, Dict, Any
@@ -143,16 +145,8 @@ The number of sections on the page should be limited to the scope necessary to a
 
 
 def load_questions_from_file(input_file: str) -> list:
-    """Load JSON objects line by line from a file and return a list."""
-    data_list = []
-    with open(input_file, "r", encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            data_list.append(json.loads(line))
+    data_list = pd.read_json(input_file).to_dict('records')
     return data_list
-
 
 def save_json(data_list: list, out_file: str):
     """Write JSON objects line by line to a specified file."""
