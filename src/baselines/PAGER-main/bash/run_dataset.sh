@@ -72,7 +72,7 @@ CUDA_VISIBLE_DEVICES=2,3 python ../src/construct_outline.py \
     --model_name "Qwen/Qwen2.5-7B-Instruct" \
     --input_file "${DATA_PATH}" \
     --out_file "output_data/outline_${DATASET_NAME}.jsonl" \
-    --max_iters 10 --batch_size 2000 --seed 66
+    --max_iters 10 --batch_size 32 --seed 66
 
 # Extract Outline (CPU Task)
 python ../src/extract_outline.py \
@@ -85,14 +85,14 @@ CUDA_VISIBLE_DEVICES=2,3 python ../src/construct_page.py \
     --retrieval_url "http://localhost:${RETRIEVER_PORT}" \
     --input_file "output_data/new_outline_${DATASET_NAME}.jsonl" \
     --out_file "output_data/new_outline_${DATASET_NAME}_page.jsonl" \
-    --max_iters 10 --batch_size 2000 --seed 66
+    --max_iters 10 --batch_size 32 --seed 66
 
 # Infer Answers (GPUs 0, 1)
 CUDA_VISIBLE_DEVICES=0,1 python ../src/infer_page.py \
     --model "Qwen/Qwen2.5-7B-Instruct" \
     --input_file "output_data/new_outline_${DATASET_NAME}_page.jsonl" \
     --output_file "output_data/${DATASET_NAME}_responses.jsonl" \
-    --batch_size 2000
+    --batch_size 32
 
 # --- Final Cleanup ---
 echo "🎉 Pipeline finished successfully. Cleaning up..."
