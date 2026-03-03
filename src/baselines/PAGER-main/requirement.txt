@@ -1,16 +1,11 @@
 --extra-index-url https://download.pytorch.org/whl/cu121
 
-# Let uv pick the best Torch +cu121 match for vLLM
+# Let vllm 0.16.0 pull its own torch dependency from the cu121 index
 vllm==0.16.0
-torch>=2.6.0+cu121
-
-# vLLM requires Transformers < 5.0
+# We specify torch without a version so uv can resolve the local +cu121 segment itself
+torch
 transformers>=4.56.0,<5.0.0
-
-# GPU-accelerated Faiss
 faiss-gpu-cu12>=1.13.0
-
-# Supporting stack
 fastapi==0.116.1
 uvicorn==0.35.0
 scikit-learn==1.7.1
