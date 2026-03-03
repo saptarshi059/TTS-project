@@ -52,7 +52,7 @@ CUDA_VISIBLE_DEVICES=4 python -m vllm.entrypoints.openai.api_server \
 wait_for_server "http://localhost:$EMBEDDING_PORT/v1/models" "vLLM Embedding" "qwen3-emb"
 
 # --- 2. Start Retriever Server (GPU 5) ---
-CUDA_VISIBLE_DEVICES=5 python src/retriever/ret_serve.py \
+CUDA_VISIBLE_DEVICES=5 python ../src/retriever/ret_serve.py \
     --faiss_index_path "${INDEX_PATH}" \
     --corpus_jsonl_path "${CORPUS_PATH}" \
     --emb_url "http://localhost:${EMBEDDING_PORT}/v1" \
@@ -66,19 +66,19 @@ wait_for_server "http://localhost:$RETRIEVER_PORT/health" "Retriever Service" "\
 # --- 3. Pipeline Execution (Using LLM() internally) ---
 
 # Construct Outline (GPUs 2, 3)
-CUDA_VISIBLE_DEVICES=2,3 python src/construct_outline.py \
+CUDA_VISIBLE_DEVICES=2,3 python ../src/construct_outline.py \
     --model_name "Qwen/Qwen2.5-7B-Instruct" \
     --input_file "${DATA_PATH}" \
     --out_file "output_data/outline_${DATASET_NAME}.jsonl" \
     --max_iters 10 --batch_size 2000 --sample_limit 10 --seed 66
 
 # Extract Outline (CPU Task)
-python src/extract_outline.py \
+python ../src/extract_outline.py \
     --json_file "output_data/outline_${DATASET_NAME}.jsonl" \
     --out_file "output_data/new_outline_${DATASET_NAME}.jsonl"
 
 # Construct Page (GPUs 2, 3)
-CUDA_VISIBLE_DEVICES=2,3 python src/construct_page.py \
+CUDA_VISIBLE_DEVICES=2,3 python ../src/construct_page.py \
     --model_name "Qwen/Qwen2.5-7B-Instruct" \
     --retrieval_url "http://localhost:${RETRIEVER_PORT}" \
     --input_file "output_data/new_outline_${DATASET_NAME}.jsonl" \
@@ -86,7 +86,7 @@ CUDA_VISIBLE_DEVICES=2,3 python src/construct_page.py \
     --max_iters 10 --batch_size 2000 --sample_limit 10 --seed 66
 
 # Infer Answers (GPUs 0, 1)
-CUDA_VISIBLE_DEVICES=0,1 python src/infer_page.py \
+CUDA_VISIBLE_DEVICES=0,1 python ../src/infer_page.py \
     --model "Qwen/Qwen2.5-7B-Instruct" \
     --input_file "output_data/new_outline_${DATASET_NAME}_page.jsonl" \
     --output_file "output_data/${DATASET_NAME}_responses.jsonl" \
