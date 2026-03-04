@@ -203,7 +203,7 @@ Task Steps:
         all_id_lists = []
 
         for sq in cleaned_sub_questions:
-            max_tries = 5
+            max_tries = 1
             tries = 0
             doc_list = []
 
