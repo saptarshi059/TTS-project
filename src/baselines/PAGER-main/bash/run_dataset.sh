@@ -67,13 +67,7 @@ wait_for_server "http://localhost:$RETRIEVER_PORT/health" "Retriever Service" "\
 
 # --- 3. Pipeline Execution (Using LLM() internally) ---
 
-# Construct Page (GPUs 2, 3)
-CUDA_VISIBLE_DEVICES=2,3 python ../src/construct_page.py \
-    --model_name "Qwen/Qwen2.5-7B-Instruct" \
-    --retrieval_url "http://localhost:${RETRIEVER_PORT}" \
-    --input_file "output_data/new_outline_${DATASET_NAME}.jsonl" \
-    --out_file "output_data/new_outline_${DATASET_NAME}_page.jsonl" \
-    --max_iters 1 --batch_size 1 --seed 66 --resume
+
 
 # Infer Answers (GPUs 0, 1)
 CUDA_VISIBLE_DEVICES=0,1 python ../src/infer_page.py \
