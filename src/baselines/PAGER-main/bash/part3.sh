@@ -74,3 +74,4 @@ CUDA_VISIBLE_DEVICES=0,1 python ../src/infer_page.py \
 # --- Final Cleanup ---
 echo "🎉 Pipeline finished successfully. Cleaning up..."
 kill "$(jobs -p)" 2>/dev/null
+cleanup

@@ -81,3 +81,4 @@ python ../src/extract_outline.py \
 # --- Final Cleanup ---
 echo "🎉 Pipeline finished successfully. Cleaning up..."
 kill "$(jobs -p)" 2>/dev/null
+cleanup
