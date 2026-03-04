@@ -18,7 +18,7 @@ def load_questions_from_file(input_file):
 
 def build_prompt(item):
     question = item.get("question", "")
-    page = item.get("page_list", [])[-1]
+    page = (item.get("page_list") or [""])[-1]
     prompt = """Page:\n{page}\n
 The User asks a question, and the Assistant solves it.
 The system will provide the Assistant with a page containing information relevant to answering the question. The assistant should answer the question by combining the Page with its internal knowledge.
