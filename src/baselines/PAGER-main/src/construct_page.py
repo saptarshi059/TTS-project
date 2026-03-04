@@ -111,11 +111,27 @@ class DirectBatchPageGenerator:
             chunk_questions = questions[i : i + chunk_size]
             chunk_questions = [make_qwen_ret_prompt(q) for q in chunk_questions]
 
-            response = requests.post(
-                f"{self.retrieval_url}/search", json={"model": "qwen3-emb", "queries": chunk_questions, "topk": topk})
-            result = response.json()
-            response.close()  # <-- ADD THIS
-            del response  # <-- AND THIS
+            try:
+                response = requests.post(
+                    f"{self.retrieval_url}/search",
+                    json={"model": "qwen3-emb", "queries": chunk_questions, "topk": topk},
+                    timeout=60  # <-- ADD THIS, was None (infinite)
+                )
+                response.raise_for_status()
+                result = response.json()
+                response.close()
+                del response
+            except requests.exceptions.Timeout:
+                print(f"Retrieval timeout on chunk {i}, returning empty docs")
+                all_doc_lists.append([])
+                all_id_list.append([])
+                continue
+            except requests.exceptions.RequestException as e:
+                print(f"Retrieval request failed: {e}")
+                all_doc_lists.append([])
+                all_id_list.append([])
+                continue
+
             chunk_doc_lists = []
             chunk_id_lists = []
             
