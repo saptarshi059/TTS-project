@@ -10,7 +10,6 @@ ulimit -n 65535
 
 DATASET_NAME=$1
 BASE_DATA_PATH="../../../../sampled_data/${DATASET_NAME}"
-DATA_PATH="${BASE_DATA_PATH}/sampled_ds.json"
 INDEX_PATH="${BASE_DATA_PATH}/${DATASET_NAME}_index.index"
 CORPUS_PATH="${BASE_DATA_PATH}/${DATASET_NAME}-chunks.jsonl"
 
@@ -65,16 +64,13 @@ CUDA_VISIBLE_DEVICES=5 python ../src/retriever/ret_serve.py \
 
 wait_for_server "http://localhost:$RETRIEVER_PORT/health" "Retriever Service" "\"status\":\"ok\""
 
-# --- 3. Pipeline Execution (Using LLM() internally) ---
-
-
-
-# Infer Answers (GPUs 0, 1)
-CUDA_VISIBLE_DEVICES=0,1 python ../src/infer_page.py \
-    --model "Qwen/Qwen2.5-7B-Instruct" \
-    --input_file "output_data/new_outline_${DATASET_NAME}_page.jsonl" \
-    --output_file "output_data/${DATASET_NAME}_responses.jsonl" \
-    --batch_size 32
+# Construct Page (GPUs 2, 3)
+CUDA_VISIBLE_DEVICES=2,3 python ../src/construct_page.py \
+    --model_name "Qwen/Qwen2.5-7B-Instruct" \
+    --retrieval_url "http://localhost:${RETRIEVER_PORT}" \
+    --input_file "output_data/new_outline_${DATASET_NAME}.jsonl" \
+    --out_file "output_data/new_outline_${DATASET_NAME}_page.jsonl" \
+    --max_iters 1 --batch_size 1 --seed 66 --resume
 
 # --- Final Cleanup ---
 echo "🎉 Pipeline finished successfully. Cleaning up..."
