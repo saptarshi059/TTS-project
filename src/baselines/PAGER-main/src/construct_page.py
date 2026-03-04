@@ -18,6 +18,21 @@ import torch
 torch.cuda.manual_seed(66)     
 torch.cuda.manual_seed_all(66) 
 print("-----------")
+
+import signal
+from contextlib import contextmanager
+
+@contextmanager
+def time_limit(seconds):
+    def handler(signum, frame):
+        raise TimeoutError(f"Generation timed out after {seconds}s")
+    signal.signal(signal.SIGALRM, handler)
+    signal.alarm(seconds)
+    try:
+        yield
+    finally:
+        signal.alarm(0)  # cancel alarm
+
 class DirectBatchPageGenerator:
     """
     A client for generating pages using direct vLLM batch inference:
@@ -89,7 +104,13 @@ class DirectBatchPageGenerator:
             )
             inputs.append(text)
 
-        outputs = self.llm.generate(inputs, sampling_params=per_params)
+        try:
+            with time_limit(30):  # 5 min hard cap per batch
+                outputs = self.llm.generate(inputs, sampling_params=per_params)
+        except TimeoutError as e:
+            print(f"  ✗ {e} — returning empty strings for this batch")
+            return [""] * len(prompts)
+
         results = [output.outputs[0].text for output in outputs]
         return results
 
@@ -334,19 +355,25 @@ Task Steps:
             )
 
             for i, active_idx in enumerate(active_indices):
-                # ADD: detect if page is unchanged
-                if new_pages[i].strip() == current_pages[active_idx].strip():
+                new_page = new_pages[i]
+
+                # Empty string = generation timed out
+                if not new_page.strip():
                     stuck_counts[active_idx] += 1
-                    print(
-                        f"  ⚠ Item {active_idx} stuck ({stuck_counts[active_idx]}/{MAX_STUCK}), question: {questions[active_idx][:80]}")
+                    print(f"  ✗ Item {active_idx} timed out, marking stuck")
+                    continue  # don't update current_pages, don't append
+
+                if new_page.strip() == current_pages[active_idx].strip():
+                    stuck_counts[active_idx] += 1
+                    print(f"  ⚠ Item {active_idx} stuck ({stuck_counts[active_idx]}/{MAX_STUCK})")
                 else:
-                    stuck_counts[active_idx] = 0  # reset if progress was made
+                    stuck_counts[active_idx] = 0
 
                 batch_items[active_idx]["doc_list"].append(doc_lists[i])
-                batch_items[active_idx]["page_list"].append(new_pages[i])
+                batch_items[active_idx]["page_list"].append(new_page)
                 batch_items[active_idx]["subquestion_list"].append(sub_questions[i])
                 batch_items[active_idx]["doc_id_list"].append(id_lists[i])
-                current_pages[active_idx] = new_pages[i]
+                current_pages[active_idx] = new_page
 
         # ADD: flag stuck items so you can inspect them later
         for idx, item in enumerate(batch_items):
