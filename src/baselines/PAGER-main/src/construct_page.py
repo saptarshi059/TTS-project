@@ -285,52 +285,46 @@ Task Steps:
 
         return cleaned_pages
 
-
     def process_batch(self, batch_items: List[Dict], max_iters: int) -> List[Dict]:
-        """Process a batch of items through the full pipeline."""
-        # Extract questions and page plans
         questions = [item["question"] for item in batch_items]
         initial_page = [item["init_page"] for item in batch_items]
 
         for idx, item in enumerate(batch_items):
-            # item["init_page"] = initial_page[idx]
             item["doc_list"] = []
             item["page_list"] = []
             item["subquestion_list"] = []
             item["doc_id_list"] = []
 
-        # Initialize current pages
-        # current_pages = ["null"] * len(batch_items)
         current_pages = initial_page
+        stuck_counts = [0] * len(batch_items)  # ADD: track stuck iterations per item
+        MAX_STUCK = 2  # ADD: if page unchanged for this many iters, skip
 
-        # Process iterations
         for iter_idx in range(max_iters):
-            print(f"Iteration {iter_idx+1}/{max_iters}")
+            print(f"Iteration {iter_idx + 1}/{max_iters}")
 
-            # Get items that still need processing (have "<TO BE FILLED>" in their pages)
             active_indices = []
             active_questions = []
             active_current_pages = []
 
             for idx, page in enumerate(current_pages):
+                # ADD: skip items that are stuck
+                if stuck_counts[idx] >= MAX_STUCK:
+                    continue
                 if page == "null" or "TO BE FILLED".lower() in page.lower():
                     active_indices.append(idx)
                     active_questions.append(questions[idx])
                     active_current_pages.append(page)
 
-            # If no active items, we're done
             if not active_indices:
                 print("All pages completed!")
                 break
 
             print(f"Processing {len(active_indices)} active items")
 
-            # Generate sub-queries and retrieve docs
             doc_lists, sub_questions, id_lists = self.generate_sub_query_batch(
                 active_questions, active_current_pages
             )
 
-            # Generate new pages
             new_pages = self.generate_page_batch(
                 active_questions,
                 active_current_pages,
@@ -339,16 +333,26 @@ Task Steps:
                 id_lists,
             )
 
-            # Update results for active items
             for i, active_idx in enumerate(active_indices):
+                # ADD: detect if page is unchanged
+                if new_pages[i].strip() == current_pages[active_idx].strip():
+                    stuck_counts[active_idx] += 1
+                    print(
+                        f"  ⚠ Item {active_idx} stuck ({stuck_counts[active_idx]}/{MAX_STUCK}), question: {questions[active_idx][:80]}")
+                else:
+                    stuck_counts[active_idx] = 0  # reset if progress was made
+
                 batch_items[active_idx]["doc_list"].append(doc_lists[i])
-                #batch_items[active_idx]["page_list"].append(new_pages[i])
-                batch_items[active_idx]["page_list"] = [new_pages[i]]
+                batch_items[active_idx]["page_list"].append(new_pages[i])
                 batch_items[active_idx]["subquestion_list"].append(sub_questions[i])
                 batch_items[active_idx]["doc_id_list"].append(id_lists[i])
                 current_pages[active_idx] = new_pages[i]
 
-            gc.collect()  # <-- ADD at end of each iteration
+        # ADD: flag stuck items so you can inspect them later
+        for idx, item in enumerate(batch_items):
+            item["stuck"] = stuck_counts[idx] >= MAX_STUCK
+            if item["stuck"]:
+                print(f"  ✗ Skipped (stuck): {item['question'][:80]}")
 
         return batch_items
 
@@ -465,10 +469,11 @@ def main():
                     continue
                 try:
                     obj = json.loads(line)
+                    # Skip both completed AND previously stuck items
                     done_questions.add(obj["question"])
                 except json.JSONDecodeError:
                     continue
-        print(f"Resuming: {len(done_questions)} already processed, skipping them")
+        print(f"Resuming: {len(done_questions)} already processed/skipped")
 
     data_list = [d for d in data_list if d["question"] not in done_questions]
     print(f"{len(data_list)} remaining to process")
