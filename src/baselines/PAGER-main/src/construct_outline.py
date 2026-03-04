@@ -207,6 +207,11 @@ def main():
         default=66,
         help="Random seed for reproducibility",
     )
+    parser.add_argument(
+        "--resume",
+        action="store_true",
+        help="Resume from existing output file, skipping already-processed items",
+    )
 
     args = parser.parse_args()
 
@@ -233,6 +238,30 @@ def main():
     if args.sample_limit is not None:
         data_list = data_list[: args.sample_limit]
     print(f"Total of {len(data_list)} records to process")
+
+    # --- RESUME LOGIC ---
+    done_questions = set()
+    if args.resume and os.path.exists(args.out_file):
+        with open(args.out_file, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    obj = json.loads(line)
+                    # Skip both completed AND previously stuck items
+                    done_questions.add(obj["question"])
+                except json.JSONDecodeError:
+                    continue
+        print(f"Resuming: {len(done_questions)} already processed/skipped")
+
+    data_list = [d for d in data_list if d["question"] not in done_questions]
+    print(f"{len(data_list)} remaining to process")
+
+    if not data_list:
+        print("Nothing to do!")
+        return
+    # --- END RESUME LOGIC ---
 
     # Initialize DirectBatchPageGenerator
     page_generator = DirectBatchPageGenerator(

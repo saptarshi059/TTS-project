@@ -70,7 +70,7 @@ CUDA_VISIBLE_DEVICES=2,3 python ../src/construct_outline.py \
     --model_name "Qwen/Qwen2.5-7B-Instruct" \
     --input_file "${DATA_PATH}" \
     --out_file "output_data/outline_${DATASET_NAME}.jsonl" \
-    --max_iters 10 --batch_size 32 --seed 66
+    --max_iters 10 --batch_size 32 --seed 66 --resume
 
 # Extract Outline (CPU Task)
 python ../src/extract_outline.py \
