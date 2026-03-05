@@ -55,7 +55,7 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str, output_dir: 
 
     main_dataset["raw_responses"] = raw_responses
 
-    # Saving results
+    print("Saving results...")
     op_dir = Path(output_dir) / f"{dataset}/system_1/"
     folder = Path(op_dir)
     folder.mkdir(parents=True, exist_ok=True)
