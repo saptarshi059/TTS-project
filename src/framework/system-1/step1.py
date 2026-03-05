@@ -42,9 +42,11 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str, output_dir: 
                                                  device_map="auto")
 
     main_dataset = pd.read_json(f"../../../sampled_data/{dataset}/sampled_ds.json")[['question', 'answer']]
+    print(f"Wrapping {dataset} with torch...")
     torch_dataset = System1Dataset(tokenizer=tokenizer, dataset=main_dataset, device=model.device)
     torch_dataset_dataloader = DataLoader(torch_dataset, batch_size=batch_size, shuffle=False)
 
+    print(f"{'-'*10}Running System-1 with {model_name} on {dataset}{'-'*10}")
     raw_responses = []
     for batch in tqdm(torch_dataset_dataloader):
         with torch.no_grad():
