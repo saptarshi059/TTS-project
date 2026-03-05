@@ -11,6 +11,7 @@ def main(dataset: str):
     ds = pd.read_json(base_path / "parsed_responses.jsonl", lines=True)
     completed = []
     for idx, row in enumerate(ds.itertuples()):
+        print(row.cleaned_ans, row.answer)
         prediction = {'prediction_text': row.cleaned_ans, 'id': str(idx), 'no_answer_probability': 0.}
         reference = {'answers': {'answer_start': [0], 'text': [row.answer]}, 'id': str(idx)}
 
