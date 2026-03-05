@@ -35,7 +35,7 @@ class System1Dataset(Dataset):
 def main(model_name:str, dataset:str, batch_size: int, gpu_id: str, output_dir: str) -> None:
     os.environ["CUDA_VISIBLE_DEVICES"] = gpu_id
 
-    tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_name)
+    tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_name, padding_side='left')
     model = AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path=model_name,
                                                  dtype="auto",
                                                  attn_implementation="flash_attention_2",
