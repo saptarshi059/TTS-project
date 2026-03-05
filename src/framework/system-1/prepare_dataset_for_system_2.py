@@ -10,7 +10,7 @@ def main(dataset: str):
     for row in ds.itertuples():
         if row.answer == row.cleaned_ans:
             completed.append(row.question)
-    print(f"Completed questions from system-1 thinking: {len(completed)}({(len(completed)/len(ds) * 100):.2f}%)")
+    print(f"Completed questions from system-1 thinking: {len(completed)} ({(len(completed)/len(ds) * 100):.2f}%)")
 
     print("Creating and saving dataset for system-2 processing...")
     filtered_ds = ds.query("question not in @completed")
