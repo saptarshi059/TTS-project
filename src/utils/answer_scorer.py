@@ -23,7 +23,7 @@ def main(prediction_dataset_path: str, predicted_answer_field: str, ground_truth
             references.append({'answers': {'answer_start': [0], 'text': [getattr(row, ground_truth_field)]}, 'id': str(idx)})
 
     results = squad_metric.compute(predictions=predictions, references=references)
-    print(results)
+    print(f"EM: {results['exact']:.2f} | F1: {results['f1']:.2f}")
 
 if __name__ == "__main__":
     parser = ArgumentParser()
