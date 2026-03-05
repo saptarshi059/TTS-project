@@ -10,6 +10,8 @@ def main(dataset: str):
     base_path = Path(f"../../../framework_output/system1/{dataset}/system_1")
 
     ds = pd.read_json(base_path / "parsed_responses.jsonl", lines=True)
+
+    print(f"Evaluating {dataset}...")
     completed = []
     for idx, row in tqdm(enumerate(ds.itertuples())):
         prediction = [{'prediction_text': row.cleaned_ans, 'id': str(idx), 'no_answer_probability': 0.}]
