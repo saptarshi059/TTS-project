@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 from evaluate import load
 from pathlib import Path
+from tqdm import tqdm
 import pandas as pd
 
 
@@ -10,7 +11,7 @@ def main(dataset: str):
 
     ds = pd.read_json(base_path / "parsed_responses.jsonl", lines=True)
     completed = []
-    for idx, row in enumerate(ds.itertuples()):
+    for idx, row in tqdm(enumerate(ds.itertuples())):
         prediction = [{'prediction_text': row.cleaned_ans, 'id': str(idx), 'no_answer_probability': 0.}]
         reference = [{'answers': {'answer_start': [0], 'text': [row.answer]}, 'id': str(idx)}]
 
