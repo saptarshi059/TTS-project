@@ -1,14 +1,21 @@
-import pandas as pd
 from argparse import ArgumentParser
+from evaluate import load
 from pathlib import Path
+import pandas as pd
+
 
 def main(dataset: str):
+    squad_metric = load("squad_v2")
     base_path = Path(f"../../../framework_output/system1/{dataset}/system_1")
 
     ds = pd.read_json(base_path / "parsed_responses.jsonl", lines=True)
     completed = []
-    for row in ds.itertuples():
-        if row.answer == row.cleaned_ans:
+    for idx, row in enumerate(ds.itertuples()):
+        prediction = {'prediction_text': row.cleaned_ans, 'id': str(idx), 'no_answer_probability': 0.}
+        reference = {'answers': {'answer_start': [0], 'text': [row.answer]}, 'id': str(idx)}
+
+        score = squad_metric.compute(predictions=prediction, references=reference)
+        if score['exact'] == 100.0:
             completed.append(row.question)
     print(f"Completed questions from system-1 thinking: {len(completed)} ({(len(completed)/len(ds) * 100):.2f}%)")
 
