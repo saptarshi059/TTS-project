@@ -22,7 +22,12 @@ def main(dataset: str):
             completed.append(row.question)
     print(f"Completed questions from system-1 thinking: {len(completed)} ({(len(completed)/len(ds) * 100):.2f}%)")
 
-    print("Creating and saving dataset for system-2 processing...")
+    print("Saving datasets for system-1 complete and system-2 processing...")
+    # System-1
+    system_1_ds = ds.query("question in @completed")
+    system_1_ds.to_json(base_path / "system_1_complete.jsonl", lines=True, orient='records', index=False)
+
+    # System-2
     filtered_ds = ds.query("question not in @completed")
     filtered_ds.to_json(base_path / "system_2_start.jsonl", lines=True, orient='records', index=False)
 
