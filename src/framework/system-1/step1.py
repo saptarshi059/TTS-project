@@ -1,4 +1,4 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, set_seed
 from torch.utils.data import Dataset, DataLoader
 from argparse import ArgumentParser
 from pathlib import Path
@@ -33,6 +33,7 @@ class System1Dataset(Dataset):
 
 
 def main(model_name:str, dataset:str, batch_size: int, gpu_id: str, output_dir: str) -> None:
+    set_seed(42)
     os.environ["CUDA_VISIBLE_DEVICES"] = gpu_id
 
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_name, padding_side='left')
@@ -50,7 +51,7 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str, output_dir: 
     raw_responses = []
     for batch in tqdm(torch_dataset_dataloader):
         with torch.no_grad():
-            generated_ids = model.generate(**batch, max_new_tokens=20)
+            generated_ids = model.generate(**batch, max_new_tokens=20, do_sample=False, num_beams=1)
             raw_responses.extend(tokenizer.batch_decode(generated_ids, skip_special_tokens=True))
 
     main_dataset["raw_responses"] = raw_responses
