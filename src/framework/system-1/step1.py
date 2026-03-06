@@ -50,7 +50,7 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str, output_dir: 
     raw_responses = []
     for batch in tqdm(torch_dataset_dataloader):
         with torch.no_grad():
-            generated_ids = model.generate(**batch, max_new_tokens=50)
+            generated_ids = model.generate(**batch, max_new_tokens=20)
             raw_responses.extend(tokenizer.batch_decode(generated_ids, skip_special_tokens=True))
 
     main_dataset["raw_responses"] = raw_responses
