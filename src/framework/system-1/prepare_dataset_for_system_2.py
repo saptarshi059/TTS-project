@@ -28,7 +28,7 @@ def main(dataset: str):
     system_1_ds.to_json(base_path / "system_1_complete.jsonl", lines=True, orient='records', index=False)
 
     # System-2
-    system_2_ds = ds.query("question not in @completed")
+    system_2_ds = ds.query("question not in @completed").copy()
     system_2_ds.rename(columns={"cleaned_ans": "system_1_guess"}, inplace=True)
     system_2_ds.to_json(base_path / "system_2_start.jsonl", lines=True, orient='records', index=False)
 
