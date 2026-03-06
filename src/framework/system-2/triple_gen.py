@@ -8,7 +8,7 @@ import os, torch
 import sys
 sys.path.append("../../utils/")
 
-from all_system_prompts import SYSTEM_1
+from all_system_prompts import SYSTEM_2_TRIPLE_GEN
 
 class System1Dataset(Dataset):
     def __init__(self, tokenizer, dataset, device):
@@ -17,8 +17,8 @@ class System1Dataset(Dataset):
         self.device = device
         self.samples = []
         for row in tqdm(dataset.itertuples()):
-            self.samples.append([{"role": "system", "content": SYSTEM_1},
-                                 {"role": "user", "content": f"QUESTION: {row.question}"}])
+            self.samples.append([{"role": "system", "content": SYSTEM_2_TRIPLE_GEN},
+                                 {"role": "user", "content": f"Question: {row.question}\nAnswer: {row.system_1_guess}"}])
         self.tokenized_samples = tokenizer.apply_chat_template(self.samples, tokenize=False, add_generation_prompt=True)
         self.model_inputs = self.tokenizer(self.tokenized_samples, padding=True, return_tensors="pt")
 
@@ -41,12 +41,13 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str, output_dir: 
                                                  attn_implementation="flash_attention_2",
                                                  device_map="auto")
 
-    main_dataset = pd.read_json(f"../../../sampled_data/{dataset}/sampled_ds.json")[['question', 'answer']]
+    main_dataset = pd.read_json(f"../../../framework_output/system1/{dataset}/system_2_start.jsonl",
+                                lines=True)
     print(f"Wrapping {dataset} with torch...")
     torch_dataset = System1Dataset(tokenizer=tokenizer, dataset=main_dataset, device=model.device)
     torch_dataset_dataloader = DataLoader(torch_dataset, batch_size=batch_size, shuffle=False)
 
-    print(f"{'-'*10}Running System-1 with {model_name} on {dataset}{'-'*10}")
+    print(f"{'-'*10}Running System-2: TRIPLE GENERATION with {model_name} on {dataset}{'-'*10}")
     raw_responses = []
     for batch in tqdm(torch_dataset_dataloader):
         with torch.no_grad():
@@ -56,7 +57,7 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str, output_dir: 
     main_dataset["raw_responses"] = raw_responses
 
     print("Saving results...")
-    op_dir = Path(output_dir) / f"{dataset}"
+    op_dir = Path(output_dir) / f"{dataset}/triple_extraction/"
     folder = Path(op_dir)
     folder.mkdir(parents=True, exist_ok=True)
     main_dataset.to_json(op_dir / "raw_responses.jsonl", lines=True, orient='records', index=False)
@@ -68,7 +69,7 @@ if __name__ == "__main__":
     parser.add_argument("--dataset", type=str, default="2wikimultihopqa")
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--gpu_id", type=str, default="0")
-    parser.add_argument("--output_directory", type=str, default="../../../framework_output/system1/")
+    parser.add_argument("--output_directory", type=str, default="../../../framework_output/system2/")
     args = parser.parse_args()
     main(model_name=args.model_name, dataset=args.dataset, batch_size=args.batch_size, gpu_id=args.gpu_id,
          output_dir=args.output_directory)
