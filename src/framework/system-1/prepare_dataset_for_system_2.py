@@ -7,7 +7,7 @@ import pandas as pd
 
 def main(dataset: str):
     squad_metric = load("squad_v2")
-    base_path = Path(f"../../../framework_output/system1/{dataset}/system_1")
+    base_path = Path(f"../../../framework_output/system1/{dataset}")
 
     ds = pd.read_json(base_path / "parsed_responses.jsonl", lines=True)
 

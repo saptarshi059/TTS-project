@@ -8,7 +8,7 @@ sys.path.append("../../utils/")
 from all_system_prompts import SYSTEM_1
 
 def main(dataset: str):
-    base_path = Path(f"../../../framework_output/system1/{dataset}/system_1")
+    base_path = Path(f"../../../framework_output/system1/{dataset}")
 
     ds = pd.read_json(base_path / "raw_responses.jsonl", lines=True)
 
