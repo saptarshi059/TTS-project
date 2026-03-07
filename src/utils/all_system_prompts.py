@@ -2,7 +2,7 @@ NAIVE_BASELINE = ("Answer the given question using the provided knowledge graph 
                   "Please keep your response concise. If no answer exists, please return ''. "
                   "Format your response as\nAnswer: <answer text>")
 
-SYSTEM_1 = """You are a precise answering engine. Your task is to provide the direct answer to a question with zero conversational filler.
+SYSTEM_1 = """You are a precise answering engine. Your task is to provide the direct answer to a question without any explanation.
 
 ### Rules:
 1. Provide ONLY the specific answer. 
