@@ -16,7 +16,7 @@ def main(dataset: str):
     print("Parsing raw responses...")
     cleaned_response = []
     for row in tqdm(ds.itertuples()):
-        cleaned_response.append(re.search(r'<answer>(.*?)</answer>', row.raw_responses.split(SYSTEM_1)[-1], re.DOTALL))
+        cleaned_response.append(re.search(r'<answer>(.*?)</answer>', row.raw_responses.split(SYSTEM_1)[-1], re.DOTALL)[1])
 
     print("Saving cleaned responses...")
     ds['cleaned_ans'] = cleaned_response
