@@ -2,6 +2,7 @@ from argparse import ArgumentParser
 from pathlib import Path
 from tqdm import tqdm
 import pandas as pd
+import re
 
 import sys
 sys.path.append("../../utils/")
@@ -15,7 +16,7 @@ def main(dataset: str):
     print("Parsing raw responses...")
     cleaned_response = []
     for row in tqdm(ds.itertuples()):
-        cleaned_response.append(row.raw_responses.split(SYSTEM_1)[-1].split("Answer:")[-1].strip())
+        cleaned_response.append(re.search(r'<answer>(.*?)</answer>', row.raw_responses.split(SYSTEM_1)[-1], re.DOTALL))
 
     print("Saving cleaned responses...")
     ds['cleaned_ans'] = cleaned_response
