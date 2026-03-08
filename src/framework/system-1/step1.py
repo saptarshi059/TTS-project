@@ -18,7 +18,7 @@ class System1Dataset(Dataset):
         self.samples = []
         for row in tqdm(dataset.itertuples()):
             self.samples.append([{"role": "system", "content": SYSTEM_1},
-                                 {"role": "user", "content": f"<input>\nQuestion: {row.question}</input>"}])
+                                 {"role": "user", "content": f"<input>\nQuestion: {row.question}\n</input>"}])
         self.tokenized_samples = tokenizer.apply_chat_template(self.samples, tokenize=False, add_generation_prompt=True)
         self.model_inputs = self.tokenizer(self.tokenized_samples, padding=True, return_tensors="pt")
 
