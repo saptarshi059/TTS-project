@@ -6,7 +6,7 @@ from tqdm import tqdm
 import pandas as pd
 import os, torch
 import sys
-sys.path.append("../../utils/")
+sys.path.append("../../../utils/")
 
 from all_system_prompts import SYSTEM_2_TRIPLE_GEN
 
@@ -42,7 +42,7 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str, output_dir: 
                                                  attn_implementation="flash_attention_2",
                                                  device_map="auto")
 
-    main_dataset = pd.read_json(f"../../../framework_output/system1/{dataset}/system_2_start.jsonl",
+    main_dataset = pd.read_json(f"../../../../framework_output/system1/{dataset}/system_2_start.jsonl",
                                 lines=True)
     print(f"Wrapping {dataset} with torch...")
     torch_dataset = System1Dataset(tokenizer=tokenizer, dataset=main_dataset, device=model.device)
@@ -70,7 +70,7 @@ if __name__ == "__main__":
     parser.add_argument("--dataset", type=str, default="2wikimultihopqa")
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--gpu_id", type=str, default="0")
-    parser.add_argument("--output_directory", type=str, default="../../../framework_output/system2/")
+    parser.add_argument("--output_directory", type=str, default="../../../../framework_output/system2/")
     args = parser.parse_args()
     main(model_name=args.model_name, dataset=args.dataset, batch_size=args.batch_size, gpu_id=args.gpu_id,
          output_dir=args.output_directory)
