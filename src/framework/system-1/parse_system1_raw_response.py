@@ -23,7 +23,7 @@ def main(dataset: str):
             cleaned_response.append(match.group(1).strip())
         else:
             # Trying as best as possible to get the main output
-            ip_string = f"<input>\nQuestion: {row.question}</input>"
+            ip_string = f"<input>\nQuestion: {row.question}\n</input>"
             cleaned_string = cleaned_string.split(ip_string)[1].strip()
             cleaned_string = re.sub(r'<\|.*?\|>|assistant\n', '', cleaned_string)
             soup = BeautifulSoup(cleaned_string, "html.parser")
