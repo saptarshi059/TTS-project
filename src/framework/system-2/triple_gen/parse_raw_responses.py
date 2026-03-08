@@ -26,6 +26,6 @@ def main(dataset: str):
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("--dataset", type=str, default='2wikimultihopqa')
+    parser.add_argument("--dataset", type=str, default='hotpotqa')
     args = parser.parse_args()
     main(dataset=args.dataset)

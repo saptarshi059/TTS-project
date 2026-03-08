@@ -67,7 +67,7 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str, output_dir: 
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--model_name", type=str, default="Qwen/Qwen2.5-7B-Instruct")
-    parser.add_argument("--dataset", type=str, default="2wikimultihopqa")
+    parser.add_argument("--dataset", type=str, default="hotpotqa")
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--gpu_id", type=str, default="0")
     parser.add_argument("--output_directory", type=str, default="../../../../framework_output/system2/")
