@@ -50,7 +50,7 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str, output_dir: 
                                                  attn_implementation="flash_attention_2",
                                                  device_map="auto")
 
-    main_dataset = pd.read_json(f"../../../../framework_output/system2/{dataset}/retrieval_results/retrieved_docs.jsonl")
+    main_dataset = pd.read_json(f"../../../../framework_output/system2/{dataset}/retrieval_results/retrieved_docs.jsonl", lines=True)
     print(f"Wrapping {dataset} with torch...")
     torch_dataset = System1Dataset(tokenizer=tokenizer, dataset=main_dataset, device=model.device)
     torch_dataset_dataloader = DataLoader(torch_dataset, batch_size=batch_size, shuffle=False)
