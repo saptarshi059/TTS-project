@@ -13,7 +13,7 @@ def main(dataset: str):
     starting_ds = pd.read_json(triple_generation_path, lines=True)
 
     print(f"Loading FAISS index for {dataset} and moving to GPU...")
-    index_path = Path(f"../../../../sampled_data/{dataset}/{dataset}_index.index")
+    index_path = f"../../../../sampled_data/{dataset}/{dataset}_index.index"
 
     # 1. Load index (currently in CPU RAM)
     dataset_index = faiss.read_index(index_path)
