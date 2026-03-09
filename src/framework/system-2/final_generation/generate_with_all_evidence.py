@@ -31,11 +31,9 @@ class System2Dataset(Dataset):
         return len(self.samples)
 
     def __getitem__(self, idx):
-        inputs = self.tokenizer.apply_chat_template(self.samples[idx],
-                                                    tokenize=False,
-                                                    add_generation_prompt=True,
-                                                    padding=False,
-                                                    return_tensors="pt")
+        formatted_ip = self.tokenizer.apply_chat_template(self.samples[idx], tokenize=False, add_generation_prompt=True)
+        inputs = self.tokenizer(formatted_ip, padding=False, return_tensors="pt")
+
         return {
             "input_ids": inputs["input_ids"].squeeze(0),
             "attention_mask": inputs["attention_mask"].squeeze(0),
