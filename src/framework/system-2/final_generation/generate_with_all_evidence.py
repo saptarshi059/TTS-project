@@ -43,7 +43,7 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str, output_dir: 
     set_seed(42)
     os.environ["CUDA_VISIBLE_DEVICES"] = gpu_id
 
-    tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_name, padding_side='left')
+    tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_name, padding_side='left', use_fast=False)
     model = AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path=model_name,
                                                  dtype="auto",
                                                  attn_implementation="flash_attention_2",
@@ -53,7 +53,7 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str, output_dir: 
     print(f"Wrapping {dataset} with torch...")
     collator = DataCollatorWithPadding(tokenizer=tokenizer)
     torch_dataset = System2Dataset(tokenizer=tokenizer, dataset=main_dataset)
-    torch_dataset_dataloader = DataLoader(torch_dataset, batch_size=batch_size, collate_fn=collator)
+    torch_dataset_dataloader = DataLoader(torch_dataset, num_workers=0, batch_size=batch_size, collate_fn=collator)
 
     print(f"{'-'*10}Running System-2: MAIN GENERATION with {model_name} on {dataset}{'-'*10}")
     op_dir = Path(output_dir) / f"{dataset}/final_response/"
@@ -63,8 +63,10 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str, output_dir: 
         for batch in tqdm(torch_dataset_dataloader):
             batch = {k: v.to(model.device) for k, v in batch.items()}
             with torch.no_grad():
+                input_length = batch["input_ids"].shape[1]
                 generated_ids = model.generate(**batch, max_new_tokens=1024, top_p=0.8, temperature=0.7)
-                decoded_response = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)
+                new_tokens = generated_ids[:, input_length:]  # slice off prompt
+                decoded_response = [tokenizer.decode(ids, skip_special_tokens=True) for ids in new_tokens]
 
                 for text in decoded_response:
                     file.write(json.dumps({"response": text}) + "\n")
