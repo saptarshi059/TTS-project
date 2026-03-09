@@ -5,12 +5,13 @@ from pathlib import Path
 from tqdm import tqdm
 import pandas as pd
 import os, torch
+import json
 import sys
 sys.path.append("../../../utils/")
 
 from all_system_prompts import SYSTEM_2_MAIN_PROMPT
 
-class System1Dataset(Dataset):
+class System2Dataset(Dataset):
     def __init__(self, tokenizer, dataset, device):
         self.tokenizer = tokenizer
         self.dataset = dataset
@@ -52,23 +53,21 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str, output_dir: 
 
     main_dataset = pd.read_json(f"../../../../framework_output/system2/{dataset}/retrieval_results/retrieved_docs.jsonl", lines=True)
     print(f"Wrapping {dataset} with torch...")
-    torch_dataset = System1Dataset(tokenizer=tokenizer, dataset=main_dataset, device=model.device)
+    torch_dataset = System2Dataset(tokenizer=tokenizer, dataset=main_dataset, device=model.device)
     torch_dataset_dataloader = DataLoader(torch_dataset, batch_size=batch_size, shuffle=False)
 
     print(f"{'-'*10}Running System-2: MAIN GENERATION with {model_name} on {dataset}{'-'*10}")
-    raw_responses = []
-    for batch in tqdm(torch_dataset_dataloader):
-        with torch.no_grad():
-            generated_ids = model.generate(**batch, max_new_tokens=1024, top_p=0.8, temperature=0.7)
-            raw_responses.extend(tokenizer.batch_decode(generated_ids, skip_special_tokens=True))
-
-    main_dataset["raw_responses"] = raw_responses
-
-    print("Saving results...")
     op_dir = Path(output_dir) / f"{dataset}/final_response/"
     folder = Path(op_dir)
     folder.mkdir(parents=True, exist_ok=True)
-    main_dataset.to_json(op_dir / "raw_responses.jsonl", lines=True, orient='records', index=False)
+    with Path(op_dir / "streamed_raw_responses.jsonl").open("a") as file:
+        for batch in tqdm(torch_dataset_dataloader):
+            with torch.no_grad():
+                generated_ids = model.generate(**batch, max_new_tokens=1024, top_p=0.8, temperature=0.7)
+                decoded_response = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)
+
+                for text in decoded_response:
+                    file.write(json.dumps({"response": text}) + "\n")
 
 
 if __name__ == "__main__":
