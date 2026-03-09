@@ -24,11 +24,11 @@ class System2Dataset(Dataset):
             retrieved_evidences = "\n\n".join(row.retrieved_docs)
 
             self.samples.append([{"role": "system", "content": SYSTEM_2_MAIN_PROMPT},
-                                 {"role": "user", "content": f"<input>"
-                                                             f"Question: {row.question}"
-                                                             f"Initial (incorrect) Guess: {row.system_1_guess}"
-                                                             f"Initial (incorrect) Reasoning (triples): {generated_triples_string}"
-                                                             f"Counterfactual Evidence: {retrieved_evidences}"
+                                 {"role": "user", "content": f"<input>\n"
+                                                             f"Question: {row.question}\n"
+                                                             f"Initial (incorrect) Guess: {row.system_1_guess}\n"
+                                                             f"Initial (incorrect) Reasoning (triples): {generated_triples_string}\n"
+                                                             f"Counterfactual Evidence: {retrieved_evidences}\n"
                                                              f"</input>"}])
         self.tokenized_samples = tokenizer.apply_chat_template(self.samples, tokenize=False, add_generation_prompt=True)
         self.model_inputs = self.tokenizer(self.tokenized_samples, padding=True, return_tensors="pt")

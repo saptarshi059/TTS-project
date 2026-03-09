@@ -85,26 +85,4 @@ CONSTRAINTS:
 - Prioritize the Counterfactual Evidence over the Initial Guess when conflicts arise.
 - Ensure all XML tags are properly closed.
 
----
-EXAMPLE:
-
-<input>
-Question: Who wrote the novel '1984'?
-Initial (incorrect) Guess: Aldous Huxley
-Initial (incorrect) Reasoning (triples): (Aldous Huxley | wrote | Brave New World), (Aldous Huxley | wrote | 1984), (1984 | genre | Dystopian)
-Counterfactual Evidence: George Orwell is widely credited as the author of 1984. Aldous Huxley wrote Brave New World, which is a different dystopian novel.
-</input>
-
-<output>
-<thought_process>
-1. **Deconstruct Initial Logic**: The initial reasoning assumes Aldous Huxley wrote '1984'. It correctly identifies '1984' as dystopian and links Huxley to 'Brave New World', but it falsely links Huxley to '1984'. This suggests a confusion between two famous dystopian authors.
-2. **Evaluate Evidence**: The Counterfactual Evidence explicitly states George Orwell is the author of '1984'. It clarifies that Huxley wrote 'Brave New World' and distinguishes the two works. This evidence directly contradicts the triple (Aldous Huxley, wrote, 1984).
-3. **Synthesize**: I must discard the incorrect triple linking Huxley to '1984'. I will retain the genre information (Dystopian) as it is not contested. I will replace the author entity with George Orwell based on the strong counterfactual evidence.
-4. **Conclude**: The initial guess was incorrect due to author confusion. The evidence confirms George Orwell is the correct author.
-</thought_process>
-<final_answer>
-George Orwell
-</final_answer>
-</output>
----
 Now, process the following input:"""
