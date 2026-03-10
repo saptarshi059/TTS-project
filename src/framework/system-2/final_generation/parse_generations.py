@@ -11,6 +11,9 @@ from all_system_prompts import SYSTEM_2_MAIN_PROMPT
 def main(dataset: str):
     base_path = Path(f"../../../../framework_output/system2/{dataset}/")
 
+    system_1_generations = pd.read_json(f'../../../../framework_output/system1/{dataset}/system_1_complete.jsonl', lines=True)
+    system_1_generations = system_1_generations.rename(columns={'cleaned_ans': 'final_ans'})
+
     streamed_responses = pd.read_json(base_path / "final_response/streamed_responses.jsonl", lines=True)
     main_dataset = pd.read_json(base_path / "retrieval_results/retrieved_docs.jsonl", lines=True)
 
@@ -23,11 +26,12 @@ def main(dataset: str):
             final_ans.append(match_obj.group(1).strip())
         except:
             print(split_ans, "\n............")
-    exit()
+
+    main_dataset['final_ans'] = final_ans
 
     print('Saving final dataset...')
-    main_dataset['final_ans'] = final_ans
-    main_dataset.to_json(base_path / "final_response/parsed_responses.jsonl", lines=True, orient='records', index=False)
+    final_ds = pd.merge(main_dataset, system_1_generations)
+    final_ds.to_json(base_path / "final_response/final_responses.jsonl", lines=True, orient='records', index=False)
 
 
 if __name__ == "__main__":
