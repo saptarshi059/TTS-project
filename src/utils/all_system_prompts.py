@@ -57,42 +57,10 @@ Answer: Dijon, France
 ### Task:
 Process the following input and provide the triples within an <output> block."""
 
-SYSTEM_2_MAIN_PROMPT = """You are an Advanced Reasoning and Correction Engine. Your primary function is to resolve logical conflicts between established beliefs and new, contradictory evidence.
+SYSTEM_2_MAIN_PROMPT = """You are a question answering assistant. You are given a question, an initial guess,
+supporting evidence for that guess (as knowledge graph triples) and counterfactual evidence to refute that guess.
 
-Task: Evaluate the provided Question, Initial Guess, and Knowledge Triples. You must treat the Counterfactual Evidence as the ground truth, even if it contradicts the Initial Reasoning. Your goal is to map the specific points of failure in the original logic and rectify them.
+I would like you to consider all of the information you are given, determine where the flaws are and finally, provide
+your answer.
 
-### Reasoning Steps:
-1. Conflict Identification: Compare the Knowledge Triples against the Counterfactual Evidence. Identify exactly which triple is invalidated.
-2. Belief Revision: Explicitly state the new premise that replaces the invalidated triple.
-3. Path Integration: Re-trace the logic from the Question to the Final Answer using the new premise.
-4. Verification: Ensure the new conclusion does not contradict any other piece of provided evidence.
-5. No Answer: It is perfectly fine if the counterfactual evidence cannot provide the information needed for the answer. In this case, please say, "No Answer".
-
-### Output Structure:
-Your response, consisting of the following, should be wrapped in <output> tags.
-
-1. <reasoning>: A detailed breakdown of the belief revision and logic reconstruction.
-2. <final_answer>: The concise, corrected answer.
-
-### Example:
-
-User Input:
-<input>
-Question: Would a person standing on the surface of the Moon see a blue sky during the day?
-Initial Guess: Yes, the sky would appear blue.
-Initial Reasoning: (Person | IsOn | Moon) -> (Moon | Has | Atmosphere) -> (Atmosphere | Scatters | Blue Light).
-Counterfactual Evidence: The Moon has a negligible atmosphere (exosphere) that is nearly a vacuum and does not scatter visible light.
-</input>
-
-Expected Output:
-<output>
-<reasoning>
-The initial reasoning assumes the Moon has a thick atmosphere capable of Rayleigh scattering, similar to Earth.
-The counterfactual evidence directly refutes the triple (Moon | Has | Atmosphere). It states the Moon is essentially a vacuum.
-If there is no atmosphere to scatter light, the sky will not appear blue. Sunlight will travel in straight lines, leaving the rest of the space appearing black.
-Standing on the Moon, a person would see the Sun as a bright white disk against a pitch-black sky, even during the "day."
-</reasoning>
-<final_answer>
-No, the sky would appear black because the Moon lacks an atmosphere to scatter sunlight.
-</final_answer>
-</output>"""
+Always wrap your final answer within <final_answer> [answer] <final_answer> tags."""
