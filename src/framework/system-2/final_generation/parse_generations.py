@@ -20,13 +20,17 @@ def main(dataset: str):
 
     print('Parsing generations...')
     final_ans = []
+    num_no_answer = 0
     for row in streamed_responses.itertuples():
         split_ans = row.generation.split(SYSTEM_2_MAIN_PROMPT)[1].strip()
         match_obj = re.search(r'<final_answer>(.*?)</final_answer>', split_ans, re.DOTALL | re.IGNORECASE)
         try:
             final_ans.append(match_obj.group(1).strip())
         except:
+            num_no_answer += 1
             final_ans.append("No answer")
+
+    print(f"Number of no_answers: {num_no_answer}...")
 
     main_dataset['final_ans'] = final_ans
     main_dataset = main_dataset[['question', 'answer', 'final_ans']]
