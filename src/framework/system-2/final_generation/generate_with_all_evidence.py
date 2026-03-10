@@ -72,11 +72,11 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str, output_dir: 
     with Path(op_dir / "streamed_responses.jsonl").open("a") as file:
         for batch in tqdm(torch_dataset_dataloader):
             with torch.no_grad():
-                generated_ids = model.generate(**batch, max_new_tokens=1024, top_p=0.8, temperature=0.7)
+                generated_ids = model.generate(**batch, max_new_tokens=1024, do_sample=False, num_beams=1)
                 decoded_generation = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)
 
                 for generation in decoded_generation:
-                    ques = re.search(r"Question:(.*)", generation.split(SYSTEM_2_MAIN_PROMPT)[1])[1].strip()
+                    ques = re.findall(r"Question:(.*)", generation)[1].strip()
                     write_obj = {'question': ques, 'generation': generation}
                     json_string = json.dumps(write_obj)
                     file.write(json_string + '\n')
