@@ -26,7 +26,7 @@ def main(dataset: str):
         try:
             final_ans.append(match_obj.group(1).strip())
         except:
-            print(split_ans, "\n............")
+            final_ans.append("No answer")
 
     main_dataset['final_ans'] = final_ans
     main_dataset = main_dataset[['question', 'answer', 'final_ans']]
