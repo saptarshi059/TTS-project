@@ -61,8 +61,10 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str, output_dir: 
     partial_op_file = Path(op_dir / "streamed_responses.jsonl")
     if partial_op_file.exists():
         completed_questions = pd.read_json(partial_op_file, lines=True)['question'].to_list()
+        print(f"Completed Questions: {len(completed_questions)}...")
+
         main_dataset = main_dataset.query("question not in @completed_questions")
-        print(f"Resuming after completing {len(main_dataset)} questions...")
+        print(f"Questions remaining: {len(main_dataset)}...")
 
     print(f"Wrapping {dataset} with torch...")
     torch_dataset = System2Dataset(tokenizer=tokenizer, dataset=main_dataset, device=model.device)
