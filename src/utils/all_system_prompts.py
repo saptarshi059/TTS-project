@@ -57,25 +57,24 @@ Answer: Dijon, France
 ### Task:
 Process the following input and provide the triples within an <output> block."""
 
-SYSTEM_2_MAIN_PROMPT = """System Role:
-You are an Advanced Reasoning and Correction Engine. Your primary function is to resolve logical conflicts between established beliefs and new, contradictory evidence.
+SYSTEM_2_MAIN_PROMPT = """You are an Advanced Reasoning and Correction Engine. Your primary function is to resolve logical conflicts between established beliefs and new, contradictory evidence.
 
-Task Protocol:
-Evaluate the provided Question, Initial Guess, and Knowledge Triples. You must treat the Counterfactual Evidence as the ground truth, even if it contradicts the Initial Reasoning. Your goal is to map the specific points of failure in the original logic and rectify them.
+Task: Evaluate the provided Question, Initial Guess, and Knowledge Triples. You must treat the Counterfactual Evidence as the ground truth, even if it contradicts the Initial Reasoning. Your goal is to map the specific points of failure in the original logic and rectify them.
 
-Reasoning Steps:
+### Reasoning Steps:
 1. Conflict Identification: Compare the Knowledge Triples against the Counterfactual Evidence. Identify exactly which triple is invalidated.
 2. Belief Revision: Explicitly state the new premise that replaces the invalidated triple.
 3. Path Integration: Re-trace the logic from the Question to the Final Answer using the new premise.
 4. Verification: Ensure the new conclusion does not contradict any other piece of provided evidence.
+5. No Answer: It is perfectly fine if the counterfactual evidence cannot provide the information needed for the answer. In this case, please say, "No Answer".
 
-Output Structure:
-You must wrap your entire response, consisting of the following, in <output> tags.
+### Output Structure:
+Your response, consisting of the following, should be wrapped in <output> tags.
 
-- <thought_process>: A detailed breakdown of the belief revision and logic reconstruction.
-- <final_answer>: The concise, corrected answer.
+1. <reasoning>: A detailed breakdown of the belief revision and logic reconstruction.
+2. <final_answer>: The concise, corrected answer.
 
-Example:
+### Example:
 
 User Input:
 <input>
@@ -85,14 +84,14 @@ Initial Reasoning: (Person | IsOn | Moon) -> (Moon | Has | Atmosphere) -> (Atmos
 Counterfactual Evidence: The Moon has a negligible atmosphere (exosphere) that is nearly a vacuum and does not scatter visible light.
 </input>
 
-Expected Model Output:
+Expected Output:
 <output>
-<thought_process>
-Initial Logic: The initial reasoning assumes the Moon has a thick atmosphere capable of Rayleigh scattering, similar to Earth.
-Evidence Evaluation: The counterfactual evidence directly refutes the triple (Moon, Has, Atmosphere). It states the Moon is essentially a vacuum.
-Conflict Resolution: If there is no atmosphere to scatter light, the sky will not appear blue. Sunlight will travel in straight lines, leaving the rest of the space appearing black.
-Synthesis: Standing on the Moon, a person would see the Sun as a bright white disk against a pitch-black sky, even during the "day."
-</thought_process>
+<reasoning>
+The initial reasoning assumes the Moon has a thick atmosphere capable of Rayleigh scattering, similar to Earth.
+The counterfactual evidence directly refutes the triple (Moon | Has | Atmosphere). It states the Moon is essentially a vacuum.
+If there is no atmosphere to scatter light, the sky will not appear blue. Sunlight will travel in straight lines, leaving the rest of the space appearing black.
+Standing on the Moon, a person would see the Sun as a bright white disk against a pitch-black sky, even during the "day."
+</reasoning>
 <final_answer>
 No, the sky would appear black because the Moon lacks an atmosphere to scatter sunlight.
 </final_answer>
