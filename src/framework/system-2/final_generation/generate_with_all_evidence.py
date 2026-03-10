@@ -9,7 +9,6 @@ import sys
 sys.path.append("../../../utils/")
 
 from all_system_prompts import SYSTEM_2_MAIN_PROMPT
-import re
 import json
 
 
@@ -72,16 +71,19 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str, output_dir: 
 
     print(f"{'-'*10}Running System-2: MAIN GENERATION with {model_name} on {dataset}{'-'*10}")
     with Path(op_dir / "streamed_responses.jsonl").open("a") as file:
+        start_idx = 0
         for batch in tqdm(torch_dataset_dataloader):
             with torch.no_grad():
+                batch_questions = main_dataset[start_idx: start_idx + batch_size]
                 generated_ids = model.generate(**batch, max_new_tokens=1024, do_sample=False, num_beams=1)
                 decoded_generation = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)
 
-                for generation in decoded_generation:
-                    ques = re.findall(r"Question:(.*)", generation)[1]
+                for ques, generation in zip(batch_questions, decoded_generation):
                     write_obj = {'question': ques, 'generation': generation}
                     json_string = json.dumps(write_obj)
                     file.write(json_string + '\n')
+
+                start_idx += batch_size
 
 
 if __name__ == "__main__":
