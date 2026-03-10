@@ -14,8 +14,6 @@ def main(dataset: str):
     system_1_generations = pd.read_json(f'../../../../framework_output/system1/{dataset}/system_1_complete.jsonl', lines=True)
     system_1_generations = system_1_generations.rename(columns={'cleaned_ans': 'final_ans'})
 
-    print(system_1_generations)
-
     streamed_responses = pd.read_json(base_path / "final_response/streamed_responses.jsonl", lines=True)
     main_dataset = pd.read_json(base_path / "retrieval_results/retrieved_docs.jsonl", lines=True)
 
@@ -32,7 +30,7 @@ def main(dataset: str):
     main_dataset['final_ans'] = final_ans
 
     print('Saving final dataset...')
-    final_ds = pd.merge(main_dataset, system_1_generations)
+    final_ds = pd.merge(main_dataset, system_1_generations, on=['question'])
     final_ds.to_json(base_path / "final_response/final_responses.jsonl", lines=True, orient='records', index=False)
 
 
