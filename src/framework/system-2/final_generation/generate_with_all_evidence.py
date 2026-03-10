@@ -74,7 +74,7 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str, output_dir: 
         start_idx = 0
         for batch in tqdm(torch_dataset_dataloader):
             with torch.no_grad():
-                batch_questions = main_dataset.iloc[start_idx: start_idx + batch_size]
+                batch_questions = main_dataset.iloc[start_idx: start_idx + batch_size]['question'].to_list()
                 generated_ids = model.generate(**batch, max_new_tokens=1024, do_sample=False, num_beams=1)
                 decoded_generation = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)
 
