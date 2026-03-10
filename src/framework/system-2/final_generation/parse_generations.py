@@ -14,6 +14,8 @@ def main(dataset: str):
     system_1_generations = pd.read_json(f'../../../../framework_output/system1/{dataset}/system_1_complete.jsonl', lines=True)
     system_1_generations = system_1_generations.rename(columns={'cleaned_ans': 'final_ans'})
 
+    print(system_1_generations)
+
     streamed_responses = pd.read_json(base_path / "final_response/streamed_responses.jsonl", lines=True)
     main_dataset = pd.read_json(base_path / "retrieval_results/retrieved_docs.jsonl", lines=True)
 
