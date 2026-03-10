@@ -18,8 +18,12 @@ def main(dataset: str):
     final_ans = []
     for row in streamed_responses.itertuples():
         split_ans = row.generation.split(SYSTEM_2_MAIN_PROMPT)[1].strip()
-        final_ans.append(re.search(r'<final_answer>(.*?)</final_answer>',
-                                     split_ans, re.DOTALL | re.IGNORECASE)[1].strip())
+        match_obj = re.search(r'<final_answer>(.*?)</final_answer>', split_ans, re.DOTALL | re.IGNORECASE)
+        try:
+            final_ans.append(match_obj.group(1).strip())
+        except:
+            print(split_ans, "\n............")
+    exit()
 
     print('Saving final dataset...')
     main_dataset['final_ans'] = final_ans
