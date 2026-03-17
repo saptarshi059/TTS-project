@@ -8,7 +8,7 @@ import os, torch
 import sys
 sys.path.append("../../../utils/")
 
-from all_system_prompts import SYSTEM_2_MAIN_PROMPT
+from all_system_prompts import SYSTEM_2
 import json
 
 
@@ -22,7 +22,7 @@ class System2Dataset(Dataset):
             generated_triples_string = ", ".join(f"({triple})" for triple in row.generated_triples)
             retrieved_evidences = "\n\n".join(list(set(row.retrieved_docs)))
 
-            self.samples.append([{"role": "system", "content": SYSTEM_2_MAIN_PROMPT},
+            self.samples.append([{"role": "system", "content": SYSTEM_2},
                                  {"role": "user", "content": f"<input>\n"
                                                              f"Question: {row.question}\n"
                                                              f"Initial (incorrect) Guess: {row.system_1_guess}\n"
@@ -52,7 +52,7 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str, output_dir: 
                                                  attn_implementation="flash_attention_2",
                                                  device_map="auto")
 
-    main_dataset = pd.read_json(f"../../../../framework_output/system2/{dataset}/retrieval_results/retrieved_docs.jsonl", lines=True)
+    main_dataset = pd.read_json(f"../../../../framework_output/system2/{dataset}/retrieval_results/with_retrieved_docs.jsonl", lines=True)
     op_dir = Path(output_dir) / f"{dataset}/final_response/"
     folder = Path(op_dir)
     folder.mkdir(parents=True, exist_ok=True)
@@ -75,7 +75,7 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str, output_dir: 
         for batch in tqdm(torch_dataset_dataloader):
             with torch.no_grad():
                 batch_questions = main_dataset.iloc[start_idx: start_idx + batch_size]['question'].to_list()
-                generated_ids = model.generate(**batch, max_new_tokens=2048, do_sample=False, num_beams=1)
+                generated_ids = model.generate(**batch, max_new_tokens=500, temperature=0.9)
                 decoded_generation = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)
 
                 for ques, generation in zip(batch_questions, decoded_generation):

@@ -23,7 +23,7 @@ Question: What is the capital of France?
 ### Task:
 Process the following input and provide the answer within an <output> block."""
 
-SYSTEM_2_TRIPLE_GEN = """You are a knowledge graph extractor. Your task is to generate a detailed logical sequence of subject-predicate-object triples that derive a given Answer from a given Question.
+TRIPLE_GEN = """You are a knowledge graph extractor. Your task is to generate a detailed logical sequence of subject-predicate-object triples that derive a given Answer from a given Question.
 
 ### Rules:
 1. Format: Each triple must be enclosed in <triple> tags using the structure: <triple>Subject | predicate_link | Object</triple>.
@@ -57,7 +57,7 @@ Answer: Dijon, France
 ### Task:
 Process the following input and provide the triples within an <output> block."""
 
-SYSTEM_2_MAIN_PROMPT = """You are a question answering assistant. You are given a question, an initial guess,
+SYSTEM_2 = """You are a question answering assistant. You are given a question, an initial guess,
 supporting evidence for that guess (as knowledge graph triples) and counterfactual evidence to refute that guess.
 
 I would like you to consider all of the information you are given, determine where the flaws are and finally, provide

@@ -6,7 +6,7 @@ import re
 
 import sys
 sys.path.append("../../../utils/")
-from all_system_prompts import SYSTEM_2_TRIPLE_GEN
+from all_system_prompts import TRIPLE_GEN
 
 def main(dataset: str):
     base_path = Path(f"../../../../framework_output/system2/{dataset}/triple_extraction")
@@ -16,8 +16,11 @@ def main(dataset: str):
     print("Parsing raw responses...")
     generated_triples = []
     for row in tqdm(ds.itertuples()):
-        ip_string = f"<input>\nQuestion: {row.question}\nAnswer: {row.system_1_guess}\n</input>"
-        cleaned_string = row.raw_responses.split(SYSTEM_2_TRIPLE_GEN)[1].strip().split(ip_string)[1].strip()
+        ip_string = (f"<input>\n"
+                     f"Question: {row.question}\n"
+                     f"Answer: {row.system_1_guess}\n"
+                     f"</input>")
+        cleaned_string = row.raw_responses.split(TRIPLE_GEN)[1].strip().split(ip_string)[1].strip()
         generated_triples.append(re.findall(r"<triple>(.*?)</triple>", cleaned_string, re.IGNORECASE | re.DOTALL))
 
     print("Saving cleaned responses...")

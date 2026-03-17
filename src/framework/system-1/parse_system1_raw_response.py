@@ -31,7 +31,7 @@ def main(dataset: str):
             cleaned_response.append(clean_text)
 
     print("Saving cleaned responses...")
-    ds['cleaned_ans'] = cleaned_response
+    ds['system_1_guess'] = cleaned_response
     ds.to_json(base_path / "parsed_responses.jsonl", orient='records', lines=True, index=False)
 
 if __name__ == "__main__":

@@ -60,7 +60,7 @@ def main(dataset: str):
     op_dir = Path(f"../../../../framework_output/system2/{dataset}/retrieval_results/")
     folder = Path(op_dir)
     folder.mkdir(parents=True, exist_ok=True)
-    starting_ds.to_json(op_dir / "retrieved_docs.jsonl", lines=True, orient='records', index=False)
+    starting_ds.to_json(op_dir / "with_retrieved_docs.jsonl", lines=True, orient='records', index=False)
 
 
 if __name__ == "__main__":
