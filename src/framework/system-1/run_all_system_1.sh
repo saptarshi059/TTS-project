@@ -6,5 +6,5 @@ for ds in "${DATASETS[@]}";do
   echo "-------------Running system-1 for ${ds}-------------"
   python step1.py --dataset "$ds"
   python parse_system1_raw_response.py --dataset "$ds"
-  python ../../utils/answer_scorer.py --prediction_dataset_path "../../../framework_output/system1/${ds}/parsed_responses.jsonl" --predicted_answer_field "cleaned_ans" --ground_truth_field "answer"
+  python ../../utils/answer_scorer.py --prediction_dataset_path "../../../framework_output/system1/${ds}/parsed_responses.jsonl" --predicted_answer_field "system_1_guess" --ground_truth_field "answer"
 done
