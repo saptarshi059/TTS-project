@@ -57,10 +57,13 @@ Answer: Dijon, France
 ### Task:
 Process the following input and provide the triples within an <output> block."""
 
-SYSTEM_2 = """You are a question answering assistant. You are given a question, an initial guess,
-supporting evidence for that guess (as knowledge graph triples) and counterfactual evidence to refute that guess.
+SYSTEM_2 = """You are a question answering assistant. You are given a question, an initial guess, initial
+reasoning (as knowledge graph triples) to support that guess and context retrieved using the triples.
 
 I would like you to consider all of the information you are given, determine where the flaws are and finally, provide
 your answer.
+
+If you find that the retrieved context does not provide the required information needed to answer the question, you can
+use your initial guess as the final answer. Else, utilize the retrieved context to update your answer.
 
 Always wrap your final answer within <final_answer> [answer] <final_answer> tags."""
