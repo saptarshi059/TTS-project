@@ -43,7 +43,7 @@ def main(dataset: str):
     embedded_triples = model.encode(flattened_triples_for_retrieval, prompt_name="query", show_progress_bar=True)
 
     print("Performing semantic search...")
-    _, doc_ids = gpu_index.search(embedded_triples, 5)
+    _, doc_ids = gpu_index.search(embedded_triples, 1)
 
     print("Collecting the original documents...")
     all_retrieved_docs = []
