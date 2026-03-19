@@ -12,7 +12,7 @@ def main(dataset: str):
     print("Parsing raw responses...")
     explanation = []
     for row in tqdm(ds.itertuples()):
-        explanation.append(re.search(r"<output>(.*?)</output>", row.raw_responses, re.IGNORECASE | re.DOTALL))
+        explanation.append(re.findall(r"<output>(.*?)</output>", row.raw_responses, re.IGNORECASE | re.DOTALL)[-1].strip())
 
     print("Saving cleaned responses...")
     ds['explanation'] = explanation
