@@ -18,7 +18,7 @@ def main(dataset: str):
     for row in tqdm(ds.itertuples()):
         ip_string = (f"<input>\n"
                      f"Question: {row.question}\n"
-                     f"Answer: {row.system_1_guess}\n"
+                     f"Explanation: {row.explanation}\n"
                      f"</input>")
         cleaned_string = row.raw_responses.split(TRIPLE_GEN)[1].strip().split(ip_string)[1].strip()
         generated_triples.append(re.findall(r"<triple>(.*?)</triple>", cleaned_string, re.IGNORECASE | re.DOTALL))
