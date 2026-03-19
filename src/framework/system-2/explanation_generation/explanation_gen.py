@@ -8,16 +8,16 @@ import os, torch
 import sys
 sys.path.append("../../../utils/")
 
-from all_system_prompts import TRIPLE_GEN
+from all_system_prompts import EXPLANATION_GEN
 
-class TripleGenDataset(Dataset):
+class ExplanationGenDataset(Dataset):
     def __init__(self, tokenizer, dataset, device):
         self.tokenizer = tokenizer
         self.dataset = dataset
         self.device = device
         self.samples = []
         for row in tqdm(dataset.itertuples()):
-            self.samples.append([{"role": "system", "content": TRIPLE_GEN},
+            self.samples.append([{"role": "system", "content": EXPLANATION_GEN},
                                  {"role": "user", "content": f"<input>\n"
                                                              f"Question: {row.question}\n"
                                                              f"Answer: {row.system_1_guess}\n"
@@ -48,10 +48,10 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str, output_dir: 
     main_dataset = pd.read_json(f"../../../../framework_output/system1/{dataset}/parsed_responses.jsonl",
                                 lines=True)
     print(f"Wrapping {dataset} with torch...")
-    torch_dataset = TripleGenDataset(tokenizer=tokenizer, dataset=main_dataset, device=model.device)
+    torch_dataset = ExplanationGenDataset(tokenizer=tokenizer, dataset=main_dataset, device=model.device)
     torch_dataset_dataloader = DataLoader(torch_dataset, batch_size=batch_size, shuffle=False)
 
-    print(f"{'-'*10}Running TRIPLE GENERATION with {model_name} on {dataset}{'-'*10}")
+    print(f"{'-'*10}Running EXPLANATION GENERATION with {model_name} on {dataset}{'-'*10}")
     raw_responses = []
     for batch in tqdm(torch_dataset_dataloader):
         with torch.no_grad():
@@ -61,7 +61,7 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str, output_dir: 
     main_dataset["raw_responses"] = raw_responses
 
     print("Saving results...")
-    op_dir = Path(output_dir) / f"{dataset}/triple_extraction/"
+    op_dir = Path(output_dir) / f"{dataset}/explanation_extraction/"
     folder = Path(op_dir)
     folder.mkdir(parents=True, exist_ok=True)
     main_dataset.to_json(op_dir / "raw_responses.jsonl", lines=True, orient='records', index=False)

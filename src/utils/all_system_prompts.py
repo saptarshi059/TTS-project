@@ -23,47 +23,22 @@ Question: What is the capital of France?
 ### Task:
 Process the following input and provide the answer within an <output> block."""
 
-TRIPLE_GEN = """You are a knowledge graph extractor. Your task is to generate a detailed logical sequence of subject-predicate-object triples that derive a given Answer from a given Question.
+EXPLANATION_GEN = """Given a question and a candidate answer, explain step-by-step how one could arrive at this answer. 
+Break your explanation into numbered steps, identifying the key people, events, or facts that connect the question to 
+the answer. Be explicit about intermediate facts even if you are uncertain about them.
+
+Provide your response inside <output> </output> tags."""
+
+TRIPLE_GEN = """You are a knowledge graph extractor. Your task is to generate a detailed logical sequence of subject-predicate-object triples based on a reasoning trace for a question.
 
 ### Rules:
 1. Format: Each triple must be enclosed in <triple> tags using the structure: <triple>Subject | predicate_link | Object</triple>.
 2. Logical Depth: Do not skip steps. If the question involves a specific role or relationship (e.g., "X's lead singer" or "Y's director"), you MUST identify that specific individual as a separate node before linking them to the final answer.
 3. Chain of Reasoning: The sequence must form a step-by-step path where the Object of one triple leads to the Subject of the next.
 4. Predicate Style: Use concise, lowercase, snake_case for predicates.
-5. Strict Output: Provide ONLY the <output> block. Do not include introductory text or explanations.
+5. Strict Output: Provide ONLY the <triples>. Do not include introductory text or explanations."""
 
-### Examples:
-
-<input>
-Question: Where was the lead singer of the band Queen born?
-Answer: Stone Town, Zanzibar
-</input>
-
-<output>
-<triple>Queen | has_lead_singer | Freddie Mercury</triple>
-<triple>Freddie Mercury | born_in | Stone Town, Zanzibar</triple>
-</output>
-
-<input>
-Question: What is the birthplace of the person who designed the Eiffel Tower?
-Answer: Dijon, France
-</input>
-
-<output>
-<triple>Eiffel Tower | designed_by | Gustave Eiffel</triple>
-<triple>Gustave Eiffel | born_in | Dijon, France</triple>
-</output>
-
-### Task:
-Process the following input and provide the triples within an <output> block."""
-
-SYSTEM_2 = """You are a question answering assistant. You are given a question, an initial guess, initial
-reasoning (as knowledge graph triples) to support that guess and context retrieved using the triples.
-
-I would like you to consider all of the information you are given, determine where the flaws are and finally, provide
-your answer.
-
-If you find that the retrieved context does not provide the required information needed to answer the question, you can
-use your initial guess as the final answer. Else, utilize the retrieved context to update your answer.
+SYSTEM_2 = """You are a question answering assistant. You are given a question and context associated with it. I would 
+like you to consider all of the information you are given to provide your answer.
 
 Always wrap your final answer within <final_answer> [answer] <final_answer> tags."""

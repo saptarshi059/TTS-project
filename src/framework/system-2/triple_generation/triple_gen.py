@@ -8,26 +8,19 @@ import os, torch
 import sys
 sys.path.append("../../../utils/")
 
-from all_system_prompts import SYSTEM_2
-import json
+from all_system_prompts import TRIPLE_GEN
 
-
-class System2Dataset(Dataset):
+class TripleGenDataset(Dataset):
     def __init__(self, tokenizer, dataset, device):
         self.tokenizer = tokenizer
         self.dataset = dataset
         self.device = device
         self.samples = []
         for row in tqdm(dataset.itertuples()):
-            generated_triples_string = ", ".join(f"({triple})" for triple in row.generated_triples)
-            retrieved_evidences = "\n\n".join(list(set(row.retrieved_docs)))
-
-            self.samples.append([{"role": "system", "content": SYSTEM_2},
+            self.samples.append([{"role": "system", "content": TRIPLE_GEN},
                                  {"role": "user", "content": f"<input>\n"
                                                              f"Question: {row.question}\n"
-                                                             f"Initial Guess: {row.system_1_guess}\n"
-                                                             f"Initial Reasoning (triples): {generated_triples_string}\n"
-                                                             f"Retrieved Context: {retrieved_evidences}\n"
+                                                             f"Explanation: {row.explanation}\n"
                                                              f"</input>"}])
         self.tokenized_samples = tokenizer.apply_chat_template(self.samples, tokenize=False, add_generation_prompt=True)
         self.model_inputs = self.tokenizer(self.tokenized_samples, padding=True, return_tensors="pt")
@@ -52,38 +45,26 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str, output_dir: 
                                                  attn_implementation="flash_attention_2",
                                                  device_map="auto")
 
-    main_dataset = pd.read_json(f"../../../../framework_output/system2/{dataset}/retrieval_results/with_retrieved_docs.jsonl", lines=True)
-    op_dir = Path(output_dir) / f"{dataset}/final_response/"
-    folder = Path(op_dir)
-    folder.mkdir(parents=True, exist_ok=True)
-
-    partial_op_file = Path(op_dir / "streamed_responses.jsonl")
-    if partial_op_file.exists():
-        completed_questions = pd.read_json(partial_op_file, lines=True)['question'].to_list()
-        print(f"Completed Questions: {len(completed_questions)}...")
-
-        main_dataset = main_dataset.query("question not in @completed_questions")
-        print(f"Questions remaining: {len(main_dataset)}...")
-
+    main_dataset = pd.read_json(f"../../../../framework_output/system2/{dataset}/explanation_extraction/parsed_responses.jsonl",
+                                lines=True)
     print(f"Wrapping {dataset} with torch...")
-    torch_dataset = System2Dataset(tokenizer=tokenizer, dataset=main_dataset, device=model.device)
+    torch_dataset = TripleGenDataset(tokenizer=tokenizer, dataset=main_dataset, device=model.device)
     torch_dataset_dataloader = DataLoader(torch_dataset, batch_size=batch_size, shuffle=False)
 
-    print(f"{'-'*10}Running System-2: MAIN GENERATION with {model_name} on {dataset}{'-'*10}")
-    with Path(op_dir / "streamed_responses.jsonl").open("a") as file:
-        start_idx = 0
-        for batch in tqdm(torch_dataset_dataloader):
-            with torch.no_grad():
-                batch_questions = main_dataset.iloc[start_idx: start_idx + batch_size]['question'].to_list()
-                generated_ids = model.generate(**batch, max_new_tokens=500, do_sample=False, num_beams=1)
-                decoded_generation = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)
+    print(f"{'-'*10}Running TRIPLE GENERATION with {model_name} on {dataset}{'-'*10}")
+    raw_responses = []
+    for batch in tqdm(torch_dataset_dataloader):
+        with torch.no_grad():
+            generated_ids = model.generate(**batch, max_new_tokens=500, do_sample=False, num_beams=1)
+            raw_responses.extend(tokenizer.batch_decode(generated_ids, skip_special_tokens=True))
 
-                for ques, generation in zip(batch_questions, decoded_generation):
-                    write_obj = {'question': ques, 'generation': generation}
-                    json_string = json.dumps(write_obj)
-                    file.write(json_string + '\n')
+    main_dataset["raw_responses"] = raw_responses
 
-                start_idx += batch_size
+    print("Saving results...")
+    op_dir = Path(output_dir) / f"{dataset}/triple_extraction/"
+    folder = Path(op_dir)
+    folder.mkdir(parents=True, exist_ok=True)
+    main_dataset.to_json(op_dir / "raw_responses.jsonl", lines=True, orient='records', index=False)
 
 
 if __name__ == "__main__":
