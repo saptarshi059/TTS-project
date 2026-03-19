@@ -44,4 +44,4 @@ reasoning (as knowledge graph triples) to support that guess and context retriev
 I would like you to consider all of the information you are given, determine where the flaws are and finally, provide
 your answer.
 
-Always wrap your final answer within <final_answer> [answer] <final_answer> tags."""
+ALWAYS wrap your final answer inside <answer> </answer> tags."""
