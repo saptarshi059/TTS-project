@@ -19,12 +19,15 @@ class System2Dataset(Dataset):
         self.device = device
         self.samples = []
         for row in tqdm(dataset.itertuples()):
+            generated_triples_string = ", ".join(f"({triple})" for triple in row.generated_triples)
             retrieved_evidences = "\n\n".join(list(set(row.retrieved_docs)))
 
             self.samples.append([{"role": "system", "content": SYSTEM_2},
                                  {"role": "user", "content": f"<input>\n"
                                                              f"Question: {row.question}\n"
-                                                             f"Context: {retrieved_evidences}\n"
+                                                             f"Initial Guess: {row.system_1_guess}\n"
+                                                             f"Initial Reasoning (triples): {generated_triples_string}\n"
+                                                             f"Retrieved Context: {retrieved_evidences}\n"
                                                              f"</input>"}])
         self.tokenized_samples = tokenizer.apply_chat_template(self.samples, tokenize=False, add_generation_prompt=True)
         self.model_inputs = self.tokenizer(self.tokenized_samples, padding=True, return_tensors="pt")

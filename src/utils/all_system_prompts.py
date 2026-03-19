@@ -38,7 +38,10 @@ TRIPLE_GEN = """You are a knowledge graph extractor. Your task is to generate a 
 4. Predicate Style: Use concise, lowercase, snake_case for predicates.
 5. Strict Output: Provide ONLY the <triples>. Do not include introductory text or explanations."""
 
-SYSTEM_2 = """You are a question answering assistant. You are given a question and context associated with it. I would 
-like you to consider all of the information you are given to provide your answer.
+SYSTEM_2 = """You are a question answering assistant. You are given a question, an initial guess, initial
+reasoning (as knowledge graph triples) to support that guess and context retrieved using the triples.
+
+I would like you to consider all of the information you are given, determine where the flaws are and finally, provide
+your answer.
 
 Always wrap your final answer within <final_answer> [answer] <final_answer> tags."""
