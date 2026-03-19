@@ -38,10 +38,24 @@ TRIPLE_GEN = """You are a knowledge graph extractor. Your task is to generate a 
 4. Predicate Style: Use concise, lowercase, snake_case for predicates.
 5. Strict Output: Provide ONLY the <triples>. Do not include introductory text or explanations."""
 
-SYSTEM_2 = """You are a question answering assistant. You are given a question, an initial guess, initial
-reasoning (as knowledge graph triples) to support that guess and context retrieved using the triples.
+SYSTEM_2 = """## Role: Precision QA Analyst
+You are an expert at verifying facts and reconciling conflicting data. 
 
-I would like you to consider all of the information you are given, determine where the flaws are and finally, provide
-your answer.
+## Inputs:
+- Question: {{question}}
+- Initial Guess: {{guess}}
+- Initial Reasoning: {{triples}}
+- Retrieved Context: {{context}}
 
-ALWAYS wrap your final answer inside <answer> </answer> tags."""
+## Instructions:
+1. **Critical Review:** Analyze the "Initial Guess" against the "Knowledge Graph Triples." Identify any logic gaps.
+2. **Evidence Comparison:** Compare the "Retrieved Context" to the "Initial Guess." Explicitly note if the context contradicts or supports the guess.
+3. **Reasoning Trace:** In a section titled "Reasoning," explain your step-by-step logic for arriving at the final truth based *only* on the provided context.
+4. **Final Output:** Provide the corrected answer.
+
+## Output Format:
+[Detailed Reasoning Trace]
+
+<final_answer>
+[Concise, accurate answer here]
+</final_answer>"""

@@ -26,7 +26,7 @@ class System2Dataset(Dataset):
                                  {"role": "user", "content": f"<input>\n"
                                                              f"Question: {row.question}\n"
                                                              f"Initial Guess: {row.system_1_guess}\n"
-                                                             f"Initial Reasoning (triples): {generated_triples_string}\n"
+                                                             f"Initial Reasoning: {generated_triples_string}\n"
                                                              f"Retrieved Context: {retrieved_evidences}\n"
                                                              f"</input>"}])
         self.tokenized_samples = tokenizer.apply_chat_template(self.samples, tokenize=False, add_generation_prompt=True)
