@@ -4,35 +4,40 @@ from argparse import ArgumentParser
 from datasets import load_dataset
 from pathlib import Path
 from tqdm import tqdm
+import pandas as pd
 import os, torch
+import json
 import sys
 sys.path.append("../../utils/")
 
 from all_system_prompts import COT
 
 class CoTDataset(Dataset):
-    def __init__(self, tokenizer, dataset, device):
+    def __init__(self, tokenizer, dataset, question_column , device):
         self.tokenizer = tokenizer
         self.dataset = dataset
         self.device = device
-        self.samples = []
-        for row in tqdm(dataset.itertuples()):
-            self.samples.append([{"role": "system", "content": COT},
-                                 {"role": "user", "content": rf"{row.problem} \n\nPlease put your final numerical or algebraic answer inside \boxed{{}}."}])
-        self.tokenized_samples = tokenizer.apply_chat_template(self.samples, tokenize=False, add_generation_prompt=True)
-        self.model_inputs = self.tokenizer(self.tokenized_samples, padding=True, return_tensors="pt")
+        self.questions = dataset.get(question_column).to_list()
 
     def __len__(self):
-        return len(self.samples)
+        return len(self.questions)
 
     def __getitem__(self, idx):
+        question = self.questions[idx]
+        formatted_sample = [{"role": "system", "content": COT},
+                            {"role": "user", "content": rf"{question} \n\nPlease put your final numerical or algebraic answer inside \boxed{{}}."}]
+
+        tokenized_sample = self.tokenizer.apply_chat_template(formatted_sample, tokenize=False, add_generation_prompt=True)
+        model_inputs = self.tokenizer(tokenized_sample, padding=True, return_tensors="pt")
+
         return {
-            "input_ids": self.model_inputs["input_ids"][idx].to(self.device),
-            "attention_mask": self.model_inputs["attention_mask"][idx].to(self.device),
+            "question": question,
+            "input_ids": model_inputs["input_ids"][idx].to(self.device),
+            "attention_mask": model_inputs["attention_mask"][idx].to(self.device),
         }
 
 
-def main(model_name:str, dataset:str, batch_size: int, gpu_id: str, output_dir: str) -> None:
+def main(model_name:str, dataset:str, question_column: str, batch_size: int, gpu_id: str, output_dir: str) -> None:
     set_seed(42)
     os.environ["CUDA_VISIBLE_DEVICES"] = gpu_id
 
@@ -44,33 +49,46 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str, output_dir: 
 
     ds = load_dataset(dataset, split='test').to_pandas()
     dataset = dataset.replace("/", "_")
+
+    op_dir = Path(output_dir) / f"{dataset}/cot/"
+    folder = Path(op_dir)
+    folder.mkdir(parents=True, exist_ok=True)
+
+    partial_op_file = Path(op_dir / "streamed_responses.jsonl")
+    if partial_op_file.exists():
+        completed_questions = pd.read_json(partial_op_file, lines=True)['question'].to_list()
+        print(f"Completed Questions: {len(completed_questions)}...")
+
+        ds = ds.query("question not in @completed_questions")
+        print(f"Questions remaining: {len(ds)}...")
+
     print(f"Wrapping {dataset} with torch...")
-    torch_dataset = CoTDataset(tokenizer=tokenizer, dataset=ds, device=model.device)
+    torch_dataset = CoTDataset(tokenizer=tokenizer, dataset=ds, question_column=question_column, device=model.device)
     torch_dataset_dataloader = DataLoader(torch_dataset, batch_size=batch_size, shuffle=False)
 
     print(f"{'-'*10}Running CoT with {model_name} on {dataset}{'-'*10}")
-    raw_responses = []
-    for batch in tqdm(torch_dataset_dataloader):
-        with torch.no_grad():
-            generated_ids = model.generate(**batch, max_new_tokens=1000, do_sample=False, num_beams=1)
-            raw_responses.extend(tokenizer.batch_decode(generated_ids, skip_special_tokens=True))
+    with Path(op_dir / "streamed_responses.jsonl").open("a") as file:
+        for batch in tqdm(torch_dataset_dataloader):
+            batch_questions = batch.pop('question')
+            with torch.no_grad():
+                generated_ids = model.generate(**batch, max_new_tokens=1000, do_sample=False, num_beams=1)
+                decoded_generation = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)
 
-    ds["raw_responses"] = raw_responses
-
-    print("Saving results...")
-    op_dir = Path(output_dir) / f"{dataset}"
-    folder = Path(op_dir)
-    folder.mkdir(parents=True, exist_ok=True)
-    ds.to_json(op_dir / "raw_responses.jsonl", lines=True, orient='records', index=False)
+            for ques, generation in zip(batch_questions, decoded_generation):
+                write_obj = {'question': ques, 'generation': generation}
+                json_string = json.dumps(write_obj)
+                file.write(json_string + '\n')
 
 
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--model_name", type=str, default="Qwen/Qwen2.5-7B-Instruct")
     parser.add_argument("--dataset", type=str, default="HuggingFaceH4/MATH-500", choices=["HuggingFaceH4/MATH-500"])
+    parser.add_argument("--question_column", type=str, default="problem")
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--gpu_id", type=str, default="0")
-    parser.add_argument("--output_directory", type=str, default="../../../all_output/cot/")
+    parser.add_argument("--output_directory", type=str, default="../../../all_output/")
     args = parser.parse_args()
-    main(model_name=args.model_name, dataset=args.dataset, batch_size=args.batch_size, gpu_id=args.gpu_id,
+    main(model_name=args.model_name, question_column=args.question_column,
+         dataset=args.dataset, batch_size=args.batch_size, gpu_id=args.gpu_id,
          output_dir=args.output_directory)
