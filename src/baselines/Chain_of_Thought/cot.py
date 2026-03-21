@@ -32,8 +32,8 @@ class CoTDataset(Dataset):
 
         return {
             "question": question,
-            "input_ids": model_inputs["input_ids"][idx].to(self.device),
-            "attention_mask": model_inputs["attention_mask"][idx].to(self.device),
+            "input_ids": model_inputs["input_ids"].to(self.device),
+            "attention_mask": model_inputs["attention_mask"].to(self.device),
         }
 
 
