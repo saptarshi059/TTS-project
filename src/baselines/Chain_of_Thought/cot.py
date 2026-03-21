@@ -1,7 +1,8 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer, set_seed, DataCollatorWithPadding
+from transformers import AutoModelForCausalLM, AutoTokenizer, set_seed
 from torch.utils.data import Dataset, DataLoader
 from argparse import ArgumentParser
 from datasets import load_dataset
+from functools import partial
 from pathlib import Path
 from tqdm import tqdm
 import pandas as pd
@@ -34,6 +35,30 @@ class CoTDataset(Dataset):
             "input_ids": model_inputs["input_ids"].squeeze(0), # Remove batch dim; DataLoader will re-batch
             "attention_mask": model_inputs["attention_mask"].squeeze(0),
         }
+
+
+def custom_collate_fn(batch, tokenizer):
+    # 1. Separate the text questions from the tensors
+    questions = [item["question"] for item in batch]
+
+    # 2. Grab the input_ids and attention_masks
+    # We need to remove the extra '1' dimension added by return_tensors="pt" in __getitem__
+    input_ids = [item["input_ids"].squeeze(0) for item in batch]
+    attention_mask = [item["attention_mask"].squeeze(0) for item in batch]
+
+    # 3. Use the tokenizer to pad the tensors
+    # This creates the actual batch tensor
+    padded_inputs = tokenizer.pad(
+        {"input_ids": input_ids, "attention_mask": attention_mask},
+        padding=True,
+        return_tensors="pt"
+    )
+
+    return {
+        "question": questions,  # Returns as a list of strings
+        "input_ids": padded_inputs["input_ids"],  # Returns as a Padded Tensor
+        "attention_mask": padded_inputs["attention_mask"]  # Returns as a Padded Tensor
+    }
 
 
 def main(model_name:str, dataset:str, question_column: str, batch_size: int, gpu_id: str, output_dir: str) -> None:
@@ -74,8 +99,11 @@ def main(model_name:str, dataset:str, question_column: str, batch_size: int, gpu
 
     print(f"Wrapping {dataset} with torch...")
     torch_dataset = CoTDataset(tokenizer=tokenizer, dataset=ds, question_column=question_column)
+
+    # Create a version of the function that already knows the tokenizer
+    collate_with_tokenizer = partial(custom_collate_fn, tokenizer=tokenizer)
     torch_dataset_dataloader = DataLoader(torch_dataset, batch_size=batch_size, shuffle=False,
-                                          collate_fn=DataCollatorWithPadding(tokenizer, padding=True))
+                                          collate_fn=collate_with_tokenizer)
 
     print(f"{'-'*10}Running CoT with {model_name} on {dataset}{'-'*10}")
     with Path(op_dir / "streamed_responses.jsonl").open("a") as file:
