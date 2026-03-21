@@ -52,7 +52,7 @@ def print_pretty_messages(messages):
         panel = Panel(content_text, title=title_text, border_style=color)
         console.print(panel)
 
-# Only used for CoT models
+# Only used for Chain_of_Thought models
 def load_prompt() -> str:
     """Load the system prompt from YAML file"""
     prompt_file = Path(__file__).parent.parent.parent / "src" / "smolagents" / "prompts" / "teacher_model.yaml"

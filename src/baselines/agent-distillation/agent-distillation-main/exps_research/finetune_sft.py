@@ -283,7 +283,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--cot_filepath",
         type=str,
-        help="Additional CoT dataset in agent training"
+        help="Additional Chain_of_Thought dataset in agent training"
     )
     parser.add_argument("--valid_filepath", type=str, default=None)
     parser.add_argument("--exp_id", type=str, default=None)
