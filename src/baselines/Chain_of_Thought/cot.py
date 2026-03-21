@@ -24,40 +24,38 @@ class CoTDataset(Dataset):
 
     def __getitem__(self, idx):
         question = self.questions[idx]
-        formatted_sample = [{"role": "system", "content": COT},
-                            {"role": "user", "content": rf"Question: {question} \n\nPlease put your final numerical or algebraic answer inside \boxed{{}}."}]
-
-        tokenized_sample = self.tokenizer.apply_chat_template(formatted_sample, tokenize=False, add_generation_prompt=True)
-        model_inputs = self.tokenizer(tokenized_sample, return_tensors="pt")
+        # Format the chat template but don't tokenize yet
+        messages = [
+            {"role": "system", "content": COT},
+            {"role": "user",
+             "content": rf"Question: {question} \n\nPlease put your final numerical or algebraic answer inside \boxed{{}}."}
+        ]
+        formatted_text = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
 
         return {
-            "question": question,
-            "input_ids": model_inputs["input_ids"].squeeze(0), # Remove batch dim; DataLoader will re-batch
-            "attention_mask": model_inputs["attention_mask"].squeeze(0),
+            "text": formatted_text,
+            "question": question
         }
 
 
-def custom_collate_fn(batch, tokenizer):
-    # 1. Separate the text questions from the tensors
+def custom_collate_fn(batch, tokenizer, device):
+    # 1. Extract the pre-formatted strings and the original questions
+    # (Assuming your Dataset __getitem__ now returns {"text": formatted_string, "question": raw_q})
+    texts = [item["text"] for item in batch]
     questions = [item["question"] for item in batch]
 
-    # 2. Grab the input_ids and attention_masks
-    # We need to remove the extra '1' dimension added by return_tensors="pt" in __getitem__
-    input_ids = [item["input_ids"].squeeze(0) for item in batch]
-    attention_mask = [item["attention_mask"].squeeze(0) for item in batch]
-
-    # 3. Use the tokenizer to pad the tensors
-    # This creates the actual batch tensor
-    padded_inputs = tokenizer.pad(
-        {"input_ids": input_ids, "attention_mask": attention_mask},
+    # 2. Tokenize AND Pad in one single call (The "Fast" way)
+    # This avoids the warning and is more efficient
+    model_inputs = tokenizer(
+        texts,
         padding=True,
         return_tensors="pt"
-    )
+    ).to(device)
 
     return {
-        "question": questions,  # Returns as a list of strings
-        "input_ids": padded_inputs["input_ids"],  # Returns as a Padded Tensor
-        "attention_mask": padded_inputs["attention_mask"]  # Returns as a Padded Tensor
+        "question": questions,
+        "input_ids": model_inputs["input_ids"],
+        "attention_mask": model_inputs["attention_mask"]
     }
 
 
