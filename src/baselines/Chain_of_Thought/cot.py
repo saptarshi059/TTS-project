@@ -1,4 +1,4 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer, set_seed
+from transformers import AutoModelForCausalLM, AutoTokenizer, set_seed, DataCollatorWithPadding
 from torch.utils.data import Dataset, DataLoader
 from argparse import ArgumentParser
 from datasets import load_dataset
@@ -13,10 +13,9 @@ sys.path.append("../../utils/")
 from all_system_prompts import COT
 
 class CoTDataset(Dataset):
-    def __init__(self, tokenizer, dataset, question_column , device):
+    def __init__(self, tokenizer, dataset, question_column):
         self.tokenizer = tokenizer
         self.dataset = dataset
-        self.device = device
         self.questions = dataset.get(question_column).to_list()
 
     def __len__(self):
@@ -28,12 +27,12 @@ class CoTDataset(Dataset):
                             {"role": "user", "content": rf"Question: {question} \n\nPlease put your final numerical or algebraic answer inside \boxed{{}}."}]
 
         tokenized_sample = self.tokenizer.apply_chat_template(formatted_sample, tokenize=False, add_generation_prompt=True)
-        model_inputs = self.tokenizer(tokenized_sample, padding=True, return_tensors="pt")
+        model_inputs = self.tokenizer(tokenized_sample, return_tensors="pt")
 
         return {
             "question": question,
-            "input_ids": model_inputs["input_ids"].to(self.device),
-            "attention_mask": model_inputs["attention_mask"].to(self.device),
+            "input_ids": model_inputs["input_ids"].squeeze(0), # Remove batch dim; DataLoader will re-batch
+            "attention_mask": model_inputs["attention_mask"].squeeze(0),
         }
 
 
@@ -74,13 +73,15 @@ def main(model_name:str, dataset:str, question_column: str, batch_size: int, gpu
         print("No existing progress found. Starting fresh.")
 
     print(f"Wrapping {dataset} with torch...")
-    torch_dataset = CoTDataset(tokenizer=tokenizer, dataset=ds, question_column=question_column, device=model.device)
-    torch_dataset_dataloader = DataLoader(torch_dataset, batch_size=batch_size, shuffle=False)
+    torch_dataset = CoTDataset(tokenizer=tokenizer, dataset=ds, question_column=question_column)
+    torch_dataset_dataloader = DataLoader(torch_dataset, batch_size=batch_size, shuffle=False,
+                                          collate_fn=DataCollatorWithPadding(tokenizer, padding=True))
 
     print(f"{'-'*10}Running CoT with {model_name} on {dataset}{'-'*10}")
     with Path(op_dir / "streamed_responses.jsonl").open("a") as file:
         for batch in tqdm(torch_dataset_dataloader):
             batch_questions = batch.pop('question')
+            batch = {k: v.to(model.device) for k, v in batch.items()}
             with torch.no_grad():
                 generated_ids = model.generate(**batch, max_new_tokens=1000, do_sample=False, num_beams=1)
                 decoded_generation = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)
