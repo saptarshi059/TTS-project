@@ -25,7 +25,7 @@ class CoTDataset(Dataset):
     def __getitem__(self, idx):
         question = self.questions[idx]
         formatted_sample = [{"role": "system", "content": COT},
-                            {"role": "user", "content": rf"{question} \n\nPlease put your final numerical or algebraic answer inside \boxed{{}}."}]
+                            {"role": "user", "content": rf"Question: {question} \n\nPlease put your final numerical or algebraic answer inside \boxed{{}}."}]
 
         tokenized_sample = self.tokenizer.apply_chat_template(formatted_sample, tokenize=False, add_generation_prompt=True)
         model_inputs = self.tokenizer(tokenized_sample, padding=True, return_tensors="pt")
