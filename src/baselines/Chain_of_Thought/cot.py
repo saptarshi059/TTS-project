@@ -99,7 +99,7 @@ def main(model_name:str, dataset:str, question_column: str, batch_size: int, gpu
     torch_dataset = CoTDataset(tokenizer=tokenizer, dataset=ds, question_column=question_column)
 
     # Create a version of the function that already knows the tokenizer
-    collate_with_tokenizer = partial(custom_collate_fn, tokenizer=tokenizer)
+    collate_with_tokenizer = partial(custom_collate_fn, tokenizer=tokenizer, device=model.device)
     torch_dataset_dataloader = DataLoader(torch_dataset, batch_size=batch_size, shuffle=False,
                                           collate_fn=collate_with_tokenizer)
 
