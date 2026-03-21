@@ -54,13 +54,24 @@ def main(model_name:str, dataset:str, question_column: str, batch_size: int, gpu
     folder = Path(op_dir)
     folder.mkdir(parents=True, exist_ok=True)
 
-    partial_op_file = Path(op_dir / "streamed_responses.jsonl")
+    partial_op_file = op_dir / "streamed_responses.jsonl"
     if partial_op_file.exists():
-        completed_questions = pd.read_json(partial_op_file, lines=True)['question'].to_list()
-        print(f"Completed Questions: {len(completed_questions)}...")
+        try:
+            completed_df = pd.read_json(partial_op_file, lines=True)
 
-        ds = ds.query("question not in @completed_questions")
-        print(f"Questions remaining: {len(ds)}...")
+            if not completed_df.empty:
+                completed_questions = set(completed_df['question'].tolist())
+                print(f"Completed Questions: {len(completed_questions)}...")
+
+                ds = ds[~ds['question'].isin(completed_questions)]
+                print(f"Questions remaining: {len(ds)}...")
+            else:
+                print("Completed file is empty. Proceeding with all questions.")
+
+        except Exception as e:
+            print(f"Error reading partial file: {e}. Starting from scratch.")
+    else:
+        print("No existing progress found. Starting fresh.")
 
     print(f"Wrapping {dataset} with torch...")
     torch_dataset = CoTDataset(tokenizer=tokenizer, dataset=ds, question_column=question_column, device=model.device)
