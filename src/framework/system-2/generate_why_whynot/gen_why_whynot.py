@@ -28,7 +28,7 @@ class GenerationDataset(Dataset):
         answer = sample.get("system_1_guess")
 
         messages = [{"role": "system", "content": WHY},
-                    {"role": "user", "content": rf"Question: {question}\nAnswer: {answer}"}]
+                    {"role": "user", "content": rf"Please explain why this solution is correct:\nQuestion: {question}\nSolution: {answer}"}]
         formatted_text = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
 
         return {
