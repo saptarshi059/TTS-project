@@ -3,7 +3,7 @@ import statistics
 import pandas as pd
 from datasets import load_dataset
 
-from math_verify import parse, verify
+from my_math_verify import parse, verify
 
 
 gold = parse("${1,3} \\cup {2,4}$")
