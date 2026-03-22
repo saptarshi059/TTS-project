@@ -8,7 +8,7 @@ import pandas as pd
 import os, torch
 import json
 import sys
-sys.path.append("../../utils/")
+sys.path.append("../../../utils/")
 
 from all_system_prompts import WHY, WHY_NOT
 
