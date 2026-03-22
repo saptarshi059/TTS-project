@@ -25,7 +25,7 @@ def main(strategy, dataset):
     split_generations = []
     for base_row, response_row in zip(ds.itertuples(), raw_responses.itertuples()):
         messages = [{"role": "system", "content": system_prompt},
-                    {"role": "user", "content": rf"Question: {base_row.question} {user_suffix}"}]
+                    {"role": "user", "content": rf"Question: {response_row.question} {user_suffix}"}]
         formatted_string = ""
         for element in messages:
             formatted_string += f"{element['role']}\n{element['content']}"
