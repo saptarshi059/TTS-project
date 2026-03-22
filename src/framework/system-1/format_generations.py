@@ -19,20 +19,19 @@ def main(dataset: str, strategy:str):
     all_user_suffix = {'math': r"\n\nPlease put your final numerical or algebraic answer inside \boxed{}."}
     user_suffix = all_user_suffix[dataset_type]
 
-
     raw_responses = pd.read_json(responses_path / "streamed_responses.jsonl", lines=True)
     base_dataset = load_dataset(dataset, split='test').to_pandas()
 
     stripped_generations = []
     for base_row, response_row in tqdm(zip(base_dataset.itertuples(), raw_responses.itertuples())):
         message = [{"role": "system", "content": system_prompt},
-                   {"role": "user", "content": f"Question: {base_row.problem} {user_suffix}"}]
+                   {"role": "user", "content": rf"Question: {base_row.problem} {user_suffix}"}]
         formatted_text = ""
         for element in message:
             formatted_text += f"{element['role']}\n{element['content']}\n"
         formatted_text += "assistant"
 
-        stripped_generations.append(response_row.generation.strip(formatted_text))
+        stripped_generations.append(response_row.generation.removeprefix(formatted_text))
 
     print("Saving formatted generations...")
     base_dataset['stripped_generation'] = stripped_generations
