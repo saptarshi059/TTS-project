@@ -18,7 +18,7 @@ def main(strategy, dataset):
     all_user_suffix = {'math': r"\n\nPlease put your final numerical or algebraic answer inside \boxed{}."}
     user_suffix = all_user_suffix[dataset_type]
 
-    base_path = Path(f"../../../all_output/{dataset}/{strategy}")
+    base_path = Path(f"../../../all_output/{dataset.replace('/', '_')}/{strategy}")
     raw_responses = pd.read_json(base_path / "streamed_responses.jsonl", lines=True)
     ds = load_dataset(dataset, split='test').to_pandas()
 
