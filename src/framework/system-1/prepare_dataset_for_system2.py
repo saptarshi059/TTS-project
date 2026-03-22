@@ -28,9 +28,9 @@ def main(strategy, dataset):
                     {"role": "user", "content": rf"Question: {response_row.question} {user_suffix}"}]
         formatted_string = ""
         for element in messages:
-            formatted_string += f"{element['role']}\n{element['content']}"
+            formatted_string += f"{element['role']}\n{element['content']}\n"
         formatted_string += "assistant"
-        split_generations.append(response_row.generation.removeprefix(formatted_string).strip())
+        split_generations.append(response_row.generation.split(formatted_string)[-1].strip())
 
     ds['system_1_guess'] = split_generations
     ds.to_json(base_path / "system_1_split_generations.jsonl", lines=True, orient='records', index=False)
