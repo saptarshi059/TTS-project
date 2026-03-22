@@ -53,18 +53,16 @@ def main(model_name:str, strategy:str, dataset:str, question_column: str, batch_
     set_seed(42)
     os.environ["CUDA_VISIBLE_DEVICES"] = gpu_id
 
-    all_system_prompts = {'cot': COT, 'system1': SYSTEM_1_MATH}
+    all_system_prompts = {'cot': COT, 'system1_math': SYSTEM_1_MATH}
     system_prompt = all_system_prompts[strategy]
 
     all_dataset_type = {"HuggingFaceH4/MATH-500": "math"}
     dataset_type = all_dataset_type[dataset]
 
-    all_user_suffix = {'math': r"\n\nPlease put your final numerical or algebraic answer inside \boxed{}.",
-                       'commonsense': ""
-                       }
+    all_user_suffix = {'math': r"\n\nPlease put your final numerical or algebraic answer inside \boxed{}."}
     user_suffix = all_user_suffix[dataset_type]
 
-    all_max_tokens = {'cot': 1000, 'system1': 20}
+    all_max_tokens = {'cot': 1000, 'system1_math': 20}
     max_tokens = all_max_tokens[strategy]
 
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_name, padding_side='left')
@@ -127,7 +125,7 @@ def main(model_name:str, strategy:str, dataset:str, question_column: str, batch_
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--model_name", type=str, default="Qwen/Qwen2.5-7B-Instruct")
-    parser.add_argument("--strategy", type=str, default='system1', choices=['system1', 'cot'])
+    parser.add_argument("--strategy", type=str, default='system1_math', choices=['system1_math', 'cot'])
     parser.add_argument("--dataset", type=str, default="HuggingFaceH4/MATH-500", choices=["HuggingFaceH4/MATH-500"])
     parser.add_argument("--question_column", type=str, default="problem")
     parser.add_argument("--batch_size", type=int, default=32)
