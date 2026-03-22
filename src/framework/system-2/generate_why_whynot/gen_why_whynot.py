@@ -59,6 +59,10 @@ def main(model_name:str, strategy:str, dataset:str, question_column: str, batch_
     all_system_prompts = {'why': WHY, 'why_not': WHY_NOT}
     system_prompt = all_system_prompts[strategy]
 
+    print(strategy, system_prompt)
+
+
+
     all_user_prefix = {'why': "Please explain why this solution is correct:",
                        'why_not': "Please explain why this solution is incorrect:"
                        }
