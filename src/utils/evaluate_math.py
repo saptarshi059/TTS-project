@@ -114,8 +114,10 @@ def main(op_file: str):
     output_file = pd.read_json(op_file, lines=True)
     responses = []
     for row in output_file.itertuples():
-        responses.append(answers_equivalent(gold_raw=row.answer, model_raw=row.stripped_generation, gold_is_extracted=True))
-
+        try:
+            responses.append(answers_equivalent(gold_raw=row.answer, model_raw=row.stripped_generation, gold_is_extracted=True))
+        except:
+            print(row.stripped_generation)
     print(f"Accuracy: {statistics.mean(responses)*100:.2f}%")
 
 
