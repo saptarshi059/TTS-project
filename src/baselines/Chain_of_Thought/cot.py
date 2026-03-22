@@ -16,7 +16,6 @@ from all_system_prompts import COT
 class CoTDataset(Dataset):
     def __init__(self, tokenizer, dataset, question_column):
         self.tokenizer = tokenizer
-        self.dataset = dataset
         self.questions = dataset.get(question_column).to_list()
 
     def __len__(self):
@@ -24,12 +23,8 @@ class CoTDataset(Dataset):
 
     def __getitem__(self, idx):
         question = self.questions[idx]
-        # Format the chat template but don't tokenize yet
-        messages = [
-            {"role": "system", "content": COT},
-            {"role": "user",
-             "content": rf"Question: {question} \n\nPlease put your final numerical or algebraic answer inside \boxed{{}}."}
-        ]
+        messages = [{"role": "system", "content": COT},
+                    {"role": "user", "content": rf"Question: {question} \n\nPlease put your final numerical or algebraic answer inside \boxed{{}}."}]
         formatted_text = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
 
         return {
@@ -39,18 +34,10 @@ class CoTDataset(Dataset):
 
 
 def custom_collate_fn(batch, tokenizer, device):
-    # 1. Extract the pre-formatted strings and the original questions
-    # (Assuming your Dataset __getitem__ now returns {"text": formatted_string, "question": raw_q})
     texts = [item["text"] for item in batch]
     questions = [item["question"] for item in batch]
 
-    # 2. Tokenize AND Pad in one single call (The "Fast" way)
-    # This avoids the warning and is more efficient
-    model_inputs = tokenizer(
-        texts,
-        padding=True,
-        return_tensors="pt"
-    ).to(device)
+    model_inputs = tokenizer(texts, padding=True, return_tensors="pt").to(device)
 
     return {
         "question": questions,

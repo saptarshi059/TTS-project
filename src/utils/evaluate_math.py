@@ -1,6 +1,8 @@
-import re
-import sympy as sp
 from sympy.parsing.latex import parse_latex
+from argparse import ArgumentParser
+import pandas as pd
+import sympy as sp
+import re
 
 
 def extract_answer(text):
@@ -106,3 +108,19 @@ def answers_equivalent(gold_raw, model_raw, gold_is_extracted=False):
     # 2. SymPy symbolic equivalence
     return sympy_equivalent(normalize(gold), normalize(pred))
 
+
+def main(op_file: str):
+    output_file = pd.read_json(op_file, lines=True)
+    responses = []
+    for row in output_file.itertuples():
+        responses.append(answers_equivalent(gold_raw=row.answer, model_raw=row.stripped_generation, gold_is_extracted=True))
+
+    avg_correct = sum(responses)/len(responses)
+    print(f"Average Accuracy: {avg_correct:.2f}")
+
+
+if __name__ == "__main__":
+    parser = ArgumentParser()
+    parser.add_argument("--output_file", type=str, default="../../../all_output/HuggingFaceH4_MATH-500/cot/formatted_generations.jsonl")
+    args = parser.parse_args()
+    main(op_file=args.output_file)
