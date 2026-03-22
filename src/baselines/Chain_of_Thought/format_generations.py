@@ -1,6 +1,6 @@
 from transformers import AutoTokenizer
 from argparse import ArgumentParser
-from datasets import load_dataset
+from datasets import load_dataset, tqdm
 import pandas as pd
 import sys
 sys.path.append("../../utils/")
@@ -14,13 +14,14 @@ def main(dataset: str):
     base_dataset = load_dataset(dataset, split='test').to_pandas()
 
     stripped_generations = []
-    for base_row, response_row in zip(base_dataset.itertuples(), raw_responses.itertuples()):
+    for base_row, response_row in tqdm(zip(base_dataset.itertuples(), raw_responses.itertuples())):
         message = [{"role": "system", "content": COT},
-                   {"role": "user", "content": rf"Question: {base_row.question} \n\nPlease put your final numerical or algebraic answer inside \boxed{{}}."}]
+                   {"role": "user", "content": rf"Question: {base_row.problem} \n\nPlease put your final numerical or algebraic answer inside \boxed{{}}."}]
         formatted_text = tokenizer.apply_chat_template(message, tokenize=False, add_generation_prompt=True)
 
         stripped_generations.append(response_row.generation.split(formatted_text)[-1].strip())
 
+    print("Saving formatted generations...")
     base_dataset['stripped_generation'] = stripped_generations
     base_dataset.to_json("formatted_generations.jsonl", lines=True, orient='records', index=False)
 
