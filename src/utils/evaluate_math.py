@@ -1,5 +1,6 @@
 from sympy.parsing.latex import parse_latex
 from argparse import ArgumentParser
+from datasets import load_dataset
 import pandas as pd
 import sympy as sp
 import statistics
@@ -7,12 +8,12 @@ import re
 
 
 def extract_answer(text):
-    """Try \\boxed{} first, then 'The answer is X' as fallback."""
     text = text.replace('\\\\', '\\')
 
-    # 1. Try \boxed{}
-    match = re.search(r'\\?boxed\{', text)
-    if match:
+    # Find the LAST \boxed{} occurrence (model may produce multiple in CoT)
+    matches = list(re.finditer(r'\\?boxed\{', text))
+    if matches:
+        match = matches[-1]  # take the last one
         start = match.end()
         depth = 1
         for i, ch in enumerate(text[start:]):
@@ -23,7 +24,7 @@ def extract_answer(text):
                 if depth == 0:
                     return text[start:start + i].strip()
 
-    # 2. Fallback: "the answer is X" or "= X" (last occurrence wins)
+    # Fallback: last occurrence of "the answer is X" or "= X"
     match = re.findall(r'(?:the answer is|=)\s*([^\s,\.]+)', text, re.IGNORECASE)
     if match:
         return match[-1].strip()
@@ -110,19 +111,19 @@ def answers_equivalent(gold_raw, model_raw, gold_is_extracted=False):
     return sympy_equivalent(normalize(gold), normalize(pred))
 
 
-def main(op_file: str):
+def main(dataset:str, op_file: str):
+    base_dataset = load_dataset(dataset, split='test').to_pandas()
     output_file = pd.read_json(op_file, lines=True)
     responses = []
-    for row in output_file.itertuples():
-        try:
-            responses.append(answers_equivalent(gold_raw=row.answer, model_raw=row.stripped_generation, gold_is_extracted=True))
-        except:
-            print(row.stripped_generation)
+    for base_row, response_row in zip(base_dataset.itertuples(), output_file.itertuples()):
+        responses.append(answers_equivalent(gold_raw=base_row.answer, model_raw=response_row.generation, gold_is_extracted=True))
+
     print(f"Accuracy: {statistics.mean(responses)*100:.2f}%")
 
 
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--output_file", type=str, default="../../../all_output/HuggingFaceH4_MATH-500/cot/formatted_generations.jsonl")
+    parser.add_argument("--dataset", type=str, default="HuggingFaceH4/MATH-500")
     args = parser.parse_args()
-    main(op_file=args.output_file)
+    main(dataset=args.dataset, op_file=args.output_file)
