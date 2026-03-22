@@ -64,8 +64,8 @@ def main(model_name:str, strategy:str, dataset:str, question_column: str, batch_
                                                  attn_implementation="flash_attention_2",
                                                  device_map="auto")
 
-    ds = load_dataset(dataset, split='test').to_pandas()
     dataset = dataset.replace("/", "_")
+    ds = pd.read_json(Path(output_dir) / f"{dataset}/system1_math/system_1_split_generations.jsonl", lines=True)
 
     op_dir = Path(output_dir) / f"{dataset}/{strategy}/"
     folder = Path(op_dir)
@@ -101,7 +101,7 @@ def main(model_name:str, strategy:str, dataset:str, question_column: str, batch_
     torch_dataset_dataloader = DataLoader(torch_dataset, batch_size=batch_size, shuffle=False,
                                           collate_fn=collate_with_tokenizer)
 
-    print(f"{'-'*10}Running {strategy} with {model_name} on {dataset}{'-'*10}")
+    print(f"{'-'*10}Running '{strategy}' with {model_name} on {dataset}{'-'*10}")
     with Path(op_dir / "streamed_responses.jsonl").open("a") as file:
         for batch in tqdm(torch_dataset_dataloader):
             batch_questions = batch.pop('question')
@@ -123,7 +123,7 @@ if __name__ == "__main__":
     parser.add_argument("--question_column", type=str, default="problem")
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--gpu_id", type=str, default="0")
-    parser.add_argument("--output_directory", type=str, default="../../../all_output/")
+    parser.add_argument("--output_directory", type=str, default="../../../../all_output/")
     args = parser.parse_args()
     main(model_name=args.model_name, strategy=args.strategy, question_column=args.question_column,
          dataset=args.dataset, batch_size=args.batch_size, gpu_id=args.gpu_id,
