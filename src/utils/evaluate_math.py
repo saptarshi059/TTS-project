@@ -44,26 +44,57 @@ def normalize(expr):
     return expr
 
 
-def strip_outer(s):
-    """Strip outer parentheses or brackets."""
-    s = s.strip()
-    if (s.startswith('(') and s.endswith(')')) or \
-       (s.startswith('[') and s.endswith(']')):
-        return s[1:-1]
-    return s
-
-
 def try_parse_latex(expr):
     try:
         return parse_latex(expr)
     except Exception:
         return None
 
+def strip_outer(s):
+    s = s.strip()
+    if (s.startswith('(') and s.endswith(')')) or \
+       (s.startswith('[') and s.endswith(']')):
+        return s[1:-1]
+    # Mixed interval brackets: (-\infty, 0] or [0, \infty)
+    if (s.startswith('(') and s.endswith(']')) or \
+       (s.startswith('[') and s.endswith(')')):
+        return s[1:-1]
+    return s
+
+
+def is_interval(s):
+    """Check if expression is an interval like (-\infty, 0] or [1, \infty)."""
+    return bool(re.match(r'^[\(\[]-?\\?infty|^[\(\[].*,.*[\)\]]$', s))
+
+
+def parse_interval(s):
+    """Convert interval string to sympy Interval."""
+    s = s.strip()
+    left_open = s[0] == '('
+    right_open = s[-1] == ')'
+    inner = s[1:-1]
+    parts = inner.split(',')
+    if len(parts) != 2:
+        return None
+    try:
+        left = parse_latex(parts[0].strip().replace('\\infty', 'oo').replace('infty', 'oo'))
+        right = parse_latex(parts[1].strip().replace('\\infty', 'oo').replace('infty', 'oo'))
+        return sp.Interval(left, right, left_open=left_open, right_open=right_open)
+    except Exception:
+        return None
+
 
 def sympy_equivalent(gold, pred):
-    """Compare two normalized LaTeX expressions using SymPy."""
     gold = strip_outer(gold)
     pred = strip_outer(pred)
+
+    # Interval comparison: (-\infty, 0] style
+    if is_interval(gold) or is_interval(pred):
+        g_interval = parse_interval(gold) if is_interval(gold) else None
+        p_interval = parse_interval(pred) if is_interval(pred) else None
+        if g_interval is None or p_interval is None:
+            return False
+        return g_interval == p_interval
 
     # Tuple/coordinate: compare element-wise
     if ',' in gold and ',' in pred:
@@ -71,10 +102,13 @@ def sympy_equivalent(gold, pred):
         pred_parts = pred.split(',')
         if len(gold_parts) != len(pred_parts):
             return False
-        return all(
-            sp.simplify(parse_latex(g.strip()) - parse_latex(p.strip())) == 0
-            for g, p in zip(gold_parts, pred_parts)
-        )
+        try:
+            return all(
+                sp.simplify(parse_latex(g.strip()) - parse_latex(p.strip())) == 0
+                for g, p in zip(gold_parts, pred_parts)
+            )
+        except Exception:
+            return False
 
     # Single expression
     parsed_gold = try_parse_latex(gold)
