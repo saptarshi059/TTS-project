@@ -2,6 +2,7 @@ from sympy.parsing.latex import parse_latex
 from argparse import ArgumentParser
 import pandas as pd
 import sympy as sp
+import statistics
 import re
 
 
@@ -115,8 +116,7 @@ def main(op_file: str):
     for row in output_file.itertuples():
         responses.append(answers_equivalent(gold_raw=row.answer, model_raw=row.stripped_generation, gold_is_extracted=True))
 
-    avg_correct = sum(responses)/len(responses)
-    print(f"Average Accuracy: {avg_correct:.2f}")
+    print(f"Accuracy: {statistics.mean(responses)*100:.2f}%")
 
 
 if __name__ == "__main__":
