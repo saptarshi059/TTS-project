@@ -28,7 +28,7 @@ def main(dataset: str, strategy:str):
                    {"role": "user", "content": rf"Question: {base_row.problem} {user_suffix}"}]
         formatted_text = ""
         for element in message:
-            formatted_text += f"{element['role']}\n{element['content']}\n"
+            formatted_text += rf"{element['role']}\n{element['content']}\n"
         formatted_text += "assistant"
 
         stripped_generations.append(response_row.generation.removeprefix(formatted_text))
