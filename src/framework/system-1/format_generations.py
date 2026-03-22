@@ -43,6 +43,6 @@ def main(dataset: str, strategy:str):
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--dataset", type=str, default="HuggingFaceH4/MATH-500", choices=["HuggingFaceH4/MATH-500"])
-    parser.add_argument("--strategy", type=str, default='system1', choices=['system1', 'cot'])
+    parser.add_argument("--strategy", type=str, default='system1_math', choices=['system1_math', 'cot'])
     args = parser.parse_args()
     main(dataset=args.dataset, strategy=args.strategy)
