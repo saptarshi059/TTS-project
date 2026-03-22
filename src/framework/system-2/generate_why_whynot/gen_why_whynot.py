@@ -13,11 +13,12 @@ sys.path.append("../../../utils/")
 from all_system_prompts import WHY, WHY_NOT
 
 class GenerationDataset(Dataset):
-    def __init__(self, tokenizer, dataset, system_prompt, question_column):
+    def __init__(self, tokenizer, dataset, system_prompt, user_prefix, question_column):
         self.tokenizer = tokenizer
         self.dataset = dataset
         self.question_column = question_column
         self.system_prompt = system_prompt
+        self.user_prefix = user_prefix
 
     def __len__(self):
         return len(self.dataset)
@@ -28,7 +29,7 @@ class GenerationDataset(Dataset):
         answer = sample.get("system_1_guess")
 
         messages = [{"role": "system", "content": WHY},
-                    {"role": "user", "content": rf"Please explain why this solution is correct:\nQuestion: {question}\nAnswer: {answer}"}]
+                    {"role": "user", "content": rf"{self.user_prefix}\nQuestion: {question}\nAnswer: {answer}"}]
         formatted_text = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
 
         return {
@@ -57,6 +58,11 @@ def main(model_name:str, strategy:str, dataset:str, question_column: str, batch_
 
     all_system_prompts = {'why': WHY, 'why_not': WHY_NOT}
     system_prompt = all_system_prompts[strategy]
+
+    all_user_prefix = {'why': "Please explain why this solution is correct:",
+                       'why_not': "Please explain why this solution is incorrect:"
+                       }
+    user_prefix = all_user_prefix[strategy]
 
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_name, padding_side='left')
     model = AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path=model_name,
@@ -92,7 +98,7 @@ def main(model_name:str, strategy:str, dataset:str, question_column: str, batch_
 
     print(f"Wrapping {dataset} with torch...")
     torch_dataset = GenerationDataset(tokenizer=tokenizer, dataset=ds, system_prompt=system_prompt,
-                                      question_column=question_column)
+                                      user_prefix=user_prefix, question_column=question_column)
 
     print(f"{'-'*10}FORMATTED DATASET SAMPLE{'-'*10}\n{torch_dataset[0]['text']}\n{'-'*10}")
 
