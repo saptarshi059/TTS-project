@@ -1,6 +1,7 @@
+from datasets import load_dataset, tqdm
 from transformers import AutoTokenizer
 from argparse import ArgumentParser
-from datasets import load_dataset, tqdm
+from pathlib import Path
 import pandas as pd
 import sys
 sys.path.append("../../utils/")
@@ -10,7 +11,9 @@ from all_system_prompts import COT
 def main(dataset: str):
     tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-7B-Instruct")
 
-    raw_responses = pd.read_json(f"../../../all_output/{dataset.replace('/','_')}/cot/streamed_responses.jsonl", lines=True)
+    base_path = Path(f"../../../all_output/{dataset.replace('/','_')}/cot")
+
+    raw_responses = pd.read_json(base_path / "streamed_responses.jsonl", lines=True)
     base_dataset = load_dataset(dataset, split='test').to_pandas()
 
     stripped_generations = []
@@ -23,7 +26,7 @@ def main(dataset: str):
 
     print("Saving formatted generations...")
     base_dataset['stripped_generation'] = stripped_generations
-    base_dataset.to_json("formatted_generations.jsonl", lines=True, orient='records', index=False)
+    base_dataset.to_json(base_path / "formatted_generations.jsonl", lines=True, orient='records', index=False)
 
 if __name__ == "__main__":
     parser = ArgumentParser()
