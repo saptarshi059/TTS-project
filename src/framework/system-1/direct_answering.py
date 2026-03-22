@@ -14,14 +14,11 @@ sys.path.append("../../utils/")
 from all_system_prompts import *
 
 class GenerationDataset(Dataset):
-    def __init__(self, tokenizer, dataset, system_prompt, dataset_type, question_column):
+    def __init__(self, tokenizer, dataset, system_prompt, user_suffix, question_column):
         self.tokenizer = tokenizer
         self.questions = dataset.get(question_column).to_list()
         self.system_prompt = system_prompt
-        self.all_user_suffix = {'math': r"\n\nPlease put your final numerical or algebraic answer inside \boxed{}.",
-                                'commonsense': ""
-                                }
-        self.user_suffix = self.all_user_suffix[dataset_type]
+        self.user_suffix = user_suffix
 
     def __len__(self):
         return len(self.questions)
@@ -62,6 +59,11 @@ def main(model_name:str, strategy:str, dataset:str, question_column: str, batch_
     all_dataset_type = {"HuggingFaceH4/MATH-500": "math"}
     dataset_type = all_dataset_type[dataset]
 
+    all_user_suffix = {'math': r"\n\nPlease put your final numerical or algebraic answer inside \boxed{}.",
+                       'commonsense': ""
+                       }
+    user_suffix = all_user_suffix[dataset_type]
+
     all_max_tokens = {'cot': 1000, 'system1': 20}
     max_tokens = all_max_tokens[strategy]
 
@@ -99,7 +101,7 @@ def main(model_name:str, strategy:str, dataset:str, question_column: str, batch_
 
     print(f"Wrapping {dataset} with torch...")
     torch_dataset = GenerationDataset(tokenizer=tokenizer, dataset=ds, system_prompt=system_prompt,
-                                      dataset_type=dataset_type, question_column=question_column)
+                                      user_suffix=user_suffix, question_column=question_column)
 
     print(f"{'-'*10}FORMATTED DATASET SAMPLE: {torch_dataset[0]['text']} {'-'*10}")
 
