@@ -6,14 +6,12 @@ import sympy as sp
 import statistics
 import re
 
-
-def extract_answer(text):
+def extract_all_answers(text):
+    """Extract all boxed answers from text."""
     text = text.replace('\\\\', '\\')
+    results = []
 
-    # Find the LAST \boxed{} occurrence (model may produce multiple in CoT)
-    matches = list(re.finditer(r'\\?boxed\{', text))
-    if matches:
-        match = matches[-1]  # take the last one
+    for match in re.finditer(r'\\?boxed\{', text):
         start = match.end()
         depth = 1
         for i, ch in enumerate(text[start:]):
@@ -22,9 +20,18 @@ def extract_answer(text):
             elif ch == '}':
                 depth -= 1
                 if depth == 0:
-                    return text[start:start + i].strip()
+                    results.append(text[start:start + i].strip())
+                    break
 
-    # Fallback: last occurrence of "the answer is X" or "= X"
+    return results
+
+def extract_answer(text):
+    """Return last boxed answer, with fallback."""
+    answers = extract_all_answers(text)
+    if answers:
+        return answers[-1]
+
+    # Fallback: last "the answer is X" or "= X"
     match = re.findall(r'(?:the answer is|=)\s*([^\s,\.]+)', text, re.IGNORECASE)
     if match:
         return match[-1].strip()
@@ -122,27 +129,31 @@ def sympy_equivalent(gold, pred):
 
 
 def answers_equivalent(gold_raw, model_raw, gold_is_extracted=False):
-    """
-    Compare gold and model answers.
-    Set gold_is_extracted=True if gold is already a clean answer field
-    (e.g. from MATH-500's dedicated answer column) rather than a full solution string.
-    """
     if gold_is_extracted:
         gold = gold_raw.replace('\\\\', '\\').strip()
     else:
         gold = extract_answer(gold_raw)
 
-    pred = extract_answer(model_raw)
-
-    if gold is None or pred is None:
+    if gold is None:
         return False
 
-    # 1. Exact string match after normalization
-    if normalize(gold) == normalize(pred):
-        return True
+    # Check all model answers — True if any match
+    pred_candidates = extract_all_answers(model_raw)
+    if not pred_candidates:
+        # Fall back to the fallback extractor
+        pred = extract_answer(model_raw)
+        pred_candidates = [pred] if pred else []
 
-    # 2. SymPy symbolic equivalence
-    return sympy_equivalent(normalize(gold), normalize(pred))
+    if not pred_candidates:
+        return False
+
+    for pred in pred_candidates:
+        if normalize(gold) == normalize(pred):
+            return True
+        if sympy_equivalent(normalize(gold), normalize(pred)):
+            return True
+
+    return False
 
 
 def main(dataset:str, op_file: str):
