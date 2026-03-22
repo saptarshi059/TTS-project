@@ -101,7 +101,7 @@ def main(model_name:str, strategy:str, dataset:str, question_column: str, batch_
     torch_dataset = GenerationDataset(tokenizer=tokenizer, dataset=ds, system_prompt=system_prompt,
                                       user_suffix=user_suffix, question_column=question_column)
 
-    print(f"{'-'*10}FORMATTED DATASET SAMPLE: {torch_dataset[0]['text']} {'-'*10}")
+    print(f"{'-'*10}FORMATTED DATASET SAMPLE{'-'*10}\n{torch_dataset[0]['text']}\n{'-'*10}")
 
     # Create a version of the function that already knows the tokenizer
     collate_with_tokenizer = partial(custom_collate_fn, tokenizer=tokenizer, device=model.device)
