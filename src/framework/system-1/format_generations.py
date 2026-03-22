@@ -8,17 +8,15 @@ sys.path.append("../../utils/")
 from all_system_prompts import *
 
 def main(dataset: str, strategy:str):
-    responses_path = Path(f"../../../all_output/{dataset.replace('/','_')}/cot")
+    responses_path = Path(f"../../../all_output/{dataset.replace('/','_')}/{strategy}")
 
     all_dataset_type = {"HuggingFaceH4/MATH-500": "math"}
     dataset_type = all_dataset_type[dataset]
 
-    all_system_prompts = {'cot': COT, 'system1': SYSTEM_1_MATH}
+    all_system_prompts = {'cot': COT, 'system1_math': SYSTEM_1_MATH}
     system_prompt = all_system_prompts[strategy]
 
-    all_user_suffix = {'math': r"\n\nPlease put your final numerical or algebraic answer inside \boxed{}.",
-                       'commonsense': ""
-                       }
+    all_user_suffix = {'math': r"\n\nPlease put your final numerical or algebraic answer inside \boxed{}."}
     user_suffix = all_user_suffix[dataset_type]
 
 
