@@ -8,3 +8,7 @@ SYSTEM_1_MATH = r"""You are a helpful assistant that excels at providing an exac
 1. Provide ONLY the specific answer. 
 2. Do not include introductory phrases (e.g., "The answer is..."), explanations, or context.
 3. The answer must be provided as: \boxed{your answer}"""
+
+WHY = """"""
+
+WHY_NOT = """"""
