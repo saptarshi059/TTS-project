@@ -7,7 +7,7 @@ sys.path.append("../../../utils/")
 from all_system_prompts import WHY, WHY_NOT
 
 
-def clean_generation(base_df, gen_ds, strategy):
+def clean_generation(base_df, question_col, gen_ds, strategy):
     all_user_prefix = {'why': "Please explain why this solution is correct:",
                        'why_not': "Please explain why this solution is incorrect:"
                        }
@@ -19,7 +19,7 @@ def clean_generation(base_df, gen_ds, strategy):
     stripped_gen = []
     for base_row, why_row in zip(base_df.itertuples(), gen_ds.itertuples()):
         messages = [{"role": "system", "content": system_prompt},
-                    {"role": "user", "content": rf"{user_prefix}\nQuestion: {base_row.question}\nAnswer: {base_row.system_1_guess}"}]
+                    {"role": "user", "content": rf"{user_prefix}\nQuestion: {base_row.get(question_col)}\nAnswer: {base_row.system_1_guess}"}]
         formatted_string = ""
         for element in messages:
             formatted_string += f"{element['role']}\n{element['content']}\n"
@@ -29,7 +29,7 @@ def clean_generation(base_df, gen_ds, strategy):
 
     return stripped_gen
 
-def main(dataset:str) -> None:
+def main(dataset:str, question_column:str) -> None:
     dataset = dataset.replace("/", "_")
     base_dir = Path(f"../../../../all_output/{dataset}")
 
@@ -37,8 +37,8 @@ def main(dataset:str) -> None:
     why_ds = pd.read_json(Path(base_dir) / "why/streamed_responses.jsonl", lines=True)
     why_not_ds = pd.read_json(Path(base_dir) / "why_not/streamed_responses.jsonl", lines=True)
 
-    why_gen_stripped = clean_generation(base_ds, why_ds, "why")
-    why_not_gen_stripped = clean_generation(base_ds, why_not_ds, "why_not")
+    why_gen_stripped = clean_generation(base_ds, question_column, why_ds, "why")
+    why_not_gen_stripped = clean_generation(base_ds, question_column, why_not_ds, "why_not")
 
     base_ds['why_cleaned'] = why_gen_stripped
     base_ds['why_not_cleaned'] = why_not_gen_stripped
@@ -53,5 +53,6 @@ def main(dataset:str) -> None:
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--dataset", type=str, default="HuggingFaceH4/MATH-500", choices=["HuggingFaceH4/MATH-500"])
+    parser.add_argument("--question_column", type=str, default="problem")
     args = parser.parse_args()
-    main(dataset=args.dataset)
+    main(dataset=args.dataset, question_column=args.question_column)
