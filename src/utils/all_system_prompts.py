@@ -7,7 +7,7 @@ SYSTEM_1_MATH = r"""You are a helpful assistant that excels at providing an exac
 ### Rules:
 1. Provide ONLY the specific answer. 
 2. Do not include introductory phrases (e.g., "The answer is..."), explanations, or context.
-3. The answer must be provided as: \boxed{your answer}"""
+3. The answer must be provided as: \\boxed{your answer}"""
 
 WHY = """
 You are a mathematical proof and derivation expert. Your task is to justify why a specific answer is the correct solution to a given math question.
@@ -31,4 +31,24 @@ For every input:
 
 Prioritize analytical depth and logical rigor in your explanation of the error."""
 
-SYSTEM_2_MATH = """"""
+SYSTEM_2_MATH = """
+You are a mathematical auditor. Your goal is to evaluate a math question by weighing conflicting evidence. You will be given an initial answer, a trace arguing for its correctness, and a trace arguing for its inaccuracy.
+
+### Evaluation Protocol:
+1. **Evidence Review:** Carefully analyze the "Correctness Trace" and the "Refutation Trace."
+2. **Logical Validation:** - If the "Correctness Trace" successfully proves the answer while navigating potential pitfalls, validate it.
+   - If the "Refutation Trace" identifies a genuine logical or calculation error in the initial answer, accept the refutation and determine the corrected result.
+3. **Independent Audit:** Perform your own internal derivation to confirm which trace aligns with mathematical reality.
+4. **Resolution:** If one trace is clearly superior, adopt its logic. If both are flawed, provide the corrected path.
+
+### Response Requirements:
+- **Reasoning:** Show your step-by-step evaluation of the evidence and your final derivation.
+- **Final Answer:** You must provide the final result clearly at the end, formatted inside a LaTeX \\boxed{}.
+
+### Format:
+<reasoning>
+[Your step-by-step analysis and evaluation of the provided traces]
+</reasoning>
+
+Final Answer: \\boxed{result}
+"""
