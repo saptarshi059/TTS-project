@@ -19,7 +19,7 @@ def clean_generation(base_df, question_col, gen_ds, strategy):
     stripped_gen = []
     for base_row, why_row in zip(base_df.itertuples(), gen_ds.itertuples()):
         messages = [{"role": "system", "content": system_prompt},
-                    {"role": "user", "content": rf"{user_prefix}\nQuestion: {base_row.get(question_col)}\nAnswer: {base_row.system_1_guess}"}]
+                    {"role": "user", "content": rf"{user_prefix}\nQuestion: {getattr(base_row, question_col)}\nAnswer: {base_row.system_1_guess}"}]
         formatted_string = ""
         for element in messages:
             formatted_string += f"{element['role']}\n{element['content']}\n"
