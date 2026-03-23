@@ -1,13 +1,16 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer, set_seed
-from torch.utils.data import Dataset, DataLoader
-from datasets import load_dataset, tqdm
+import json
+import os
+import sys
+import torch
 from argparse import ArgumentParser
 from functools import partial
 from pathlib import Path
+
 import pandas as pd
-import os, torch
-import json
-import sys
+from datasets import tqdm
+from torch.utils.data import Dataset, DataLoader
+from transformers import AutoModelForCausalLM, AutoTokenizer, set_seed
+
 sys.path.append("../../../utils/")
 
 from all_system_prompts import WHY, WHY_NOT
@@ -28,7 +31,7 @@ class GenerationDataset(Dataset):
         question = sample.get(self.question_column)
         answer = sample.get("system_1_guess")
 
-        messages = [{"role": "system", "content": WHY},
+        messages = [{"role": "system", "content": self.system_prompt},
                     {"role": "user", "content": rf"{self.user_prefix}\nQuestion: {question}\nAnswer: {answer}"}]
         formatted_text = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
 

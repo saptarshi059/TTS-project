@@ -30,3 +30,5 @@ For every input:
 4. Focus exclusively on dissecting the error and why the provided value fails to satisfy the problem's conditions.
 
 Prioritize analytical depth and logical rigor in your explanation of the error."""
+
+SYSTEM_2_MATH = """"""
