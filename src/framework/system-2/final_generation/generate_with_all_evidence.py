@@ -78,7 +78,7 @@ def main(model_name:str, dataset:str, question_column: str, batch_size: int, gpu
                 completed_questions = set(completed_df['question'].tolist())
                 print(f"Completed Questions: {len(completed_questions)}...")
 
-                ds = ds[~ds['question'].isin(completed_questions)]
+                ds = ds[~getattr(ds, question_column).isin(completed_questions)]
                 print(f"Questions remaining: {len(ds)}...")
             else:
                 print("Completed file is empty. Proceeding with all questions.")
@@ -93,7 +93,6 @@ def main(model_name:str, dataset:str, question_column: str, batch_size: int, gpu
 
     print(f"{'-'*10}FORMATTED DATASET SAMPLE{'-'*10}\n{torch_dataset[0]['text']}\n{'-'*10}")
 
-    # Create a version of the function that already knows the tokenizer
     collate_with_tokenizer = partial(custom_collate_fn, tokenizer=tokenizer, device=model.device)
     torch_dataset_dataloader = DataLoader(torch_dataset, batch_size=batch_size, shuffle=False,
                                           collate_fn=collate_with_tokenizer)
