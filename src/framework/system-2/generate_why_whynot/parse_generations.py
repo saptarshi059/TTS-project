@@ -47,7 +47,7 @@ def main(dataset:str, question_column:str) -> None:
     folder = Path(op_dir)
     folder.mkdir(parents=True, exist_ok=True)
 
-    base_ds.to_json(base_dir / op_dir/"system2_start.jsonl", lines=True, orient='records', index=False)
+    base_ds.to_json(op_dir/"system2_start.jsonl", lines=True, orient='records', index=False)
 
 
 if __name__ == "__main__":
