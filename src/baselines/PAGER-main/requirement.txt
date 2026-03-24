@@ -1,0 +1,15 @@
+--extra-index-url https://download.pytorch.org/whl/cu121
+
+# Core Engine (Latest 2026 Stable)
+vllm==0.16.0
+torch
+
+# Modern FastAPI to match vLLM's Starlette requirements
+fastapi>=0.130.0
+uvicorn>=0.35.0
+
+# Library Compatibility
+transformers>=4.56.0,<5.0.0
+faiss-gpu-cu12>=1.13.0
+scikit-learn>=1.7.1
+tqdm>=4.67.1

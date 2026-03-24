@@ -1,54 +1,61 @@
-COT = """You are a helpful assistant that excels at logical reasoning. 
-Please solve the following task by thinking step-by-step. 
-Provide a clear, structured explanation of your logic, and conclude by stating the final answer clearly."""
+NAIVE_BASELINE = ("Answer the given question using the provided knowledge graph triples. "
+                  "Please keep your response concise. If no answer exists, please return ''. "
+                  "Format your response as\nAnswer: <answer text>")
 
-SYSTEM_1_MATH = """You are a helpful assistant that excels at providing an exact solution to a math question.
+SYSTEM_1 = """You are a precise answering engine. Your task is to provide the direct answer to a question without any explanation.
 
 ### Rules:
 1. Provide ONLY the specific answer. 
 2. Do not include introductory phrases (e.g., "The answer is..."), explanations, or context.
-3. The answer must be provided as: \\boxed{your answer}"""
+3. The answer must be wrapped in <answer> tags inside an <output> block.
+4. Output ONLY the <output> block.
 
-WHY = """
-You are a mathematical proof and derivation expert. Your task is to justify why a specific answer is the correct solution to a given math question.
+### Example:
 
-Since you are provided only with the Question and the Final Answer, your role is to:
-1. Reconstruct the logical derivation: Provide the step-by-step mathematical path that leads from the question to the given answer.
-2. Justify every step: For every algebraic manipulation, theorem applied, or calculation performed, explicitly state the mathematical rule or property used (e.g., "Applying the Quadratic Formula," "Using Trigonometric Identities," or "Integration by Parts").
-3. Verification: Explain why the given answer is the unique and correct conclusion based on the steps you reconstructed.
-4. Strict Focus: Do not offer alternative solutions, discuss common mistakes, or deviate from the logic that directly supports the provided answer.
+<input>
+Question: What is the capital of France?
+</input>
 
-Format your response as a clear, structured sequence of logical justifications.
-"""
+<output>
+<answer>Paris</answer>
+</output>
 
-WHY_NOT = """You are a precise Mathematical Auditor. Your sole task is to explain the logical, procedural, or numerical reasons why a provided final answer is incorrect.
+### Task:
+Process the following input and provide the answer within an <output> block."""
 
-For every input:
-1. Identify the specific mathematical rules, constraints, or logic that the provided answer violates.
-2. Provide a rigorous, step-by-step justification focusing entirely on the flaws of the given answer.
-3. **Strictly Prohibition**: Do not provide the correct answer or a full derivation of the correct solution. 
-4. Focus exclusively on dissecting the error and why the provided value fails to satisfy the problem's conditions.
+EXPLANATION_GEN = """Given a question and a candidate answer, explain step-by-step how one could arrive at this answer. 
+Break your explanation into numbered steps, identifying the key people, events, or facts that connect the question to 
+the answer. Be explicit about intermediate facts even if you are uncertain about them.
 
-Prioritize analytical depth and logical rigor in your explanation of the error."""
+Provide your response inside <output> </output> tags."""
 
-SYSTEM_2_MATH = """
-You are a mathematical auditor. Your goal is to evaluate a math question by weighing conflicting evidence. You will be given an initial answer, a trace arguing for its correctness, and a trace arguing for its inaccuracy.
+TRIPLE_GEN = """You are a knowledge graph extractor. Your task is to generate a detailed logical sequence of subject-predicate-object triples based on a reasoning trace for a question.
 
-### Evaluation Protocol:
-1. **Evidence Review:** Carefully analyze the "Correctness Trace" and the "Refutation Trace."
-2. **Logical Validation:** - If the "Correctness Trace" successfully proves the answer while navigating potential pitfalls, validate it.
-   - If the "Refutation Trace" identifies a genuine logical or calculation error in the initial answer, accept the refutation and determine the corrected result.
-3. **Independent Audit:** Perform your own internal derivation to confirm which trace aligns with mathematical reality.
-4. **Resolution:** If one trace is clearly superior, adopt its logic. If both are flawed, provide the corrected path.
+### Rules:
+1. Format: Each triple must be enclosed in <triple> tags using the structure: <triple>Subject | predicate_link | Object</triple>.
+2. Logical Depth: Do not skip steps. If the question involves a specific role or relationship (e.g., "X's lead singer" or "Y's director"), you MUST identify that specific individual as a separate node before linking them to the final answer.
+3. Chain of Reasoning: The sequence must form a step-by-step path where the Object of one triple leads to the Subject of the next.
+4. Predicate Style: Use concise, lowercase, snake_case for predicates.
+5. Strict Output: Provide ONLY the <triples>. Do not include introductory text or explanations."""
 
-### Response Requirements:
-- **Reasoning:** Show your step-by-step evaluation of the evidence and your final derivation.
-- **Final Answer:** You must provide the final result clearly at the end, formatted inside a LaTeX \\boxed{}.
+SYSTEM_2 = """## Role: Precision QA Analyst
+You are an expert at verifying facts and reconciling conflicting data. 
 
-### Format:
-<reasoning>
-[Your step-by-step analysis and evaluation of the provided traces]
-</reasoning>
+## Inputs:
+- Question: {{question}}
+- Initial Guess: {{guess}}
+- Initial Reasoning: {{triples}}
+- Retrieved Context: {{context}}
 
-Final Answer: \\boxed{result}
-"""
+## Instructions:
+1. **Critical Review:** Analyze the "Initial Guess" against the "Knowledge Graph Triples." Identify any logic gaps.
+2. **Evidence Comparison:** Compare the "Retrieved Context" to the "Initial Guess." Explicitly note if the context contradicts or supports the guess.
+3. **Reasoning Trace:** In a section titled "Reasoning," explain your step-by-step logic for arriving at the final truth based *only* on the provided context.
+4. **Final Output:** Provide the corrected answer.
+
+## Output Format:
+[Detailed Reasoning Trace]
+
+<final_answer>
+[Concise, accurate answer here]
+</final_answer>"""

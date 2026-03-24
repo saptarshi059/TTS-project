@@ -1,5 +1,5 @@
 '''
-This code builds prefix memory based on the Chain_of_Thought completions - which will be used in agent.
+This code builds prefix memory based on the CoT completions - which will be used in agent.
 '''
 
 import argparse

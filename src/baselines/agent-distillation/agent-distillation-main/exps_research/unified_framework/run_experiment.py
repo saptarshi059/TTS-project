@@ -73,7 +73,7 @@ def run_experiment():
     parser.add_argument("--max_steps", type=int, default=5, help="Maximum number of steps for agent")
     parser.add_argument("--use_planning", action="store_true", help="Enable planning in agent")
     parser.add_argument("--prefix_memory", type=str, help="Path for prefix memory")
-    parser.add_argument("--cot_memory", type=str, help="Path for Chain_of_Thought memory")
+    parser.add_argument("--cot_memory", type=str, help="Path for CoT memory")
 
     # Reasoning-specific arguments
     parser.add_argument('--task_type', type=str, choices=["fact", "math"],

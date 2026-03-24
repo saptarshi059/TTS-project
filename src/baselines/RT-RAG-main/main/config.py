@@ -1,0 +1,50 @@
+import os
+
+# Tree generation parameters for hierarchical QA
+TREES_PER_QUESTION = 1           # Number of trees to generate per question (for consensus-based QA)
+MAX_TOKENS = 500                # Maximum number of tokens allowed per tree
+DECOMPOSE_TEMPERATURE = 0.8
+TOP_P = 1.0
+FREQUENCY_PENALTY = 0.0
+PRESENCE_PENALTY = 0.0
+NUM_EXAMPLES = 3                # Number of few-shot examples
+MAX_HEIGHT = 1                   # Maximum depth of the generated tree
+ENHANCED_RIGHT_SUBTREE = False
+RIGHT_SUBTREE_VARIANTS = 1
+RIGHT_SUBTREE_TREES_PER_VARIANT = 1
+MAX_VARIANTS = 1
+
+# Retrieval configuration
+RETRIEVE_TEMPERATURE = 0.3
+DATASET = os.environ.get('DATASET') # Dataset name (e.g., "musique", "hotpotqa", etc.)
+METHOD = "dense"                # Retrieval method: "dense" or "bm25"
+CHUNK_SIZE = 200                # Max number of words per chunk
+MIN_SENTENCE = 2                # Minimum number of sentences per chunk
+OVERLAP = 2                     # Number of overlapping sentences between chunks
+TOPK1 = 10                      # Top-K candidates from initial retrieval
+TOPK2 = 10                      # Top-K reranked candidates
+SAMPLING_ITERATIONS = 1        # Number of sampling iterations for consensus
+MAX_ITERATIONS = 1             # Maximum number of iterations for query rewriting
+
+# Root output directory for saving predictions/results
+OUTPUT_DIR_ROOT = "output/results"
+
+# Concurrency control
+MAX_CONCURRENT = 4              # Maximum number of concurrent QA jobs
+
+# Path to evaluation dataset (in .jsonl format)
+DATA_PATH = f"../../../../sampled_data/{DATASET}/sampled_ds.json"
+
+# Path to save run-time statistics and logs
+STATS_FILE_PATH = "output/statistics_log.txt"
+
+# OpenAI-compatible language model API settings
+BASE_URL = f"http://localhost:{os.environ.get('LLM_PORT')}/v1"
+API_KEY = "your-api-key-string"
+
+# Path to save generated dense embeddings
+EMBEDDING_DATA = f"../../../../sampled_data"
+
+# External reranker service settings (optional)
+RANKER_URL = f"http://localhost:{os.environ.get('EMBED_PORT')}/v1"
+RANKER_KEY = "your-ranker-api-key"
