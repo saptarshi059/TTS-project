@@ -107,7 +107,7 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str) -> None:
                 generated_ids = outputs.sequences
                 # 2. Extract scores (logits). This is a tuple of length = max_new_tokens
                 # Each element is a tensor of shape (batch_size, vocab_size)
-                logits = torch.stack(outputs.scores, dim=1).cpu()
+                logits = torch.stack(outputs.scores, dim=1)
 
                 # 3. Calculate confidence (e.g., Mean Log Probability)
                 # We use log_softmax to get normalized probabilities
