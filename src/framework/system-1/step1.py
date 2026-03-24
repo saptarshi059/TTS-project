@@ -54,7 +54,7 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str) -> None:
                                                  attn_implementation="flash_attention_2",
                                                  device_map="auto")
 
-    ds = pd.read_json(f"../../../sampled_data/{dataset}/sampled_ds.json", lines=True)
+    ds = pd.read_json(f"../../../sampled_data/{dataset}/sampled_ds.json", lines=True)[['question', 'answer']]
 
     op_dir = Path(f"../../../framework_output/{dataset}/system1/")
     op_dir.mkdir(parents=True, exist_ok=True)
