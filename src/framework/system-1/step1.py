@@ -122,14 +122,14 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str) -> None:
                 ).squeeze(-1)
 
                 # Average log prob per sequence as a simple confidence metric
-                confidences = token_log_probs.mean(dim=-1).tolist()
+                confidences = token_log_probs.mean(dim=-1).exp().tolist() # .exp() converts Log-Prob to Prob
                 decoded_generation = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)
 
             for ques, generation, conf in zip(batch_questions, decoded_generation, confidences):
                 write_obj = {
                     'question': ques,
                     'generation': generation,
-                    'avg_log_prob': conf  # Saving the confidence score
+                    'avg_log_prob': round(conf, 4)  # Saving the confidence score
                 }
                 file.write(json.dumps(write_obj) + '\n')
 

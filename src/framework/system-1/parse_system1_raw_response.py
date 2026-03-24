@@ -10,13 +10,16 @@ sys.path.append("../../utils/")
 from all_system_prompts import SYSTEM_1
 
 def main(dataset: str):
-    base_path = Path(f"../../../framework_output/system1/{dataset}")
+    base_ds = pd.read_json(f"../../../sampled_data/{dataset}/sampled_ds.json")[['question', 'answer']]
 
-    ds = pd.read_json(base_path / "raw_responses.jsonl", lines=True)
+    generation_folder_path = Path(f"../../../framework_output/{dataset}/system1/")
+    generation_ds = pd.read_json(generation_folder_path / "streamed_responses.jsonl", lines=True)
+
+    merged_df = pd.merge(base_ds, generation_ds)
 
     print("Parsing raw responses...")
     cleaned_response = []
-    for row in tqdm(ds.itertuples()):
+    for row in tqdm(merged_df.itertuples()):
         cleaned_string = row.raw_responses.split(SYSTEM_1)[-1].strip()
         match = re.search(r'<answer>(.*)</answer>', cleaned_string , re.DOTALL | re.IGNORECASE)
         if match:
@@ -31,8 +34,9 @@ def main(dataset: str):
             cleaned_response.append(clean_text)
 
     print("Saving cleaned responses...")
-    ds['system_1_guess'] = cleaned_response
-    ds.to_json(base_path / "parsed_responses.jsonl", orient='records', lines=True, index=False)
+    merged_df['system_1_guess'] = cleaned_response
+    merged_df.to_json(generation_folder_path / "parsed_responses.jsonl", orient='records', lines=True, index=False)
+
 
 if __name__ == "__main__":
     parser = ArgumentParser()
