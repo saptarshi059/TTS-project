@@ -7,7 +7,7 @@ import pandas as pd
 
 def main(dataset: str):
     squad_metric = load("squad_v2")
-    base_path = Path(f"../../../framework_output/system1/{dataset}")
+    base_path = Path(f"../../../framework_output/{dataset}/system1/")
 
     ds = pd.read_json(base_path / "parsed_responses.jsonl", lines=True)
 
@@ -22,7 +22,7 @@ def main(dataset: str):
             completed.append(row.question)
     print(f"Completed questions from system-1 thinking: {len(completed)} ({(len(completed)/len(ds) * 100):.2f}%)")
 
-    print("Saving datasets for system-1 complete and system-2 processing...")
+    '''print("Saving datasets for system-1 complete and system-2 processing...")
     # System-1
     system_1_ds = ds.query("question in @completed")
     system_1_ds.to_json(base_path / "system_1_complete.jsonl", lines=True, orient='records', index=False)
@@ -30,7 +30,7 @@ def main(dataset: str):
     # System-2
     system_2_ds = ds.query("question not in @completed").copy()
     system_2_ds.rename(columns={"cleaned_ans": "system_1_guess"}, inplace=True)
-    system_2_ds.to_json(base_path / "system_2_start.jsonl", lines=True, orient='records', index=False)
+    system_2_ds.to_json(base_path / "system_2_start.jsonl", lines=True, orient='records', index=False)'''
 
 
 if __name__ == "__main__":
