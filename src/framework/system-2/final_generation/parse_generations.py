@@ -9,7 +9,7 @@ from all_system_prompts import SYSTEM_2
 
 
 def main(dataset: str):
-    base_path = Path(f"../../../../framework_output/system2/{dataset}/")
+    base_path = Path(f"../../../../framework_output/{dataset}/system2")
 
     streamed_responses = pd.read_json(base_path / "final_response/streamed_responses.jsonl", lines=True)
     main_dataset = pd.read_json(base_path / "retrieval_results/with_retrieved_docs.jsonl", lines=True)
