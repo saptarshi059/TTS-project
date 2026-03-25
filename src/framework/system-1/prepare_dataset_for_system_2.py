@@ -14,7 +14,7 @@ def main(dataset: str):
     print(f"Evaluating {dataset}...")
     completed = []
     for idx, row in tqdm(enumerate(ds.itertuples())):
-        prediction = [{'prediction_text': row.cleaned_ans, 'id': str(idx), 'no_answer_probability': 0.}]
+        prediction = [{'prediction_text': row.system_1_guess, 'id': str(idx), 'no_answer_probability': 0.}]
         reference = [{'answers': {'answer_start': [0], 'text': [row.answer]}, 'id': str(idx)}]
 
         score = squad_metric.compute(predictions=prediction, references=reference)
@@ -29,7 +29,6 @@ def main(dataset: str):
 
     # System-2
     system_2_ds = ds.query("question not in @completed").copy()
-    system_2_ds.rename(columns={"cleaned_ans": "system_1_guess"}, inplace=True)
     system_2_ds.to_json(base_path / "system_2_start.jsonl", lines=True, orient='records', index=False)'''
 
 
