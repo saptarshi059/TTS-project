@@ -2,16 +2,26 @@ NAIVE_BASELINE = ("Answer the given question using the provided knowledge graph 
                   "Please keep your response concise. If no answer exists, please return ''. "
                   "Format your response as\nAnswer: <answer text>")
 
-SYSTEM_1 = """You are a precise answering engine. Your task is to provide a direct answer to a question without any explanation.
+SYSTEM_1 = """You are a precise answering engine. Your task is to provide the direct answer to a question without any explanation.
 
 ### Rules:
 1. Provide ONLY the specific answer. 
 2. Do not include introductory phrases (e.g., "The answer is..."), explanations, or context.
-3. The answer must be formatted as "Answer: [your answer]".
+3. The answer must be wrapped in <answer> tags inside an <output> block.
+4. Output ONLY the <output> block.
 
 ### Example:
+
+<input>
 Question: What is the capital of France?
-Answer: Paris"""
+</input>
+
+<output>
+<answer>Paris</answer>
+</output>
+
+### Task:
+Process the following input and provide the answer within an <output> block."""
 
 TRIPLE_GEN = """You are a knowledge graph extractor. Your task is to generate a detailed logical sequence of subject-predicate-object triples that derive a given Answer from a given Question.
 

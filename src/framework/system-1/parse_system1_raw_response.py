@@ -21,12 +21,12 @@ def main(dataset: str):
     cleaned_response = []
     for row in tqdm(merged_df.itertuples()):
         cleaned_string = row.generation.split(SYSTEM_1)[-1].strip()
-        match = re.search(r'Answer: ', cleaned_string , re.DOTALL | re.IGNORECASE)
-        try:
+        match = re.search(r'<answer>(.*)</answer>', cleaned_string , re.DOTALL | re.IGNORECASE)
+        if match:
             cleaned_response.append(match.group(1).strip())
-        except:
+        else:
             # Trying as best as possible to get the main output
-            ip_string = f"Question: {row.question}\n"
+            ip_string = f"<input>\nQuestion: {row.question}\n</input>"
             cleaned_string = cleaned_string.split(ip_string)[1].strip()
             cleaned_string = re.sub(r'<\|.*?\|>|assistant\n', '', cleaned_string)
             soup = BeautifulSoup(cleaned_string, "html.parser")
