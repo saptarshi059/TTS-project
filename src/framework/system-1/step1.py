@@ -23,9 +23,7 @@ class GenerationDataset(Dataset):
     def __getitem__(self, idx):
         question = self.questions[idx]
         messages = [{"role": "system", "content": SYSTEM_1},
-                    {"role": "user", "content": f"<input>\n"
-                                                f"Question: {question}\n"
-                                                f"</input>"}]
+                    {"role": "user", "content": f"Question: {question}\n"}]
         formatted_text = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
 
         return {"text": formatted_text, "question": question}
