@@ -22,9 +22,9 @@ def main(dataset: str):
     for row in tqdm(merged_df.itertuples()):
         cleaned_string = row.generation.split(SYSTEM_1)[-1].strip()
         match = re.search(r'Answer: ', cleaned_string , re.DOTALL | re.IGNORECASE)
-        if match:
+        try:
             cleaned_response.append(match.group(1).strip())
-        else:
+        except:
             # Trying as best as possible to get the main output
             ip_string = f"Question: {row.question}\n"
             cleaned_string = cleaned_string.split(ip_string)[1].strip()
