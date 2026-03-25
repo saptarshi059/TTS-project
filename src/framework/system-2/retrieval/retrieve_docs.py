@@ -9,7 +9,7 @@ import faiss
 
 def main(dataset: str):
     print(f"Loading triple generation for {dataset}...")
-    triple_generation_path = Path(f"../../../../framework_output/system2/{dataset}/triple_extraction/parsed_responses.jsonl")
+    triple_generation_path = Path(f"../../../../framework_output/{dataset}/system2/triple_extraction/parsed_responses.jsonl")
     starting_ds = pd.read_json(triple_generation_path, lines=True)
 
     print(f"Loading FAISS index for {dataset} and moving to GPU...")
@@ -57,9 +57,8 @@ def main(dataset: str):
 
     print("Saving results...")
     starting_ds['retrieved_docs'] = all_retrieved_docs
-    op_dir = Path(f"../../../../framework_output/system2/{dataset}/retrieval_results/")
-    folder = Path(op_dir)
-    folder.mkdir(parents=True, exist_ok=True)
+    op_dir = Path(f"../../../../framework_output/{dataset}/system2/retrieval_results/")
+    op_dir.mkdir(parents=True, exist_ok=True)
     starting_ds.to_json(op_dir / "with_retrieved_docs.jsonl", lines=True, orient='records', index=False)
 
 
