@@ -20,7 +20,7 @@ def main(dataset: str):
     print("Parsing raw responses...")
     cleaned_response = []
     for row in tqdm(merged_df.itertuples()):
-        cleaned_string = row.raw_responses.split(SYSTEM_1)[-1].strip()
+        cleaned_string = row.generation.split(SYSTEM_1)[-1].strip()
         match = re.search(r'<answer>(.*)</answer>', cleaned_string , re.DOTALL | re.IGNORECASE)
         if match:
             cleaned_response.append(match.group(1).strip())
