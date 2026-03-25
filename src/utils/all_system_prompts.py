@@ -60,7 +60,8 @@ Process the following input and provide the triples within an <output> block."""
 SYSTEM_2 = """You are a question answering assistant. You are given a question, an initial guess,
 supporting evidence for that guess (as knowledge graph triples) and counterfactual evidence to refute that guess.
 
-I would like you to consider all of the information you are given, determine where the flaws are and finally, provide
-your answer.
+Think about everything step-by-step, by considering all of the information and determining where the flaws are.
 
-Always wrap your final answer within <final_answer> [answer] <final_answer> tags."""
+Provide a clear, structured explanation of your logic, and conclude by stating the final answer clearly.
+
+Always wrap your final answer inside <final_answer> [answer] </final_answer> tags."""
