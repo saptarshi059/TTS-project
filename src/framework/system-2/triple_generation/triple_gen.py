@@ -35,7 +35,7 @@ class TripleGenDataset(Dataset):
         }
 
 
-def main(model_name:str, dataset:str, batch_size: int, gpu_id: str, output_dir: str) -> None:
+def main(model_name:str, dataset:str, batch_size: int, gpu_id: str) -> None:
     set_seed(42)
     os.environ["CUDA_VISIBLE_DEVICES"] = gpu_id
 
@@ -45,8 +45,9 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str, output_dir: 
                                                  attn_implementation="flash_attention_2",
                                                  device_map="auto")
 
-    main_dataset = pd.read_json(f"../../../../framework_output/{dataset}/system1/system_2_start.jsonl",
-                                lines=True)
+    base_path = Path(f"../../../../framework_output/{dataset}")
+
+    main_dataset = pd.read_json(base_path / "system1/system_2_start.jsonl", lines=True)
     print(f"Wrapping {dataset} with torch...")
     torch_dataset = TripleGenDataset(tokenizer=tokenizer, dataset=main_dataset, device=model.device)
     torch_dataset_dataloader = DataLoader(torch_dataset, batch_size=batch_size, shuffle=False)
@@ -61,9 +62,8 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str, output_dir: 
     main_dataset["raw_responses"] = raw_responses
 
     print("Saving results...")
-    op_dir = Path(output_dir) / f"{dataset}/triple_extraction/"
-    folder = Path(op_dir)
-    folder.mkdir(parents=True, exist_ok=True)
+    op_dir = base_path / "system2/triple_extraction"
+    op_dir.mkdir(parents=True, exist_ok=True)
     main_dataset.to_json(op_dir / "raw_responses.jsonl", lines=True, orient='records', index=False)
 
 
@@ -73,7 +73,5 @@ if __name__ == "__main__":
     parser.add_argument("--dataset", type=str, default="2wikimultihopqa")
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--gpu_id", type=str, default="0")
-    parser.add_argument("--output_directory", type=str, default="../../../../framework_output/system2/")
     args = parser.parse_args()
-    main(model_name=args.model_name, dataset=args.dataset, batch_size=args.batch_size, gpu_id=args.gpu_id,
-         output_dir=args.output_directory)
+    main(model_name=args.model_name, dataset=args.dataset, batch_size=args.batch_size, gpu_id=args.gpu_id)
