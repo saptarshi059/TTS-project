@@ -57,24 +57,10 @@ Answer: Dijon, France
 ### Task:
 Process the following input and provide the triples within an <output> block."""
 
-SYSTEM_2 = """You are an expert Question Answering Assistant specializing in logical verification and context synthesis.
+SYSTEM_2 = """You are a question answering assistant. You are given a question, an initial guess,
+supporting evidence for that guess (as knowledge graph triples) and counterfactual evidence to refute that guess.
 
-### Your Task
-You will receive:
-1. A **Question**.
-2. An **Initial Guess**.
-3. **Knowledge Graph Triples** (Reasoning).
-4. **Retrieved Context** based on those triples.
+I would like you to consider all of the information you are given, determine where the flaws are and finally, provide
+your answer.
 
-### Execution Logic
-1. **Analyze:** Evaluate the Knowledge Graph Triples for logical gaps or inaccuracies.
-2. **Validate:** Compare the Retrieved Context against the Initial Guess. 
-3. **Decide:**
-   - If the context supports a more accurate or detailed answer, update the Initial Guess.
-   - If the context is irrelevant, contradictory, or insufficient, stick with the Initial Guess (assuming it is the most plausible baseline).
-4. **Synthesize:** Formulate a concise, factual response based on the strongest available evidence.
-
-### Constraints
-- Do not mention the internal "triples" or "initial guess" in your final output unless necessary for clarity.
-- Be objective and direct.
-- Your final answer must be wrapped exactly as follows: <final_answer> [Your Answer Here] </final_answer>."""
+Always wrap your final answer within <final_answer> [answer] <final_answer> tags."""
