@@ -42,7 +42,7 @@ class System2Dataset(Dataset):
         }
 
 
-def main(model_name:str, dataset:str, batch_size: int, gpu_id: str, output_dir: str) -> None:
+def main(model_name:str, dataset:str, batch_size: int, gpu_id: str) -> None:
     set_seed(42)
     os.environ["CUDA_VISIBLE_DEVICES"] = gpu_id
 
@@ -52,10 +52,12 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str, output_dir: 
                                                  attn_implementation="flash_attention_2",
                                                  device_map="auto")
 
-    main_dataset = pd.read_json(f"../../../../framework_output/system2/{dataset}/retrieval_results/with_retrieved_docs.jsonl", lines=True)
-    op_dir = Path(output_dir) / f"{dataset}/final_response/"
-    folder = Path(op_dir)
-    folder.mkdir(parents=True, exist_ok=True)
+    base_path = Path(f"../../../../framework_output/{dataset}/system2")
+
+    main_dataset = pd.read_json(base_path / "retrieval_results/with_retrieved_docs.jsonl", lines=True)
+
+    op_dir = base_path / "final_response"
+    op_dir.mkdir(parents=True, exist_ok=True)
 
     partial_op_file = Path(op_dir / "streamed_responses.jsonl")
     if partial_op_file.exists():
@@ -75,7 +77,7 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str, output_dir: 
         for batch in tqdm(torch_dataset_dataloader):
             with torch.no_grad():
                 batch_questions = main_dataset.iloc[start_idx: start_idx + batch_size]['question'].to_list()
-                generated_ids = model.generate(**batch, max_new_tokens=500, do_sample=False, num_beams=1)
+                generated_ids = model.generate(**batch, max_new_tokens=1000, do_sample=False, num_beams=1)
                 decoded_generation = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)
 
                 for ques, generation in zip(batch_questions, decoded_generation):
@@ -92,7 +94,5 @@ if __name__ == "__main__":
     parser.add_argument("--dataset", type=str, default="2wikimultihopqa")
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--gpu_id", type=str, default="0")
-    parser.add_argument("--output_directory", type=str, default="../../../../framework_output/system2/")
     args = parser.parse_args()
-    main(model_name=args.model_name, dataset=args.dataset, batch_size=args.batch_size, gpu_id=args.gpu_id,
-         output_dir=args.output_directory)
+    main(model_name=args.model_name, dataset=args.dataset, batch_size=args.batch_size, gpu_id=args.gpu_id)
