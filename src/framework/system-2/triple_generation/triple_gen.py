@@ -20,7 +20,7 @@ class TripleGenDataset(Dataset):
             self.samples.append([{"role": "system", "content": TRIPLE_GEN},
                                  {"role": "user", "content": f"<input>\n"
                                                              f"Question: {row.question}\n"
-                                                             f"Explanation: {row.explanation}\n"
+                                                             f"Answer: {row.system_1_guess}\n"
                                                              f"</input>"}])
         self.tokenized_samples = tokenizer.apply_chat_template(self.samples, tokenize=False, add_generation_prompt=True)
         self.model_inputs = self.tokenizer(self.tokenized_samples, padding=True, return_tensors="pt")
@@ -45,7 +45,7 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str, output_dir: 
                                                  attn_implementation="flash_attention_2",
                                                  device_map="auto")
 
-    main_dataset = pd.read_json(f"../../../../framework_output/system2/{dataset}/explanation_extraction/parsed_responses.jsonl",
+    main_dataset = pd.read_json(f"../../../../framework_output/{dataset}/system1/system_2_start.jsonl",
                                 lines=True)
     print(f"Wrapping {dataset} with torch...")
     torch_dataset = TripleGenDataset(tokenizer=tokenizer, dataset=main_dataset, device=model.device)

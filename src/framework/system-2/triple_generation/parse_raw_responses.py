@@ -9,7 +9,7 @@ sys.path.append("../../../utils/")
 from all_system_prompts import TRIPLE_GEN
 
 def main(dataset: str):
-    base_path = Path(f"../../../../framework_output/system2/{dataset}/triple_extraction")
+    base_path = Path(f"../../../../framework_output/{dataset}/system2/triple_extraction")
 
     ds = pd.read_json(base_path / "raw_responses.jsonl", lines=True)
 
@@ -18,7 +18,7 @@ def main(dataset: str):
     for row in tqdm(ds.itertuples()):
         ip_string = (f"<input>\n"
                      f"Question: {row.question}\n"
-                     f"Explanation: {row.explanation}\n"
+                     f"Answer: {row.system_1_guess}\n"
                      f"</input>")
         cleaned_string = row.raw_responses.split(TRIPLE_GEN)[1].strip().split(ip_string)[1].strip()
         generated_triples.append(re.findall(r"<triple>(.*?)</triple>", cleaned_string, re.IGNORECASE | re.DOTALL))
@@ -29,6 +29,6 @@ def main(dataset: str):
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("--dataset", type=str, default='hotpotqa')
+    parser.add_argument("--dataset", type=str, default='2wikimultihopqa')
     args = parser.parse_args()
     main(dataset=args.dataset)
