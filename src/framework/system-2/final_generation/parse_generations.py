@@ -9,10 +9,15 @@ from all_system_prompts import SYSTEM_2
 
 
 def main(dataset: str):
-    base_path = Path(f"../../../../framework_output/{dataset}/system2")
+    base_path = Path(f"../../../../framework_output/{dataset}")
 
-    streamed_responses = pd.read_json(base_path / "final_response/streamed_responses.jsonl", lines=True)
-    main_dataset = pd.read_json(base_path / "retrieval_results/with_retrieved_docs.jsonl", lines=True)
+    system_1_generations = pd.read_json(base_path/ "system1/system_1_complete.jsonl", lines=True)[['question',
+                                                                                                   'answer',
+                                                                                                   'system_1_guess']]
+    system_1_generations['final_ans'] = system_1_generations['system_1_guess']
+
+    streamed_responses = pd.read_json(base_path / "system2/final_response/streamed_responses.jsonl", lines=True)
+    main_dataset = pd.read_json(base_path / "system2/retrieval_results/with_retrieved_docs.jsonl", lines=True)
 
     print('Parsing generations...')
     final_ans = []
@@ -29,10 +34,11 @@ def main(dataset: str):
     print(f"Number of no_answers: {num_no_answer}...")
 
     main_dataset['final_ans'] = final_ans
-    main_dataset = main_dataset[['question', 'system_1_guess', 'answer', 'final_ans']]
+    main_dataset = main_dataset[['question', 'answer', 'system_1_guess', 'final_ans']]
 
     print('Saving final dataset...')
-    main_dataset.to_json(base_path / "final_response/final_responses.jsonl", lines=True, orient='records', index=False)
+    final_ds = pd.concat([main_dataset, system_1_generations])
+    final_ds.to_json(base_path / "system2/final_response/final_responses.jsonl", lines=True, orient='records', index=False)
 
 
 if __name__ == "__main__":
