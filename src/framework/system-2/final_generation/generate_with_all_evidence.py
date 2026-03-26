@@ -1,5 +1,4 @@
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 from transformers import AutoModelForCausalLM, AutoTokenizer, set_seed
 from torch.utils.data import Dataset, DataLoader
@@ -55,6 +54,12 @@ def custom_collate_fn(batch, tokenizer, device):
 
 
 def main(model_name:str, dataset:str, batch_size: int) -> None:
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
+    torch.use_deterministic_algorithms(True)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
     set_seed(42)
 
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_name, padding_side='left')
