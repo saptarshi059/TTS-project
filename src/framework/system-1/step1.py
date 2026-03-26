@@ -1,13 +1,13 @@
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
 from transformers import AutoModelForCausalLM, AutoTokenizer, set_seed
 from torch.utils.data import Dataset, DataLoader
 from argparse import ArgumentParser
 from functools import partial
 from pathlib import Path
 from tqdm import tqdm
-import pandas as pd
-import os, torch
-import json
-import sys
+import torch, json, sys, pandas as pd
 sys.path.append("../../utils/")
 
 from all_system_prompts import SYSTEM_1

@@ -1,11 +1,14 @@
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
 from transformers import AutoModelForCausalLM, AutoTokenizer, set_seed
 from torch.utils.data import Dataset, DataLoader
 from argparse import ArgumentParser
+from functools import partial
 from pathlib import Path
 from tqdm import tqdm
 import pandas as pd
-import os, torch
-import sys
+import torch, sys
 sys.path.append("../../../utils/")
 
 from all_system_prompts import SYSTEM_2
@@ -13,38 +16,46 @@ import json
 
 
 class System2Dataset(Dataset):
-    def __init__(self, tokenizer, dataset, device):
+    def __init__(self, tokenizer, dataset):
         self.tokenizer = tokenizer
         self.dataset = dataset
-        self.device = device
-        self.samples = []
-        for row in tqdm(dataset.itertuples()):
-            generated_triples_string = ", ".join(f"({triple})" for triple in row.generated_triples)
-            retrieved_evidences = "\n\n".join(list(set(row.retrieved_docs)))
-
-            self.samples.append([{"role": "system", "content": SYSTEM_2},
-                                 {"role": "user", "content": f"<input>\n"
-                                                             f"Question: {row.question}\n"
-                                                             f"Initial Guess: {row.system_1_guess}\n"
-                                                             f"Initial Reasoning: {generated_triples_string}\n"
-                                                             f"Retrieved Context: {retrieved_evidences}\n"
-                                                             f"</input>"}])
-        self.tokenized_samples = tokenizer.apply_chat_template(self.samples, tokenize=False, add_generation_prompt=True)
-        self.model_inputs = self.tokenizer(self.tokenized_samples, padding=True, return_tensors="pt")
 
     def __len__(self):
-        return len(self.samples)
+        return len(self.dataset)
 
     def __getitem__(self, idx):
-        return {
-            "input_ids": self.model_inputs["input_ids"][idx].to(self.device),
-            "attention_mask": self.model_inputs["attention_mask"][idx].to(self.device),
-        }
+        sample = self.dataset.iloc[idx]
+        question = sample.question
+        generated_triples_string = ", ".join(f"({triple})" for triple in sample.generated_triples)
+        retrieved_evidences = "\n\n".join(dict.fromkeys(sample.retrieved_docs))  # dedup, stable order
+
+        messages = [{"role": "system", "content": SYSTEM_2},
+                    {"role": "user", "content": f"<input>\n"
+                                                f"Question: {question}\n"
+                                                f"Initial Guess: {sample.system_1_guess}\n"
+                                                f"Initial Reasoning: {generated_triples_string}\n"
+                                                f"Retrieved Context: {retrieved_evidences}\n"
+                                                f"</input>"}]
+        formatted_text = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+
+        return {"text": formatted_text, "question": question}
 
 
-def main(model_name:str, dataset:str, batch_size: int, gpu_id: str) -> None:
+def custom_collate_fn(batch, tokenizer, device):
+    texts = [item["text"] for item in batch]
+    questions = [item["question"] for item in batch]
+
+    model_inputs = tokenizer(texts, padding=True, return_tensors="pt").to(device)
+
+    return {
+        "question": questions,
+        "input_ids": model_inputs["input_ids"],
+        "attention_mask": model_inputs["attention_mask"]
+    }
+
+
+def main(model_name:str, dataset:str, batch_size: int) -> None:
     set_seed(42)
-    os.environ["CUDA_VISIBLE_DEVICES"] = gpu_id
 
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_name, padding_side='left')
     model = AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path=model_name,
@@ -54,29 +65,44 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str) -> None:
 
     base_path = Path(f"../../../../framework_output/{dataset}/system2")
 
-    main_dataset = pd.read_json(base_path / "retrieval_results/with_retrieved_docs.jsonl", lines=True)
+    ds = pd.read_json(base_path / "retrieval_results/with_retrieved_docs.jsonl", lines=True)
 
     op_dir = base_path / "final_response"
     op_dir.mkdir(parents=True, exist_ok=True)
 
-    partial_op_file = Path(op_dir / "streamed_responses.jsonl")
+    partial_op_file = op_dir / "streamed_responses.jsonl"
     if partial_op_file.exists():
-        completed_questions = pd.read_json(partial_op_file, lines=True)['question'].to_list()
-        print(f"Completed Questions: {len(completed_questions)}...")
+        try:
+            completed_df = pd.read_json(partial_op_file, lines=True)
 
-        main_dataset = main_dataset.query("question not in @completed_questions")
-        print(f"Questions remaining: {len(main_dataset)}...")
+            if not completed_df.empty:
+                completed_questions = set(completed_df['question'].tolist())
+                print(f"Completed Questions: {len(completed_questions)}...")
+
+                ds = ds[~ds['question'].isin(completed_questions)]
+                print(f"Questions remaining: {len(ds)}...")
+            else:
+                print("Completed file is empty. Proceeding with all questions.")
+
+        except Exception as e:
+            print(f"Error reading partial file: {e}. Starting from scratch.")
+    else:
+        print("No existing progress found. Starting fresh.")
 
     print(f"Wrapping {dataset} with torch...")
-    torch_dataset = System2Dataset(tokenizer=tokenizer, dataset=main_dataset, device=model.device)
-    torch_dataset_dataloader = DataLoader(torch_dataset, batch_size=batch_size, shuffle=False)
+    torch_dataset = System2Dataset(tokenizer=tokenizer, dataset=ds)
+
+    # Create a version of the function that already knows the tokenizer
+    collate_with_tokenizer = partial(custom_collate_fn, tokenizer=tokenizer, device=model.device)
+    torch_dataset_dataloader = DataLoader(torch_dataset, batch_size=batch_size, shuffle=False,
+                                          collate_fn=collate_with_tokenizer)
+
 
     print(f"{'-'*10}Running System-2: MAIN GENERATION with {model_name} on {dataset}{'-'*10}")
     with Path(op_dir / "streamed_responses.jsonl").open("a") as file:
-        start_idx = 0
         for batch in tqdm(torch_dataset_dataloader):
+            batch_questions = batch.pop('question')
             with torch.no_grad():
-                batch_questions = main_dataset.iloc[start_idx: start_idx + batch_size]['question'].to_list()
                 generated_ids = model.generate(**batch, max_new_tokens=1000, do_sample=False, num_beams=1)
                 decoded_generation = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)
 
@@ -85,14 +111,11 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str) -> None:
                     json_string = json.dumps(write_obj)
                     file.write(json_string + '\n')
 
-                start_idx += batch_size
-
 
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--model_name", type=str, default="Qwen/Qwen2.5-7B-Instruct")
     parser.add_argument("--dataset", type=str, default="2wikimultihopqa")
     parser.add_argument("--batch_size", type=int, default=32)
-    parser.add_argument("--gpu_id", type=str, default="0")
     args = parser.parse_args()
-    main(model_name=args.model_name, dataset=args.dataset, batch_size=args.batch_size, gpu_id=args.gpu_id)
+    main(model_name=args.model_name, dataset=args.dataset, batch_size=args.batch_size)

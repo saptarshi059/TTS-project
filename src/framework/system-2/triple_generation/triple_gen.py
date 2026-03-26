@@ -1,11 +1,12 @@
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
 from transformers import AutoModelForCausalLM, AutoTokenizer, set_seed
 from torch.utils.data import Dataset, DataLoader
 from argparse import ArgumentParser
 from pathlib import Path
 from tqdm import tqdm
-import pandas as pd
-import os, torch
-import sys
+import torch, sys, pandas as pd
 sys.path.append("../../../utils/")
 
 from all_system_prompts import TRIPLE_GEN
@@ -35,9 +36,8 @@ class TripleGenDataset(Dataset):
         }
 
 
-def main(model_name:str, dataset:str, batch_size: int, gpu_id: str) -> None:
+def main(model_name:str, dataset:str, batch_size: int) -> None:
     set_seed(42)
-    os.environ["CUDA_VISIBLE_DEVICES"] = gpu_id
 
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_name, padding_side='left')
     model = AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path=model_name,
@@ -72,6 +72,5 @@ if __name__ == "__main__":
     parser.add_argument("--model_name", type=str, default="Qwen/Qwen2.5-7B-Instruct")
     parser.add_argument("--dataset", type=str, default="2wikimultihopqa")
     parser.add_argument("--batch_size", type=int, default=32)
-    parser.add_argument("--gpu_id", type=str, default="0")
     args = parser.parse_args()
-    main(model_name=args.model_name, dataset=args.dataset, batch_size=args.batch_size, gpu_id=args.gpu_id)
+    main(model_name=args.model_name, dataset=args.dataset, batch_size=args.batch_size)
