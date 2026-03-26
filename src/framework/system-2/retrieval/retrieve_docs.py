@@ -1,3 +1,7 @@
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
+from transformers import set_seed
 from sentence_transformers import SentenceTransformer
 from argparse import ArgumentParser
 from datasets import load_dataset
@@ -8,6 +12,8 @@ import faiss
 
 
 def main(dataset: str):
+    set_seed(42)
+
     print(f"Loading triple generation for {dataset}...")
     triple_generation_path = Path(f"../../../../framework_output/{dataset}/system2/triple_extraction/parsed_responses.jsonl")
     starting_ds = pd.read_json(triple_generation_path, lines=True)
