@@ -51,7 +51,7 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str) -> None:
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_name, padding_side='left')
     model = AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path=model_name,
                                                  dtype="auto",
-                                                 attn_implementation="sdpa",
+                                                 attn_implementation="eager",
                                                  device_map="auto")
 
     ds = pd.read_json(f"../../../sampled_data/{dataset}/sampled_ds.json")[['question', 'answer']]
