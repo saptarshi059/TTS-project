@@ -15,7 +15,7 @@ def main(dataset: str):
     triple_generation_path = Path(f"../../../../framework_output/{dataset}/system2/triple_extraction/parsed_responses.jsonl")
     starting_ds = pd.read_json(triple_generation_path, lines=True)
 
-    print(f"Loading FAISS index for {dataset} and moving to GPU...")
+    print(f"Loading FAISS index for {dataset}...")
     index_path = f"../../../../sampled_data/{dataset}/{dataset}_index.index"
 
     dataset_index = faiss.read_index(index_path)
