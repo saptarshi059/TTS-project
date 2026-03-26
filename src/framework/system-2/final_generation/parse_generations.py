@@ -37,7 +37,8 @@ def main(dataset: str):
     main_dataset = main_dataset[['question', 'answer', 'system_1_guess', 'final_ans']]
 
     print('Saving final dataset...')
-    final_ds = pd.concat([main_dataset, system_1_generations])
+    final_ds = pd.concat([main_dataset, system_1_generations], ignore_index=True)
+    final_ds = final_ds.sort_values('question').reset_index(drop=True)
     final_ds.to_json(base_path / "system2/final_response/final_responses.jsonl", lines=True, orient='records', index=False)
 
 

@@ -26,14 +26,7 @@ def main(dataset: str):
     print(f"Loading FAISS index for {dataset} and moving to GPU...")
     index_path = f"../../../../sampled_data/{dataset}/{dataset}_index.index"
 
-    # 1. Load index (currently in CPU RAM)
     dataset_index = faiss.read_index(index_path)
-
-    '''# 2. Initialize GPU resources (this manages temporary memory for the GPU)
-    res = faiss.StandardGpuResources()
-
-    # 3. Transfer the index to a specific GPU (ID 0 is usually the first card)
-    gpu_index = faiss.index_cpu_to_gpu(res, 0, dataset_index)'''
 
     print(f"Loading documents for {dataset} index...")
     doc_path = f"../../../../sampled_data/{dataset}/{dataset}-chunks.jsonl"
