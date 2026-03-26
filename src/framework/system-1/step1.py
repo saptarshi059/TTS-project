@@ -129,7 +129,7 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str) -> None:
                 write_obj = {
                     'question': ques,
                     'generation': generation,
-                    'avg_log_prob': round(conf, 4)  # Saving the confidence score
+                    'avg_log_prob': conf,
                 }
                 file.write(json.dumps(write_obj) + '\n')
 
