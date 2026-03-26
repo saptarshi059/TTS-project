@@ -31,7 +31,7 @@ def main(dataset: str):
     print("Loading embedding model: Qwen3-Embedding-0.6B...")
     model = SentenceTransformer(
         "Qwen/Qwen3-Embedding-0.6B",
-        model_kwargs={"attn_implementation": "flash_attention_2", "device_map": "auto", "dtype": "auto"},
+        model_kwargs={"attn_implementation": "sdpa", "device_map": "auto", "dtype": "auto"},
         tokenizer_kwargs={"padding_side": "left"},
     )
 
