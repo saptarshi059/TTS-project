@@ -11,6 +11,7 @@ import faiss, torch
 
 def main(dataset: str):
     os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
 
     torch.use_deterministic_algorithms(True)
     torch.backends.cudnn.deterministic = True
