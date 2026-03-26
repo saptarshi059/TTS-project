@@ -1,12 +1,11 @@
-import os
-
 from transformers import AutoModelForCausalLM, AutoTokenizer, set_seed
 from torch.utils.data import Dataset, DataLoader
 from argparse import ArgumentParser
 from functools import partial
 from pathlib import Path
 from tqdm import tqdm
-import torch, json, sys, pandas as pd
+
+import os, torch, json, sys, pandas as pd
 sys.path.append("../../utils/")
 
 from all_system_prompts import SYSTEM_1
@@ -45,19 +44,13 @@ def custom_collate_fn(batch, tokenizer, device):
 
 def main(model_name:str, dataset:str, batch_size: int) -> None:
     os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-    os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
-
-    torch.use_deterministic_algorithms(True)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
-
 
     set_seed(42)
 
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_name, padding_side='left')
     model = AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path=model_name,
                                                  dtype="auto",
-                                                 attn_implementation="sdpa",
+                                                 attn_implementation="flash_attention_2",
                                                  device_map="auto")
 
     ds = pd.read_json(f"../../../sampled_data/{dataset}/sampled_ds.json")[['question', 'answer']]

@@ -1,13 +1,15 @@
 import os
-
-from transformers import AutoModelForCausalLM, AutoTokenizer, set_seed
-from torch.utils.data import Dataset, DataLoader
+import pandas as pd
+import sys
+import torch
 from argparse import ArgumentParser
 from functools import partial
 from pathlib import Path
+
+from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
-import pandas as pd
-import torch, sys
+from transformers import AutoModelForCausalLM, AutoTokenizer, set_seed
+
 sys.path.append("../../../utils/")
 
 from all_system_prompts import SYSTEM_2
@@ -55,18 +57,13 @@ def custom_collate_fn(batch, tokenizer, device):
 
 def main(model_name:str, dataset:str, batch_size: int) -> None:
     os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-    os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
-
-    torch.use_deterministic_algorithms(True)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
 
     set_seed(42)
 
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_name, padding_side='left')
     model = AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path=model_name,
                                                  dtype="auto",
-                                                 attn_implementation="sdpa",
+                                                 attn_implementation="flash_attention_2",
                                                  device_map="auto")
 
     base_path = Path(f"../../../../framework_output/{dataset}/system2")

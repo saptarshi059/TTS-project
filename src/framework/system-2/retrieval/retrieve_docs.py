@@ -1,22 +1,14 @@
-import os
-from transformers import set_seed
-from sentence_transformers import SentenceTransformer
 from argparse import ArgumentParser
-from datasets import load_dataset
 from pathlib import Path
+
+import faiss
 import pandas as pd
-import numpy as np
-import faiss, torch
+from datasets import load_dataset
+from sentence_transformers import SentenceTransformer
+from transformers import set_seed
 
 
 def main(dataset: str):
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-    os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
-
-    torch.use_deterministic_algorithms(True)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
-
     set_seed(42)
 
     print(f"Loading triple generation for {dataset}...")
@@ -35,7 +27,7 @@ def main(dataset: str):
     print("Loading embedding model: Qwen3-Embedding-0.6B...")
     model = SentenceTransformer(
         "Qwen/Qwen3-Embedding-0.6B",
-        model_kwargs={"attn_implementation": "sdpa", "device_map": "auto", "dtype": "auto"},
+        model_kwargs={"attn_implementation": "flash_attention_2", "device_map": "auto", "dtype": "auto"},
         tokenizer_kwargs={"padding_side": "left"},
     )
 
