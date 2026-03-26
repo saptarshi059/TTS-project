@@ -1,11 +1,11 @@
 #!/bin/bash
 
-DATASETS=("2wikimultihopqa" "hotpotqa" "musique" "frames")
+DATASETS=("2wikimultihopqa")
 
 for DS in "${DATASETS[@]}"; do
     echo "Starting processing for dataset: $DS"
 
-    until python generate_with_all_evidence.py --dataset "$DS" --batch_size 8; do
+    until python generate_with_all_evidence.py --dataset "$DS"; do
         echo "Script crashed for $DS with exit code $?. Restarting..." >&2
         sleep 2
     done

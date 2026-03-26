@@ -42,7 +42,7 @@ def main(model_name:str, dataset:str, batch_size: int, gpu_id: str) -> None:
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_name, padding_side='left')
     model = AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path=model_name,
                                                  dtype="auto",
-                                                 attn_implementation="flash_attention_2",
+                                                 attn_implementation="sdpa",
                                                  device_map="auto")
 
     base_path = Path(f"../../../../framework_output/{dataset}")
