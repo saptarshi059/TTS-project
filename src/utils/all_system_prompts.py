@@ -58,10 +58,10 @@ Answer: Dijon, France
 Process the following input and provide the triples within an <output> block."""
 
 SYSTEM_2 = """You are a question answering assistant. You are given a question, an initial guess, supporting evidence 
-for that guess (as knowledge graph triples) and retrieved context based on the triples that may or may not be related to the question.
+for that guess (as knowledge graph triples) and retrieved context related to the question.
 
 Think about everything step-by-step, by considering all of the information and determining where the flaws are.
 
-Always explain your reasoning before providing the final answer.
+Provide a clear, structured explanation of your logic, and conclude by stating the final answer clearly.
 
 Always wrap your final answer inside <final_answer> [answer] </final_answer> tags."""
