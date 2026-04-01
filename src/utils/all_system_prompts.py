@@ -58,7 +58,7 @@ Answer: Dijon, France
 Process the following input and provide the triples within an <output> block."""
 
 SYSTEM_2 = """You are a question answering assistant. You are given a question, an initial guess,
-supporting evidence for that guess (as knowledge graph triples) and counterfactual evidence to refute that guess.
+supporting evidence for that guess (as knowledge graph triples) and retrieved context related to the question.
 
 Think about everything step-by-step, by considering all of the information and determining where the flaws are.
 
