@@ -5,16 +5,16 @@ import re
 import sys
 sys.path.append("../../../utils/")
 
-from all_system_prompts import SYSTEM_2
+from all_system_prompts import SYSTEM_2, SYSTEM_2_ABLATION
 
 
-def main(dataset: str):
+def main(dataset: str, generation_mode:str):
     base_path = Path(f"../../../../framework_output/{dataset}")
 
-    system_1_generations = pd.read_json(base_path/ "system1/system_1_complete.jsonl", lines=True)[['question',
-                                                                                                   'answer',
-                                                                                                   'system_1_guess']]
-    system_1_generations['final_ans'] = system_1_generations['system_1_guess']
+    system_1_generations = pd.read_json(base_path/ "system1/system_1_complete.jsonl", lines=True)
+    if not system_1_generations.empty:
+        system_1_generations = system_1_generations[['question', 'answer', 'system_1_guess']]
+        system_1_generations['final_ans'] = system_1_generations['system_1_guess']
 
     streamed_responses = pd.read_json(base_path / "system2/final_response/streamed_responses.jsonl", lines=True)
     main_dataset = pd.read_json(base_path / "system2/retrieval_results/with_retrieved_docs.jsonl", lines=True)
@@ -22,8 +22,9 @@ def main(dataset: str):
     print('Parsing generations...')
     final_ans = []
     num_no_answer = 0
+    system_prompt = SYSTEM_2 if generation_mode == 'normal' else SYSTEM_2_ABLATION
     for row in streamed_responses.itertuples():
-        split_ans = row.generation.split(SYSTEM_2)[1].strip()
+        split_ans = row.generation.split(system_prompt)[1].strip()
         match_obj = re.search(r'<final_answer>(.*?)</final_answer>', split_ans, re.DOTALL | re.IGNORECASE)
         if match_obj:
             final_ans.append(match_obj.group(1).strip())
@@ -45,5 +46,6 @@ def main(dataset: str):
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--dataset", type=str, default='2wikimultihopqa')
+    parser.add_argument("--generation_mode", type=str, choices=['normal', 'ablation'], default='normal')
     args = parser.parse_args()
-    main(dataset=args.dataset)
+    main(dataset=args.dataset, generation_mode=args.generation_mode)
