@@ -29,6 +29,6 @@ def main(dataset: str, confidence_threshold: int):
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--dataset", type=str, default="2wikimultihopqa")
-    parser.add_argument("--confidence_threshold", type=float, default=0.05)
+    parser.add_argument("--confidence_threshold", type=float, default=1)
     args = parser.parse_args()
     main(dataset=args.dataset, confidence_threshold=args.confidence_threshold)

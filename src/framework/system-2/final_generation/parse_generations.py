@@ -13,8 +13,11 @@ def main(dataset: str, generation_mode:str):
 
     system_1_generations = pd.read_json(base_path/ "system1/system_1_complete.jsonl", lines=True)
     if not system_1_generations.empty:
+        print("System 1 generations not empty...")
         system_1_generations = system_1_generations[['question', 'answer', 'system_1_guess']]
         system_1_generations['final_ans'] = system_1_generations['system_1_guess']
+    else:
+        print("System 1 generations empty...")
 
     streamed_responses = pd.read_json(base_path / "system2/final_response/streamed_responses.jsonl", lines=True)
     main_dataset = pd.read_json(base_path / "system2/retrieval_results/with_retrieved_docs.jsonl", lines=True)
