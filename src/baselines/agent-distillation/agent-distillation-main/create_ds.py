@@ -5,9 +5,9 @@ import os
 for dataset_name in ['triviaqa']:
     formatted_samples = []
     ds = pd.read_json(f"../../../../sampled_data/{dataset_name}/sampled_ds.json")
-    for row in ds.itertuples():
+    for idx, row in enumerate(ds.itertuples()):
         formatted_samples.append({
-            "id": row.id,
+            "id": row.id if 'id' in ds.columns else str(idx),
             "question": row.question,
             "answer": row.answer,
             "level": "hard",
