@@ -18,7 +18,7 @@ DATASET_NAME="triviaqa"
 
 EXP_TYPE="agent"
 PORT_BASE=12178
-GPU_MEMORY_UTILIZATION=0.3
+GPU_MEMORY_UTILIZATION=0.6
 MAX_LORA_RANK=64
 N=1
 TEMP=0.4
@@ -82,7 +82,7 @@ for i in $(seq 0 $((NUM_GPUS - 1))); do
       --port "$CURRENT_PORT" \
       --tensor-parallel-size 1 \
       --gpu-memory-utilization "$GPU_MEMORY_UTILIZATION" \
-      --max-model-len 1024 \
+      --max-model-len 8192 \
       --disable-log-requests \
       --trust-remote-code \
       --enable-lora \
