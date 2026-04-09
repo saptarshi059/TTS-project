@@ -13,7 +13,7 @@ BASE_MODEL="/gpuhome/sks6765/.cache/huggingface/hub/models--Qwen--Qwen2.5-7B-Ins
 LORA_PATH="/gpuhome/sks6765/.cache/huggingface/hub/models--agent-distillation--agent_distilled_Qwen2.5-7B-Instruct/snapshots/816cf2f90baa7948ddb29cd0667b1d83567b0707"
 
 BASE_DATA_DIR="../../../../sampled_data"
-DATASET_NAME="frames"
+DATASET_NAME="triviaqa"
 
 EXP_TYPE="agent"
 PORT_BASE=14134
@@ -29,7 +29,7 @@ RETRIEVER_LOG="retriever_server.log"
 # ===================================================== #
 
 declare -A DATASETS=(
-  ["frames"]="data_processor/qa_dataset/test/frames.json"
+  ["triviaqa"]="data_processor/qa_dataset/test/triviaqa.json"
 )
 
 PIDS=()

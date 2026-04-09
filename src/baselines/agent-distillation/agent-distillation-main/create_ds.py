@@ -2,7 +2,7 @@ import pandas as pd
 import json
 import os
 
-for dataset_name in ['triviaqa']:
+for dataset_name in ['2wikimultihopqa', 'musique', 'frames', 'hotpotqa', 'triviaqa']:
     formatted_samples = []
     ds = pd.read_json(f"../../../../sampled_data/{dataset_name}/sampled_ds.json")
     for idx, row in enumerate(ds.itertuples()):
