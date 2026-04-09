@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DATASETS=("2wikimultihopqa" "hotpotqa" "musique" "frames")
+DATASETS=("triviaqa")
 
 for ds in "${DATASETS[@]}";do
   echo "-------------${ds}-------------"
