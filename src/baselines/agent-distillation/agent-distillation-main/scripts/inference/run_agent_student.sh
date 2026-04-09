@@ -67,14 +67,17 @@ RETRIEVER_PID=$!
 # ===================================================== #
 # 1. Run 4 vLLM instances (one per GPU)
 # ===================================================== #
-NUM_GPUS=4
+GPU_LIST=(4 5 6 7)  # define your available GPUs
+NUM_GPUS=${#GPU_LIST[@]}
+
 for i in $(seq 0 $((NUM_GPUS - 1))); do
   CURRENT_PORT=$((PORT_BASE + i))
+  ASSIGNED_GPU=${GPU_LIST[$i]}
   LOG_FILE="vllm_gpu${i}.log"
 
-  echo "🚀 Launching vLLM on GPU $i (API: $CURRENT_PORT)..."
+  echo "🚀 Launching vLLM on GPU $ASSIGNED_GPU (API: $CURRENT_PORT)..."
 
-  CUDA_VISIBLE_DEVICES=$i python -m vllm.entrypoints.openai.api_server \
+  CUDA_VISIBLE_DEVICES=$ASSIGNED_GPU python -m vllm.entrypoints.openai.api_server \
       --model "$BASE_MODEL" \
       --port "$CURRENT_PORT" \
       --tensor-parallel-size 1 \
