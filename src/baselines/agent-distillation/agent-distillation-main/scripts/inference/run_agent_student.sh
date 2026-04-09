@@ -7,6 +7,7 @@ export OPENBLAS_NUM_THREADS=1
 export VLLM_ATTENTION_BACKEND=FLASH_ATTN
 export NCCL_IGNORE_DISABLED_P2P=1
 export VLLM_USE_V1=0
+export CUDA_VISIBLE_DEVICES=4,5,6,7
 
 # ===================== User setting ===================== #
 BASE_MODEL="/gpuhome/sks6765/.cache/huggingface/hub/models--Qwen--Qwen2.5-7B-Instruct/snapshots/a09a35458c702b33eeacc393d103063234e8bc28"
@@ -16,7 +17,7 @@ BASE_DATA_DIR="../../../../sampled_data"
 DATASET_NAME="triviaqa"
 
 EXP_TYPE="agent"
-PORT_BASE=14134
+PORT_BASE=12178
 GPU_MEMORY_UTILIZATION=0.3
 MAX_LORA_RANK=64
 N=1
@@ -78,7 +79,7 @@ for i in $(seq 0 $((NUM_GPUS - 1))); do
       --port "$CURRENT_PORT" \
       --tensor-parallel-size 1 \
       --gpu-memory-utilization "$GPU_MEMORY_UTILIZATION" \
-      --max-model-len 8192 \
+      --max-model-len 1024 \
       --disable-log-requests \
       --trust-remote-code \
       --enable-lora \
