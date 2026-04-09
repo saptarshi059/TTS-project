@@ -61,11 +61,17 @@ def collect_contexts(dataset, dataset_name):
                 title = ctx["title"]
                 text = ctx["paragraph_text"]
                 all_contexts.append(f"{title}\n{text}")
-    else:
+    elif dataset_name == 'frames':
         for row in dataset.itertuples():
             ctx = row.Text
             title = unquote(row.URL.split('/')[-1])
             all_contexts.append(f"{title}\n{ctx}")
+    elif dataset_name == 'triviaqa':
+        for row in dataset.itertuples():
+            all_titles = row.entity_pages['title']
+            all_wiki = row.entity_pages['wiki_context']
+            for title, text in zip(all_titles, all_wiki):
+                all_contexts.append(f"{title}\n{text}")
 
     return all_contexts
 
@@ -82,7 +88,7 @@ def main(dataset_name):
     print("Embedding model loaded...")
 
     base_path = Path(f"../../sampled_data/{dataset_name}")
-    dataset = pd.read_json(base_path / "sampled_ds.json") if dataset_name != "frames" else pd.read_parquet(base_path / "frames_corpus")
+    dataset = pd.read_json(base_path / "sampled_ds.json")
 
     print("Collecting all contexts...")
     all_contexts = collect_contexts(dataset, dataset_name)
@@ -99,6 +105,6 @@ def main(dataset_name):
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("--dataset", choices=["2wikimultihopqa", "frames", "hotpotqa", "musique"])
+    parser.add_argument("--dataset", choices=["2wikimultihopqa", "triviaqa", "hotpotqa", "frames", "musique"])
     args = parser.parse_args()
     main(dataset_name=args.dataset)
