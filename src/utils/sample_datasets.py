@@ -6,10 +6,10 @@ import numpy as np
 
 
 def main():
-    datasets = {'2wikimultihopqa': 'dev.json',
-                'hotpotqa': 'hotpot_dev_fullwiki_v1.json',
-                'musique': 'musique_ans_v1.0_dev.jsonl',
-                'frames': 'google/frames-benchmark',
+    datasets = {#'2wikimultihopqa': 'dev.json',
+                #'hotpotqa': 'hotpot_dev_fullwiki_v1.json',
+                #'musique': 'musique_ans_v1.0_dev.jsonl',
+                #'frames': 'google/frames-benchmark',
                 'triviaqa': 'hf://datasets/mandarjoshi/trivia_qa/rc.wikipedia/validation-00000-of-00001.parquet'}
 
     for dataset_name, dataset_file_name in datasets.items():
