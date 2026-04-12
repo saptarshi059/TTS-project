@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DATASETS=("triviaqa")
+DATASETS=("2wikimultihopqa" "hotpotqa" "musique")
 
 for DS in "${DATASETS[@]}"; do
     echo "Starting processing for dataset: $DS"
