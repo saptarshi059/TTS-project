@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DATASETS=("2wikimultihopqa" "hotpotqa" "musique" "frames")
+DATASETS=("2wikimultihopqa" "hotpotqa" "musique")
 
 for DS in "${DATASETS[@]}"; do
     echo "Starting ABLATION processing for dataset: $DS"
