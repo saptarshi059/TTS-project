@@ -50,7 +50,7 @@ Output format for answer:
     d['prompt'] = prompt
     try:
         response = client.chat.completions.create(
-            model="qwen2.5:latest",
+            model="qwen2.5:7b-instruct",
             messages=[{"role": "user", "content": prompt}]
         )
         d['generation'] = response.choices[0].message.content

@@ -2,22 +2,22 @@
 HippoRAG retrieval service API
 Provides HippoRAG-based indexing and query service
 """
-import os
-import json
 import logging
+import os
 from typing import List
 
+import pandas as pd
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-from src.hipporag.utils.config_utils import BaseConfig
-from src.hipporag import HippoRAG
 from config import (
     HF_ENDPOINT, CUDA_VISIBLE_DEVICES,
     LLM_MODEL_NAME, EMBEDDING_MODEL_NAME, LLM_BASE_URL,
     SAVE_DIR, DATA_PATH, HIPPORAG_CONFIG,
     SERVER_HOST, SERVER_PORT, LOG_LEVEL
 )
+from src.hipporag import HippoRAG
+from src.hipporag.utils.config_utils import BaseConfig
 
 # Set environment variables
 os.environ["HF_ENDPOINT"] = HF_ENDPOINT
@@ -76,12 +76,24 @@ async def load_data_and_index():
         
         if not os.path.exists(DATA_PATH):
             raise FileNotFoundError(f"Data file not found: {DATA_PATH}")
-        
-        with open(DATA_PATH, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-        
-        docs = [e["passage"] for e in data.get("docs", []) if "passage" in e]
-        
+
+        dataset = pd.read_json(DATA_PATH)
+        docs = []
+        if ("2wikimultihopqa" in DATA_PATH) or ("hotpotqa" in DATA_PATH):
+            for row in dataset.itertuples():
+                row_ctx = row.context
+                for ctx in row_ctx:
+                    title = ctx[0]
+                    text = ctx[1]
+                    docs.append(f"{title}\n{' '.join(text)}")
+        else:
+            for row in dataset.itertuples():
+                row_ctx = row.paragraphs
+                for ctx in row_ctx:
+                    title = ctx["title"]
+                    text = ctx["paragraph_text"]
+                    docs.append(f"{title}\n{text}")
+
         if not docs:
             raise ValueError("No valid documents found")
         
