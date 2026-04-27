@@ -594,7 +594,7 @@ async def ollama_model_complete(
     if keyword_extraction:
         kwargs["format"] = "json"
     #model_name = kwargs["hashing_kv"].global_config["llm_model_name"]
-    model_name = "qwen2.5:latest"
+    model_name = "qwen2.5:7b-instruct"
     return await ollama_model_if_cache(
         model_name,
         prompt,
