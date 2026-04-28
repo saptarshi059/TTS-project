@@ -1,2 +1,2 @@
 FROM qwen2.5:7b-instruct
-ADAPTER qwen_instruct_v2/adapter_model.safetensors
+ADAPTER qwen_instruct_v2/
