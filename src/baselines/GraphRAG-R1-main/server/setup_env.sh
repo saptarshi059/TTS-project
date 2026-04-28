@@ -14,31 +14,49 @@ export RERANK_API_KEY="${RERANK_API_KEY:-sk-your-api-key-here}"
 # ========== Optional ==========
 
 # HuggingFace mirror endpoint
-export HF_ENDPOINT="${HF_ENDPOINT:-https://huggingface.co}"
+export HF_ENDPOINT="https://huggingface.co"
 
 # GPU device IDs (comma-separated, e.g. "0,1")
-export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0}"
+export CUDA_VISIBLE_DEVICES="0"
 
-# LLM model settings
-export LLM_MODEL_NAME="${LLM_MODEL_NAME:-qwen7B_4096:latest}"
-export LLM_BASE_URL="${LLM_BASE_URL:-http://localhost:11434/}"
+# LLM/OLLAMA settings
+
+export OLLAMA_NUM_PARALLEL=16
+export OLLAMA_MAX_LOADED_MODELS=4
+export OLLAMA_PORT=10278
+export OLLAMA_HOST="127.0.0.1:$OLLAMA_PORT"
+
+OLLAMA_BIN="./../../HyperGraphRAG-main/evaluation/ollama/bin/ollama"
+
+# --- 1. Start Ollama ---
+if ! pgrep -f "$OLLAMA_BIN serve" > /dev/null
+then
+    echo "[$(date)] Starting Ollama..."
+    $OLLAMA_BIN serve > ollama_server.log 2>&1 &
+    sleep 15
+else
+    echo "[$(date)] Ollama is already running."
+fi
+
+export LLM_MODEL_NAME="qwen2.5-graphrag-r1" # This is their adapter loaded model.
+export LLM_BASE_URL="http://localhost:$OLLAMA_PORT"
 
 # Embedding model settings
-export EMBEDDING_MODEL_NAME="${EMBEDDING_MODEL_NAME:-nvidia/NV-Embed-v2}"
+export EMBEDDING_MODEL_NAME="Qwen/Qwen3-Embedding-0.6B"
 
 # Rerank model settings
 export RERANK_BASE_URL="${RERANK_BASE_URL:-https://dashscope.aliyuncs.com/compatible-mode/v1}"
 export RERANK_MODEL="${RERANK_MODEL:-qwen-turbo-latest}"
 
 # Data path (relative to project root)
-export DATA_PATH="${DATA_PATH:-outputs/server/openie_results_ner_qwen7B_4096:latest.json}"
+export DATA_PATH="../../../../sampled_data/2wikimultihopqa/sampled_ds.json"
 
 # Index save directory
 export SAVE_DIR="${SAVE_DIR:-outputs/server}"
 
 # Server settings
 export SERVER_HOST="${SERVER_HOST:-127.0.0.1}"
-export SERVER_PORT="${SERVER_PORT:-8090}"
+export SERVER_PORT="${SERVER_PORT:-8120}"
 export LOG_LEVEL="${LOG_LEVEL:-info}"
 
 # ========== Confirmation ==========

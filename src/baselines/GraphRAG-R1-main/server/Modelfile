@@ -1,0 +1,2 @@
+FROM qwen2.5:7b-instruct
+ADAPTER /gpuhome/sks6765/.cache/huggingface/hub/models--yuchuanyue--GraphRAG-R1/snapshots/c03a3ddffc007b5cc1bf8c878b24445cf47edf3d/checkpoints/qwen_instruct_v2

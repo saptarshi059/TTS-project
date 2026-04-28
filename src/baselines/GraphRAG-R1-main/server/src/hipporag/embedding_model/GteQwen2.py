@@ -80,7 +80,7 @@ class Qwen2EmbeddingModel(BaseEmbeddingModel):
         # # Determine batch size
         # batch_size = getattr(self.global_config, "embedding_batch_size")
         batch_size = 8
-        logger.debug(f"Qwen2SentenceEmbeddingModel encoding {len(texts)} texts with batch size {batch_size}")
+        logger.debug(f"Qwen Embedding encoding {len(texts)} texts with batch size {batch_size}")
         # Use sentence-transformers encode
         embeddings = self.embedding_model.encode(
             texts,

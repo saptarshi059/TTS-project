@@ -1,2 +1,0 @@
-FROM <base model name>
-ADAPTER /path/to/safetensors/adapter/directory

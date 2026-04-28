@@ -83,16 +83,12 @@ async def load_data_and_index():
             for row in dataset.itertuples():
                 row_ctx = row.context
                 for ctx in row_ctx:
-                    title = ctx[0]
-                    text = ctx[1]
-                    docs.append(f"{title}\n{' '.join(text)}")
+                    docs.append(f"{' '.join(ctx[1])}")
         else:
             for row in dataset.itertuples():
                 row_ctx = row.paragraphs
                 for ctx in row_ctx:
-                    title = ctx["title"]
-                    text = ctx["paragraph_text"]
-                    docs.append(f"{title}\n{text}")
+                    docs.append(f"{ctx['paragraph_text']}")
 
         if not docs:
             raise ValueError("No valid documents found")
