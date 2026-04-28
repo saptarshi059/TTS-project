@@ -2,7 +2,7 @@ from peft import PeftModel
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 base_path = "Qwen/Qwen2.5-7B-Instruct"
-adapter_path = "./qwen_instruct_v2"
+adapter_path = "~/.cache/huggingface/hub/models--yuchuanyue--GraphRAG-R1/snapshots/c03a3ddffc007b5cc1bf8c878b24445cf47edf3d/checkpoints/qwen_instruct_v2/"
 
 print("Loading base model...")
 model = AutoModelForCausalLM.from_pretrained(base_path, dtype="auto")
