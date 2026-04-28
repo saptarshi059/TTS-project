@@ -1,2 +1,1 @@
-FROM qwen2.5:7b-instruct
-ADAPTER qwen_instruct_v2/
+FROM ./qwen-r1.gguf
