@@ -31,7 +31,7 @@ export OLLAMA_HOST="127.0.0.1:$OLLAMA_PORT"
 
 OLLAMA_BIN="./../../HyperGraphRAG-main/evaluation/ollama/bin/ollama"
 
-if ! lsof -i :$OLLAMA_PORT > /dev/null 2>&1; then
+if ! curl -s "http://127.0.0.1:$OLLAMA_PORT/api/tags" > /dev/null 2>&1; then
     echo "[$(date)] Starting Ollama on port $OLLAMA_PORT..."
     OLLAMA_HOST="127.0.0.1:$OLLAMA_PORT" $OLLAMA_BIN serve > ollama_server.log 2>&1 &
     sleep 15
