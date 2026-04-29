@@ -41,7 +41,7 @@ else
 fi
 
 export LLM_MODEL_NAME="qwen2.5-graphrag-r1" # This is their adapter loaded model.
-export LLM_BASE_URL="http://localhost:$OLLAMA_PORT"
+export LLM_BASE_URL="http://127.0.0.1:$OLLAMA_PORT/v1"
 
 # Embedding model settings
 export EMBEDDING_MODEL_NAME="Qwen/Qwen3-Embedding-0.6B"
