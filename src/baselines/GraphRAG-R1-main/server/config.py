@@ -10,7 +10,7 @@ CUDA_VISIBLE_DEVICES = os.getenv("CUDA_VISIBLE_DEVICES", "0")
 # Model settings
 LLM_MODEL_NAME = os.getenv("LLM_MODEL_NAME", "qwen7B_4096:latest")
 EMBEDDING_MODEL_NAME = os.getenv("EMBEDDING_MODEL_NAME", "nvidia/NV-Embed-v2")
-LLM_BASE_URL = os.getenv("LLM_BASE_URL", "http://localhost:11434/")
+LLM_BASE_URL = os.getenv("LLM_BASE_URL", "http://localhost:11434/v1")
 
 # Data path settings
 SAVE_DIR = os.getenv("SAVE_DIR", "outputs/server")
