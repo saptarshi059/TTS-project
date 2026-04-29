@@ -1,0 +1,8 @@
+In server - to create their merged model for ollama inference
+1. Download llama.cpp
+2. Create a new venv for it.
+3. Run fix_config.py to correct their base model path.
+4. Then, run merge.py to create a single fused model (qwen-merged).
+5. Covert to GGUF for ollama python llama.cpp/convert_hf_to_gguf.py ./qwen-merged --outfile qwen-r1.gguf
+6. Create ollama compatible model: ./../../HyperGraphRAG-main/evaluation/ollama/bin/ollama create qwen2.5-graphrag-r1
+
