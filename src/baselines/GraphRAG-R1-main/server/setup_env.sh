@@ -31,13 +31,12 @@ export OLLAMA_HOST="127.0.0.1:$OLLAMA_PORT"
 
 OLLAMA_BIN="./../../HyperGraphRAG-main/evaluation/ollama/bin/ollama"
 
-if ! curl -s "http://127.0.0.1:$OLLAMA_PORT/api/tags" > /dev/null 2>&1; then
-    echo "[$(date)] Starting Ollama on port $OLLAMA_PORT..."
-    OLLAMA_HOST="127.0.0.1:$OLLAMA_PORT" $OLLAMA_BIN serve > ollama_server.log 2>&1 &
-    sleep 15
-else
-    echo "[$(date)] Ollama already running on port $OLLAMA_PORT."
-fi
+echo "Waiting for Ollama to be ready..."
+for i in $(seq 1 30); do
+    curl -s "http://127.0.0.1:$OLLAMA_PORT/api/tags" > /dev/null 2>&1 && break
+    echo "  attempt $i/30..."
+    sleep 2
+done
 
 export LLM_MODEL_NAME="qwen2.5-graphrag-r1" # This is their adapter loaded model.
 export LLM_BASE_URL="http://127.0.0.1:$OLLAMA_PORT/v1"
