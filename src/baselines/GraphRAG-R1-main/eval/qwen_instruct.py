@@ -61,7 +61,7 @@ def run(
     base_model = AutoModelForCausalLM.from_pretrained(
         base_model_path,
         trust_remote_code=True,
-        torch_dtype=torch.float16,
+        dtype=torch.float16,
         device_map="auto"
     )
     # 第二步：加载 adapter（SFT）权重
@@ -87,7 +87,7 @@ def run(
         search_url=search_url
     )
 
-    raw_data = pd.read_json(input_json_path)
+    raw_data = pd.read_json(input_json_path).to_dict(orient='records')
 
     # 打开输出文件，准备写入，一边生成，一边写入
     with open(output_jsonl_path, 'w', encoding='utf-8') as f:
