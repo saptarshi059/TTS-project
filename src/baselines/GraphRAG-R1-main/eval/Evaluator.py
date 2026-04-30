@@ -158,7 +158,8 @@ class RolloutEvaluator(GRPOTrainer):
                 start_time = time.time()
                                 
                 if t>0:
-                    print(ds['prompt'])
+                    print('akljshdlkshd-', ds['prompt'])
+                    exit()
                     prompt_inputs = self.processing_class(
                                     text=list(ds['prompt']), return_tensors="pt", padding=True, padding_side="left", add_special_tokens=False
                                 )
