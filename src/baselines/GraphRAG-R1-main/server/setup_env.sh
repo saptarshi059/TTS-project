@@ -94,4 +94,5 @@ echo "  source setup_env.sh    # load env vars"
 echo "  python server.py       # start server"
 echo "======================================"
 
-python server.py
+# To just build the indices.
+python index_datasets.py
