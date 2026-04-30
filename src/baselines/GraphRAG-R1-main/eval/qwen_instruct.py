@@ -142,35 +142,18 @@ def run(
 if __name__ == "__main__":
 
     result_path='./result/qwen_instruct'
-    checkpoint_path='../checkpoints/qwen_instruct_v2'
+    checkpoint_path="/gpuhome/sks6765/.cache/huggingface/hub/models--yuchuanyue--GraphRAG-R1/snapshots/c03a3ddffc007b5cc1bf8c878b24445cf47edf3d/checkpoints/qwen_instruct_v2/"
     os.makedirs(result_path, exist_ok=True)
-    search_url='http://127.0.0.1:8090/query'
+    search_url='http://127.0.0.1:8120/query'
 
     run(
-        input_json_path="../datasets/hotpotqa/Question.json",         
-        output_jsonl_path=result_path+"/hotpotqa.jsonl",
+        input_json_path="../../../../sampled_data/2wikimultihopqa/sampled_ds.json",
+        output_jsonl_path=result_path+"/2wikimultihopqa.jsonl",
         model_ckpt=checkpoint_path,
         prompt_type="v0c", 
         mode=0,      
         search_url=search_url                  
     )
-    run(
-        input_json_path="../datasets/2wikimultihop/Question.json",         
-        output_jsonl_path=result_path+"/2wiki.jsonl",
-        model_ckpt=checkpoint_path,
-        prompt_type="v0c",
-        mode=0,      
-        search_url=search_url                          
-    )
-    run(
-        input_json_path="../datasets/musique/Question.json",         
-        output_jsonl_path=result_path+"/musique.jsonl",
-        model_ckpt=checkpoint_path,
-        prompt_type="v0c", 
-        mode=0,      
-        search_url=search_url                           
-    )
-
 
 
 
