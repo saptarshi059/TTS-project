@@ -6,7 +6,22 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 from peft import LoraConfig
 from trl import GRPOConfig, GRPOTrainer
 from typing import Any, Callable, Optional, Sized, Union
-from trl.extras.profiling import profiling_context, profiling_decorator
+
+try:
+    from trl.extras.profiling import profiling_context, profiling_decorator
+except ImportError:
+    import contextlib
+
+
+    # Mock the context manager
+    @contextlib.contextmanager
+    def profiling_context(*args, **kwargs):
+        yield
+
+
+    # Mock the decorator
+    def profiling_decorator(func):
+        return func
 from trl.data_utils import apply_chat_template, is_conversational, maybe_apply_chat_template
 from accelerate.utils import broadcast_object_list, gather, gather_object, is_peft_model, set_seed
 from trl.trainer.utils import (
