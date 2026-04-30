@@ -6,38 +6,16 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 from peft import LoraConfig
 from trl import GRPOConfig, GRPOTrainer
 from typing import Any, Callable, Optional, Sized, Union
-
-try:
-    from trl.extras.profiling import profiling_context, profiling_decorator
-except ImportError:
-    import contextlib
-
-
-    # Mock the context manager
-    @contextlib.contextmanager
-    def profiling_context(*args, **kwargs):
-        yield
-
-
-    # Mock the decorator
-    def profiling_decorator(func):
-        return func
+from trl.extras.profiling import profiling_context, profiling_decorator
 from trl.data_utils import apply_chat_template, is_conversational, maybe_apply_chat_template
 from accelerate.utils import broadcast_object_list, gather, gather_object, is_peft_model, set_seed
 from trl.trainer.utils import (
     generate_model_card,
     get_comet_experiment_url,
     pad,
+    print_prompt_completions_sample,
     selective_log_softmax,
 )
-
-# Handle the missing function separately
-try:
-    from trl.trainer.utils import print_prompt_completions_sample
-except ImportError:
-    # We define a dummy function so the rest of the code can call it without crashing
-    def print_prompt_completions_sample(*args, **kwargs):
-        return None
 from trl.models import create_reference_model, prepare_deepspeed, unwrap_model_for_generation
 from torch import nn
 from trl.import_utils import is_deepspeed_available, is_rich_available, is_vllm_available
