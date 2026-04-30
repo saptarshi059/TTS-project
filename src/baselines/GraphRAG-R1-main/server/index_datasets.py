@@ -68,7 +68,12 @@ def load_docs(data_path: str) -> list[str]:
         raise FileNotFoundError(f"Data file not found: {data_path}")
 
     # Since we're only using the gold contexts.
-    docs = pd.read_json(data_path)[0].to_list()[:1]
+    docs = [
+  {
+    "title": "FIRST PASSAGE TITLE",
+    "text": pd.read_json(data_path)[0].to_list()[:1],
+    "idx": 0
+  }]
 
     if not docs:
         raise ValueError(f"No documents found in {data_path}")
