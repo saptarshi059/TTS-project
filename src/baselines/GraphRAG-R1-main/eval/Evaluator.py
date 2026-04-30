@@ -158,8 +158,9 @@ class RolloutEvaluator(GRPOTrainer):
                 start_time = time.time()
                                 
                 if t>0:
+                    print(ds['prompt'])
                     prompt_inputs = self.processing_class(
-                                    text=ds['prompt'], return_tensors="pt", padding=True, padding_side="left", add_special_tokens=False
+                                    text=list(ds['prompt']), return_tensors="pt", padding=True, padding_side="left", add_special_tokens=False
                                 )
                     prompt_inputs = Trainer._prepare_inputs(self,inputs=prompt_inputs)
                     temp_prompt_ids, temp_prompt_mask = prompt_inputs["input_ids"], prompt_inputs["attention_mask"]
