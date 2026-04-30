@@ -28,9 +28,16 @@ from trl.trainer.utils import (
     generate_model_card,
     get_comet_experiment_url,
     pad,
-    print_prompt_completions_sample,
     selective_log_softmax,
 )
+
+# Handle the missing function separately
+try:
+    from trl.trainer.utils import print_prompt_completions_sample
+except ImportError:
+    # We define a dummy function so the rest of the code can call it without crashing
+    def print_prompt_completions_sample(*args, **kwargs):
+        return None
 from trl.models import create_reference_model, prepare_deepspeed, unwrap_model_for_generation
 from torch import nn
 from trl.import_utils import is_deepspeed_available, is_rich_available, is_vllm_available
