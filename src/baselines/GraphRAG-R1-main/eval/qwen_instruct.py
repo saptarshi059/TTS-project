@@ -1,4 +1,7 @@
 import os
+
+import pandas as pd
+
 os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # 设置为 ERROR 级别,只显示错误信息，不显示警告和信息级别的
 import json
@@ -84,19 +87,7 @@ def run(
         search_url=search_url
     )
 
-
-
-    # 读取后200条
-    with open(input_json_path, 'r', encoding='utf-8') as f:
-        raw_lines = [line for line in f if line.strip()]  # 去掉空行
-        total_lines = len(raw_lines)
-        
-        # 计算倒数第500条数据的起始索引
-        start_index = max(0, total_lines - 200)  # 确保不会出现负索引
-        raw_data = [json.loads(line) for line in raw_lines[start_index:]]
-        
-        print("评估数据条数:")
-        print(len(raw_data))
+    raw_data = pd.read_json(input_json_path)
 
     # 打开输出文件，准备写入，一边生成，一边写入
     with open(output_jsonl_path, 'w', encoding='utf-8') as f:
