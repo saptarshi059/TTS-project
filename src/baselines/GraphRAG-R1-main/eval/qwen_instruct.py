@@ -51,7 +51,6 @@ def run(
     search_url="http://127.0.0.1:8081/query",
     plus=False
 ):
-    print("模型路径:")
     print(model_ckpt)
     # 加载adapter配置
     peft_config = PeftConfig.from_pretrained(model_ckpt)
@@ -87,7 +86,12 @@ def run(
         search_url=search_url
     )
 
-    raw_data = pd.read_json(input_json_path).to_dict(orient='records')
+    with open(input_json_path, 'r', encoding='utf-8') as f:
+        raw_lines = [line for line in f if line.strip()]
+        raw_data = [json.loads(line) for line in raw_lines]
+
+        print("评估数据条数:")
+        print(len(raw_data))
 
     # 打开输出文件，准备写入，一边生成，一边写入
     with open(output_jsonl_path, 'w', encoding='utf-8') as f:
@@ -138,7 +142,7 @@ if __name__ == "__main__":
     search_url='http://127.0.0.1:8120/query'
 
     run(
-        input_json_path="../../../../sampled_data/2wikimultihopqa/sampled_ds.json",
+        input_json_path="../datasets/2wikimultihop/Question.json",
         output_jsonl_path=result_path+"/2wikimultihopqa.jsonl",
         model_ckpt=checkpoint_path,
         prompt_type="v0c", 
