@@ -39,7 +39,7 @@ else
     echo "[$(date)] Ollama already running on port $OLLAMA_PORT."
 fi
 
-export LLM_MODEL_NAME="qwen2.5-graphrag-r1" # This is their adapter loaded model.
+export LLM_MODEL_NAME="qwen2.5:7b-instruct" # Using basic instruct model for index building.
 export LLM_BASE_URL="http://127.0.0.1:$OLLAMA_PORT/v1"
 
 # Embedding model settings
