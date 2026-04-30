@@ -26,7 +26,7 @@ export CUDA_VISIBLE_DEVICES="0"
 
 export OLLAMA_NUM_PARALLEL=16
 export OLLAMA_MAX_LOADED_MODELS=4
-export OLLAMA_PORT=10278
+export OLLAMA_PORT=10178
 export OLLAMA_HOST="127.0.0.1:$OLLAMA_PORT"
 
 OLLAMA_BIN="./../../HyperGraphRAG-main/evaluation/ollama/bin/ollama"
