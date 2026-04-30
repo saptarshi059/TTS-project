@@ -1,0 +1,3 @@
+1. Run create_datasets.py to retain only the gold contexts for the 3 datasets
+2. Execute run_tests.sh - wait 3 days lol
+3. Then run extract_answers.py to parse out their answers.
