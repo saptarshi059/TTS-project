@@ -25,4 +25,6 @@ for ds in datasets:
     # 4. Save the processed data
     output_file = os.path.join(output_dir, 'Question.json')
     with open(output_file, 'w', encoding='utf-8') as f:
-        json.dump(final_rows, f, indent=4)
+        for entry in final_rows:
+            # Save each dictionary as a single line
+            f.write(json.dumps(entry) + '\n')
