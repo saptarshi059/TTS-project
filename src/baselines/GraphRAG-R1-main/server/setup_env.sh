@@ -95,4 +95,4 @@ echo "  python server.py       # start server"
 echo "======================================"
 
 # To just build the indices.
-python index_datasets.py --dataset 2wikimultihopqa
+python index_datasets.py
