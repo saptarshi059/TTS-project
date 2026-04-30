@@ -142,7 +142,7 @@ if __name__ == "__main__":
     search_url='http://127.0.0.1:8120/query'
 
     run(
-        input_json_path="../datasets/2wikimultihop/Question.json",
+        input_json_path="/gpuhome/sks6765/TTS-project/src/baselines/GraphRAG-R1-main/datasets/2wikimultihopqa/Question.json",
         output_jsonl_path=result_path+"/2wikimultihopqa.jsonl",
         model_ckpt=checkpoint_path,
         prompt_type="v0c", 
