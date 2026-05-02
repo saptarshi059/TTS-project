@@ -1,19 +1,22 @@
 #!/bin/bash
 set -ex
 
-WIKI2018_WORK_DIR=/path/to/wiki2018
+export RAG_SERVER_ADDR_DIR="127.0.0.1"
+export PORT=3416
 
-index_file=$WIKI2018_WORK_DIR/e5.index/e5_Flat.index
-corpus_file=$WIKI2018_WORK_DIR/wiki_corpus.jsonl
-pages_file=$WIKI2018_WORK_DIR/wiki_webpages.jsonl
-retriever_name=e5
-retriever_path=intfloat__e5-base-v2
+DATASET="2wikimultihopqa"
+
+WORK_DIR="../../../../sampled_data/${DATASET}"
+
+index_file="${WORK_DIR}/${DATASET}_index.index"
+corpus_file="${WORK_DIR}/${DATASET}-chunks.jsonl"
+
+retriever_name="qwen3-0.6b"
+retriever_path="/gpuhome/sks6765/.cache/huggingface/hub/models--Qwen--Qwen3-Embedding-0.6B"
 
 python3  tools/local_retrieval_server.py --index_path $index_file \
                                             --corpus_path $corpus_file \
-                                            --pages_path $pages_file \
                                             --topk 3 \
                                             --retriever_name $retriever_name \
                                             --retriever_model $retriever_path \
-                                            --faiss_gpu --port $1 \
-                                            --save-address-to $2
+                                            --faiss_gpu --port $PORT --save-address-to $RAG_SERVER_ADDR_DIR
