@@ -3,6 +3,13 @@ set -ex
 
 export RAG_SERVER_ADDR_DIR="127.0.0.1"
 export PORT=3416
+ulimit -n 65535
+export OMP_NUM_THREADS=1
+export MKL_NUM_THREADS=1
+export OPENBLAS_NUM_THREADS=1
+export VLLM_ATTENTION_BACKEND=FLASH_ATTN
+export NCCL_IGNORE_DISABLED_P2P=1
+export VLLM_USE_V1=0
 
 DATASET="2wikimultihopqa"
 
