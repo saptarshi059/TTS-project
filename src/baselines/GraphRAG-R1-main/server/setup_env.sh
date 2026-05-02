@@ -50,7 +50,7 @@ export RERANK_BASE_URL="${RERANK_BASE_URL:-https://dashscope.aliyuncs.com/compat
 export RERANK_MODEL="${RERANK_MODEL:-qwen-turbo-latest}"
 
 # Data path (relative to project root)
-export DATA_PATH="../../../../sampled_data/hotpotqa/sampled_ds.json"
+export DATA_PATH="../../../../sampled_data/musique/sampled_ds.json"
 
 # Index save directory
 export SAVE_DIR="${SAVE_DIR:-outputs/server}"

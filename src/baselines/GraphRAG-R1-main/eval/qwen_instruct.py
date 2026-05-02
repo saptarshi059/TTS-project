@@ -142,8 +142,8 @@ if __name__ == "__main__":
     search_url='http://127.0.0.1:8120/query'
 
     run(
-        input_json_path="/gpuhome/sks6765/TTS-project/src/baselines/GraphRAG-R1-main/datasets/hotpotqa/Question.json",
-        output_jsonl_path=result_path+"/hotpotqa.jsonl",
+        input_json_path="/gpuhome/sks6765/TTS-project/src/baselines/GraphRAG-R1-main/datasets/musique/Question.json",
+        output_jsonl_path=result_path+"/musique.jsonl",
         model_ckpt=checkpoint_path,
         prompt_type="v0c", 
         mode=0,      
