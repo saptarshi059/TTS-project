@@ -5,6 +5,7 @@ DATA_NAMES="2wikimultihopqa"
 AGENT_TYPE="search-r1"
 PROMPT_TYPE="search-r1"
 SEARCH_CLIENT_TYPE="async-search-access"
+export CUDA_VISIBLE_DEVICES="0,1"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
