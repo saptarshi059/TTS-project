@@ -447,7 +447,7 @@ if __name__ == "__main__":
     # 2) Instantiate a global retriever so it is loaded once and reused.
     retriever = get_retriever(config)
 
-    print("Retriver is ready.")
+    print("Retriever is ready.")
 
     # 3) Load pages
     if os.path.exists(args.pages_path):

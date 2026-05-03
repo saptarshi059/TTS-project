@@ -2,7 +2,7 @@
 set -ex
 
 export RAG_SERVER_ADDR_DIR="127.0.0.1"
-export PORT=3416
+export PORT=3246
 ulimit -n 65535
 export OMP_NUM_THREADS=1
 export MKL_NUM_THREADS=1
