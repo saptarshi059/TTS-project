@@ -13,7 +13,7 @@ export VLLM_USE_V1=0
 
 DATASET="2wikimultihopqa"
 
-WORK_DIR="../../../../sampled_data/${DATASET}"
+WORK_DIR="/gpuhome/sks6765/TTS-project/sampled_data/${DATASET}"
 
 index_file="${WORK_DIR}/${DATASET}_index.index"
 corpus_file="${WORK_DIR}/${DATASET}-chunks.jsonl"
