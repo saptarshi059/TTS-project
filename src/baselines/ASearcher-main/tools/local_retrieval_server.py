@@ -452,8 +452,7 @@ if __name__ == "__main__":
     # 3) Load pages
     if os.path.exists(args.pages_path):
         page_access = PageAccess(args.pages_path)
-
-    print("Page Access is ready.")
+        print("Page Access is ready.")
 
     # 4) Launch the server.
     config = uvicorn.Config(
