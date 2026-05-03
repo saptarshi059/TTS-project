@@ -1,5 +1,3 @@
-cd evaluation/
-
 MODEL_PATH="/gpuhome/sks6765/.cache/huggingface/hub/models--inclusionAI--ASearcher-Local-7B/snapshots/bd1b05b86ca7fae5617c608008a57e12e592a8b2"
 DATA_DIR="/gpuhome/sks6765/TTS-project/sampled_data"
 
