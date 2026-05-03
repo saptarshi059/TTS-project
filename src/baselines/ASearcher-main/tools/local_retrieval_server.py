@@ -92,6 +92,12 @@ class Encoder:
             if is_query:
                 query_list = [f"Represent this sentence for searching relevant passages: {query}" for query in query_list]
 
+        if "qwen" in self.model_name.lower():
+            if is_query:
+                query_list = [f"Instruct: Given a web search query, retrieve relevant passages that answer the query\nQuery: {query}" for query in
+                              query_list]
+
+
         inputs = self.tokenizer(query_list,
                                 max_length=self.max_length,
                                 padding=True,

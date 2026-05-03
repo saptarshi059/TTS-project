@@ -19,7 +19,7 @@ index_file="${WORK_DIR}/${DATASET}_index.index"
 corpus_file="${WORK_DIR}/${DATASET}-chunks.jsonl"
 
 retriever_name="qwen3-0.6b"
-retriever_path="/gpuhome/sks6765/.cache/huggingface/hub/models--Qwen--Qwen3-Embedding-0.6B"
+retriever_path="/gpuhome/sks6765/.cache/huggingface/hub/models--Qwen--Qwen3-Embedding-0.6B/snapshots/c54f2e6e80b2d7b7de06f51cec4959f6b3e03418"
 
 python3  tools/local_retrieval_server.py --index_path $index_file \
                                             --corpus_path $corpus_file \
