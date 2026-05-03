@@ -18,7 +18,7 @@ python3 search_eval_async.py \
     --data_dir ${DATA_DIR} \
     --prompt_type ${PROMPT_TYPE} \
     --agent-type ${AGENT_TYPE} \
-    --search_client_type ${SEARCH_CLIENT_TYPE} \
+    --search-client-type ${SEARCH_CLIENT_TYPE} \
     --tensor_parallel_size 4 \
     --temperature 0.6 \
     --parallel-mode seed \
