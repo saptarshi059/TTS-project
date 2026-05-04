@@ -2,8 +2,8 @@ MODEL_PATH="/gpuhome/sks6765/.cache/huggingface/hub/models--inclusionAI--ASearch
 DATA_DIR="/gpuhome/sks6765/TTS-project/sampled_data"
 
 DATA_NAMES="2wikimultihopqa"
-AGENT_TYPE="search-r1"
-PROMPT_TYPE="search-r1"
+AGENT_TYPE="asearcher"
+PROMPT_TYPE="local-rag"
 SEARCH_CLIENT_TYPE="async-search-access"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
