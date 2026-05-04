@@ -22,5 +22,5 @@ settings:
   
   # Local search server configuration
   local_server:
-    address: ""
-    port: ""
+    address: "130.203.139.5"
+    port: "3246"
