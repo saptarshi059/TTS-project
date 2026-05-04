@@ -10,7 +10,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
 PYTHONPATH="${PROJECT_ROOT}:$PYTHONPATH" \
-CUDA_VISIBLE_DEVICES="0,1" \
+CUDA_VISIBLE_DEVICES="0" \
 TOKENIZERS_PARALLELISM=false \
 python3 search_eval_async.py \
     --data_names ${DATA_NAMES} \
@@ -20,8 +20,9 @@ python3 search_eval_async.py \
     --prompt_type ${PROMPT_TYPE} \
     --agent-type ${AGENT_TYPE} \
     --search_client_type ${SEARCH_CLIENT_TYPE} \
-    --tensor_parallel_size 2 \
+    --tensor_parallel_size 1 \
     --temperature 0.6 \
+    --concurrent 1 \
     --parallel-mode seed \
     --seed 1 \
     --pass-at-k 1
