@@ -2,7 +2,7 @@ MODEL_PATH="/gpuhome/sks6765/.cache/huggingface/hub/models--inclusionAI--ASearch
 DATA_DIR="/gpuhome/sks6765/TTS-project/sampled_data"
 
 DATA_NAMES="2wikimultihopqa"
-AGENT_TYPE="asearcher"
+AGENT_TYPE="asearcher-reasoning"
 PROMPT_TYPE="local-rag"
 SEARCH_CLIENT_TYPE="async-search-access"
 
