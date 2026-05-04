@@ -293,7 +293,7 @@ def parse_args():
     parser.add_argument("--prompt_type", default="none", type=str)
     parser.add_argument("--agent-type", default="areal-search-reasoning-v2", type=str)
     parser.add_argument("--search-client-type", default="search-r1", type=str)
-    parser.add_argument("--split", default="test", type=str)
+    parser.add_argument("--split", default="sampled_ds", type=str)
     parser.add_argument("--num_test_sample", default=-1, type=int)
     parser.add_argument("--seed", default=0, type=int)
     parser.add_argument("--n-splits", default=1, type=int)
