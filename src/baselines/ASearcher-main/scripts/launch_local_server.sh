@@ -2,7 +2,7 @@
 set -ex
 
 export RAG_SERVER_ADDR_DIR="/gpuhome/sks6765/TTS-project/src/baselines/ASearcher-main/rag_server"
-export PORT=3246
+export PORT=3241
 ulimit -n 65535
 export OMP_NUM_THREADS=1
 export MKL_NUM_THREADS=1
