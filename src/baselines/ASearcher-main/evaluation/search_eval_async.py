@@ -341,7 +341,9 @@ async def main(args):
     load_config_and_set_env()
 
     data_list = args.data_names.split(",")
-    
+
+    print(data_list)
+
     # If only aggregating existing results, skip new evaluation
     if args.aggregate_only:
         print("Aggregating existing results mode...")
