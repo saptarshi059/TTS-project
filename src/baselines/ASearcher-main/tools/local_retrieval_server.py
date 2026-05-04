@@ -42,7 +42,6 @@ def load_docs(corpus, doc_idxs):
 
 def load_model(model_path: str, use_fp16: bool = False):
     model = SentenceTransformer(model_path,
-                                model_kwargs={"device_map": "auto"},
                                 tokenizer_kwargs={"padding_side": "left"})
 
     '''model_config = AutoConfig.from_pretrained(model_path, trust_remote_code=True)
