@@ -24,4 +24,5 @@ python3 search_eval_async.py \
     --temperature 0.6 \
     --parallel-mode seed \
     --seed 1 \
+    --llm_as_judge \
     --pass-at-k 1
