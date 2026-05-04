@@ -2,8 +2,8 @@ MODEL_PATH="/gpuhome/sks6765/.cache/huggingface/hub/models--inclusionAI--ASearch
 DATA_DIR="/gpuhome/sks6765/TTS-project/sampled_data"
 
 DATA_NAMES="2wikimultihopqa"
-AGENT_TYPE="asearcher-reasoning"
-PROMPT_TYPE="asearcher-reasoning"
+AGENT_TYPE="search-r1"
+PROMPT_TYPE="search-r1"
 SEARCH_CLIENT_TYPE="async-search-access"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
@@ -19,7 +19,7 @@ python3 search_eval_async.py \
     --data_dir ${DATA_DIR} \
     --prompt_type ${PROMPT_TYPE} \
     --agent-type ${AGENT_TYPE} \
-    --search-client-type ${SEARCH_CLIENT_TYPE} \
+    --search_client_type ${SEARCH_CLIENT_TYPE} \
     --tensor_parallel_size 2 \
     --temperature 0.6 \
     --parallel-mode seed \
