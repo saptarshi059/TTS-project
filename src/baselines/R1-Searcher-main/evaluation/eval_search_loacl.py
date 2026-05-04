@@ -1,4 +1,4 @@
-import argparse
+import pandas as pd
 import argparse
 import copy
 import json
@@ -90,15 +90,7 @@ def main():
     model_path=args.model_path
     gpu_memory_rate=args.gpu_memory_rate
 
-    data_ori_all = []
-    with open(args.src_file, "r") as f:
-        data_ori_all = []
-        for i, line in enumerate(f):
-            if args.start_sample <= i < args.end_sample:
-                obj_ori=json.loads(line)
-                data_ori_all.append(obj_ori)
-            if i >= args.end_sample - 1:
-                break
+    data_ori_all = pd.read_json(args.src_file).to_dict(orient='records')
 
     print("All Data Length: ",len(data_ori_all))
     chunk_size = 20000
