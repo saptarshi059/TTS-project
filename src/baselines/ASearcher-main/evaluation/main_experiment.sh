@@ -2,8 +2,8 @@ MODEL_PATH="/gpuhome/sks6765/.cache/huggingface/hub/models--inclusionAI--ASearch
 DATA_DIR="/gpuhome/sks6765/TTS-project/sampled_data"
 
 DATA_NAMES="2wikimultihopqa"
-AGENT_TYPE="asearcher-reasoning"
-PROMPT_TYPE="asearcher-reasoning"
+AGENT_TYPE="asearcher"
+PROMPT_TYPE="asearcher"
 SEARCH_CLIENT_TYPE="async-search-access"
 export CUDA_VISIBLE_DEVICES="0,1"
 
