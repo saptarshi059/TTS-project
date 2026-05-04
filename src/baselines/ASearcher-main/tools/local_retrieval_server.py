@@ -13,6 +13,7 @@ import numpy as np
 from transformers import AutoConfig, AutoTokenizer, AutoModel
 from tqdm import tqdm
 import datasets
+from sentence_transformers import SentenceTransformer
 
 import uvicorn
 from fastapi import FastAPI
@@ -40,14 +41,18 @@ def load_docs(corpus, doc_idxs):
     return results
 
 def load_model(model_path: str, use_fp16: bool = False):
-    model_config = AutoConfig.from_pretrained(model_path, trust_remote_code=True)
+    model = SentenceTransformer(model_path,
+                                model_kwargs={"device_map": "auto"},
+                                tokenizer_kwargs={"padding_side": "left"})
+
+    '''model_config = AutoConfig.from_pretrained(model_path, trust_remote_code=True)
     model = AutoModel.from_pretrained(model_path, trust_remote_code=True)
     model.eval()
     model.cuda()
     if use_fp16: 
         model = model.half()
-    tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=True, trust_remote_code=True)
-    return model, tokenizer
+    tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=True, trust_remote_code=True)'''
+    return model#, tokenizer
 
 def pooling(
     pooler_output,
@@ -73,8 +78,8 @@ class Encoder:
         self.max_length = max_length
         self.use_fp16 = use_fp16
 
-        self.model, self.tokenizer = load_model(model_path=model_path, use_fp16=use_fp16)
-        self.model.eval()
+        self.model = load_model(model_path=model_path, use_fp16=use_fp16)
+        #self.model.eval()
 
     @torch.no_grad()
     def encode(self, query_list: List[str], is_query=True) -> np.ndarray:
@@ -92,42 +97,39 @@ class Encoder:
             if is_query:
                 query_list = [f"Represent this sentence for searching relevant passages: {query}" for query in query_list]
 
-        if "qwen" in self.model_name.lower():
-            if is_query:
-                query_list = [f"Instruct: Given a web search query, retrieve relevant passages that answer the query\nQuery: {query}" for query in
-                              query_list]
-
-
-        inputs = self.tokenizer(query_list,
+        '''inputs = self.tokenizer(query_list,
                                 max_length=self.max_length,
                                 padding=True,
                                 truncation=True,
                                 return_tensors="pt"
                                 )
-        inputs = {k: v.cuda() for k, v in inputs.items()}
+        inputs = {k: v.cuda() for k, v in inputs.items()}'''
 
         if "T5" in type(self.model).__name__:
             # T5-based retrieval model
-            decoder_input_ids = torch.zeros(
+            print('useless...')
+            '''decoder_input_ids = torch.zeros(
                 (inputs['input_ids'].shape[0], 1), dtype=torch.long
             ).to(inputs['input_ids'].device)
             output = self.model(
                 **inputs, decoder_input_ids=decoder_input_ids, return_dict=True
             )
-            query_emb = output.last_hidden_state[:, 0, :]
+            query_emb = output.last_hidden_state[:, 0, :]'''
         else:
-            output = self.model(**inputs, return_dict=True)
-            query_emb = pooling(output.pooler_output,
+            #output = self.model(**inputs, return_dict=True)
+            query_emb = self.model.encode(query_list, prompt_name="query")
+
+            '''query_emb = pooling(output.pooler_output,
                                 output.last_hidden_state,
                                 inputs['attention_mask'],
                                 self.pooling_method)
             if "dpr" not in self.model_name.lower():
-                query_emb = torch.nn.functional.normalize(query_emb, dim=-1)
+                query_emb = torch.nn.functional.normalize(query_emb, dim=-1)'''
 
         query_emb = query_emb.detach().cpu().numpy()
         query_emb = query_emb.astype(np.float32, order="C")
         
-        del inputs, output
+        #del inputs, output
         torch.cuda.empty_cache()
 
         return query_emb
