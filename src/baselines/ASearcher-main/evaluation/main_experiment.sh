@@ -22,7 +22,6 @@ python3 search_eval_async.py \
     --search_client_type ${SEARCH_CLIENT_TYPE} \
     --tensor_parallel_size 1 \
     --temperature 0.6 \
-    --concurrent 1 \
     --parallel-mode seed \
     --seed 1 \
     --pass-at-k 1

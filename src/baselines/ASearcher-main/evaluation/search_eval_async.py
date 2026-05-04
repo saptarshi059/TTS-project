@@ -764,7 +764,7 @@ async def process_single_work_item(semaphore, agent_type, llm, tokenizer, search
                             process["history"].append({
                                 "type": "search_result",
                                 "query": tool_call["query"],
-                                "documents": documents,
+                                "documents":  [d[:500] for d in documents],
                                 "urls": urls
                             })
                     
