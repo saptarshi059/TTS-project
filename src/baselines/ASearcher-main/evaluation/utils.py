@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any, Iterable, Union
 
 import numpy as np
+import pandas as pd
 
 def set_seed(seed: int = 42) -> None:
     np.random.seed(seed)
@@ -44,7 +45,8 @@ def prepare_data(data_name, args, save_async=False):
     else:
         print(f"Loading data from {args.data_dir}/{data_name}/{args.split}.json")
         data_file = f"{args.data_dir}/{data_name}/{args.split}.json"
-        processes = json.load(open(data_file, "r"))
+        #processes = json.load(open(data_file, "r"))
+        processes = pd.read_json(data_file).to_dict(orient='records')
     
     for idx, process in enumerate(processes):
         process["id"] = str(idx)

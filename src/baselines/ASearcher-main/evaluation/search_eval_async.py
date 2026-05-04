@@ -342,8 +342,6 @@ async def main(args):
 
     data_list = args.data_names.split(",")
 
-    print('dkafljhaklsdjhf-', data_list)
-
     # If only aggregating existing results, skip new evaluation
     if args.aggregate_only:
         print("Aggregating existing results mode...")
