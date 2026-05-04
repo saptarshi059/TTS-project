@@ -42,10 +42,10 @@ if __name__ == "__main__":
 
     base_path = Path("/gpuhome/sks6765/TTS-project/sampled_data/")
 
-    corpus_path = base_path / Path(args.dataset_name/f"{args.dataset_name}-chunks.jsonl")
+    corpus_path = base_path / f"{args.dataset_name}/{args.dataset_name}-chunks.jsonl"
     corpus = load_corpus(corpus_path)
 
-    index_path = base_path / Path(args.dataset_name/f"{args.dataset_name}_index.index")
+    index_path = base_path / f"{args.dataset_name}/{args.dataset_name}_index.index"
     index = faiss.read_index(index_path)
 
     app.run(host="0.0.0.0", port=port, debug=False)
