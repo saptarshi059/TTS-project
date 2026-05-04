@@ -16,7 +16,7 @@ def query():
     data = request.json
     queries = data["queries"]
     k = data.get("k", 3)
-    query_embeddings = model.encode_queries(queries)
+    query_embeddings = model.encode(queries,  prompt_name="query")
 
     all_answers = []
     D, I = index.search(query_embeddings, k=k)
