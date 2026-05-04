@@ -683,7 +683,7 @@ async def process_single_work_item(semaphore, agent_type, llm, tokenizer, search
 
         # Create fresh agent instance for thread safety
         agent = make_agent(agent_type)
-        agent.initialize_with_prompt(process["prompt"])
+        agent.initialize_with_prompt(process)
         
         # Set tokenizer for V1 agents that need it
         if hasattr(agent, 'set_tokenizer'):
@@ -764,7 +764,7 @@ async def process_single_work_item(semaphore, agent_type, llm, tokenizer, search
                             process["history"].append({
                                 "type": "search_result",
                                 "query": tool_call["query"],
-                                "documents":  [d[:500] for d in documents],
+                                "documents": documents,
                                 "urls": urls
                             })
                     
