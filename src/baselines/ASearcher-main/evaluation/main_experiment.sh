@@ -5,8 +5,6 @@ DATA_NAMES="2wikimultihopqa"
 AGENT_TYPE="asearcher"
 PROMPT_TYPE="local-rag"
 SEARCH_CLIENT_TYPE="async-search-access"
-export RAG_SERVER_ADDR_DIR="/gpuhome/sks6765/TTS-project/src/baselines/ASearcher-main/rag_server"
-export PORT=3241
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
