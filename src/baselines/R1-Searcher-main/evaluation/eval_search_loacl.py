@@ -1,41 +1,18 @@
-import os
 import argparse
-import torch.distributed as dist
+import argparse
+import copy
 import json
-from vllm import LLM, SamplingParams
+import os
+import re
+
+import requests
+import torch.distributed as dist
 from datasets import Dataset
 from transformers import AutoTokenizer
-import torch.multiprocessing as mp
-from openai import OpenAI
-import sys
-import os
-import re
-from datasets import load_dataset
-import http.client
-import json
-import copy
-from tqdm import tqdm
-import multiprocessing
-from time import sleep
-import requests
-from collections import defaultdict
-import random
-import requests
-import time
+from vllm import LLM, SamplingParams
+
 
 # CUDA_VISIBLE_DEVICES=5
-
-
-
-import re
-from time import sleep
-from openai import OpenAI
-import requests
-import json
-import multiprocessing
-from collections import defaultdict
-from tqdm import tqdm
-
 
 
 def parse_args():
@@ -101,23 +78,6 @@ Assistant: <think>"""
     else:
         kill
     return examples
-
-# def process_text(examples,tokenizer,type=None):
-#     sys_prompt_with_doc_token='''You are a helpful assistant. Given a question, you should answer it by first thinking about the reasoning process in the mind and then providing the final answer. The output format of reasoning process and final answer are enclosed within <think> </think> and <answer> </answer> tags, respectively, i.e., "<think> reasoning process here </think>\n\n<answer> final answer here </answer>". During the thinking process, you can perform searching for uncertain knowledge if necessary with the format of "<|begin_of_query|> search query (only keywords) here <|end_of_query|>". Then, the system will provide the Assistant with helpful information with the format of "<|begin_of_documents|> ...search results... <|end_of_documents|>"'''
-#     sys_prompt_wo_doc_token='''You are a helpful assistant. Given a question, you should answer it by first thinking about the reasoning process in the mind and then providing the final answer. The output format of reasoning process and final answer are enclosed within <think> </think> and <answer> </answer> tags, respectively, i.e., "<think> reasoning process here </think>\n\n<answer> final answer here </answer>". During the thinking process, you can perform searching for uncertain knowledge if necessary with the format of "<|begin_of_query|> search query (only keywords) here <|end_of_query|>".'''
-
-#     question = examples["question"]
-#     messages_chat_v1=[
-#             {"role": "system","content":sys_prompt_wo_doc_token},
-#             {"role": "user", "content":question}
-#         ]
-#     chat_prompt = tokenizer.apply_chat_template(
-#                     messages_chat_v1,
-#                     tokenize=False,
-#                     add_generation_prompt=True
-#                 )
-#     examples["chat_prompt"] = chat_prompt + "<think>"
-#     return examples
 
 def main():
     print("=Begin="*10)

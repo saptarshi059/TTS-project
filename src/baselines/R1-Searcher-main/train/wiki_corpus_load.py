@@ -48,5 +48,6 @@ if __name__ == "__main__":
     index_path = f"{str(base_path)}/{args.dataset_name}/{args.dataset_name}_index.index"
     index = faiss.read_index(index_path)
 
-    app.run(host="0.0.0.0", port=port, debug=False)
     print('Running server...')
+    app.run(host="0.0.0.0", port=port, debug=False)
+
