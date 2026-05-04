@@ -21,7 +21,7 @@ def parse_args():
     parser.add_argument("--output_dir", default="./output", type=str)
     parser.add_argument("--prompt_type", default="none", type=str)
     parser.add_argument("--agent-type", default="r1-searcher", type=str)
-    parser.add_argument("--search-client-type", default="search-r1", type=str)
+    parser.add_argument("--search_client_type", default="search-r1", type=str)
     parser.add_argument("--split", default="test", type=str)
     parser.add_argument("--num_test_sample", default=-1, type=int)
     parser.add_argument("--seed", default=0, type=int)

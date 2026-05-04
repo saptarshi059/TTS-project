@@ -111,7 +111,8 @@ class SearchR1Agent:
             return "", {"stop": self.stop}
         
         # Check if last text contains a search query
-        last_text = process["history"][-1]["text"]
+        last_entry = process["history"][-1]
+        last_text = last_entry.get("text", "") if isinstance(last_entry.get("text"), str) else ""
         
         # Handle search query patterns - return empty to trigger tool calling
         if (("<|begin_of_query|>" in last_text and last_text.strip().endswith("<|end_of_query|>")) or
@@ -119,7 +120,11 @@ class SearchR1Agent:
             return "", {"stop": self.stop}
         
         # Normal LLM generation
-        input_text = "".join([h["text"] for h in process["history"]])
+        input_text = "".join([
+            h["text"]
+            for h in process["history"]
+            if h.get("type") in {"prompt", "act", "documents"} and isinstance(h.get("text"), str)
+        ])
         query_len = self.tokenizer([input_text], return_length=True)['length'][0]
         
         sampling_params = {"stop": self.stop}
