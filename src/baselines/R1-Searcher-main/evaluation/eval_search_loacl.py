@@ -86,6 +86,12 @@ def main():
     model_path=args.model_path
     gpu_memory_rate=args.gpu_memory_rate
 
+    output_file = args.src_file.replace(".jsonl", "").replace(".json", "") + \
+                  f"-{model_path.split('/')[-2]}{model_path.split('/')[-1]}_base_temp{args.temp}_type{type}.jsonl"
+
+    assert output_file != args.src_file, f"Output file would overwrite input!\nInput:  {args.src_file}\nOutput: {output_file}"
+    print("Output will be written to:", output_file)  # so you always know where results go
+
     data_ori_all = pd.read_json(args.src_file).to_dict(orient='records')
 
     print("All Data Length: ",len(data_ori_all))
@@ -250,7 +256,7 @@ def main():
 
             if len(continued_texts)==0:
                 if len(finished_texts)>0:
-                    with open(args.src_file.replace(".jsonl","-"+model_path.split("/")[-2]+model_path.split("/")[-1]+f"_base_temp{args.temp}_type{type}.jsonl"), "a") as f:
+                    with open(output_file, "a") as f:
                         for text in finished_texts:
                             f.write(json.dumps(text) + "\n")
 
@@ -268,7 +274,7 @@ def main():
             print("=="*80)
             # print(finished_texts)
             if len(finished_texts)>0:
-                with open(args.src_file.replace(".jsonl","-"+model_path.split("/")[-2]+model_path.split("/")[-1]+f"_base_temp{args.temp}_type{type}.jsonl"), "a") as f:
+                with open(output_file, "a") as f:
                     for text in finished_texts:
                         f.write(json.dumps(text) + "\n")
 
