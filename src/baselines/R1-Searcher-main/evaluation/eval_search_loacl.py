@@ -11,10 +11,6 @@ from datasets import Dataset
 from transformers import AutoTokenizer
 from vllm import LLM, SamplingParams
 
-
-# CUDA_VISIBLE_DEVICES=5
-
-
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--subject", type=str, default="")
@@ -127,6 +123,8 @@ def main():
         finished_all_list=[]
 
         continued_answer = copy.deepcopy(data)
+        for item in continued_answer:
+            item["gen_text_store"] = ""
 
         for k in range(16):
 
