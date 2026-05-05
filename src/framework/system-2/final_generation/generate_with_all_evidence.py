@@ -60,9 +60,9 @@ def main(model_name:str, dataset:str, batch_size: int) -> None:
 
     set_seed(42)
 
-    tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path="Qwen/Qwen2.5-7B-Instruct", padding_side='left')
+    tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_name, padding_side='left')
     model = AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path=model_name,
-                                                 dtype=torch.float16,
+                                                 dtype="auto",
                                                  attn_implementation="flash_attention_2",
                                                  device_map="auto")
 
