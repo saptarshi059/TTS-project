@@ -1,9 +1,8 @@
-from argparse import ArgumentParser
-from pathlib import Path
+from collections import Counter
 
 import pandas as pd
-from sentence_transformers import SentenceTransformer
-from collections import Counter
+from transformers import AutoTokenizer
+
 
 def collect_contexts(dataset, dataset_name):
     all_contexts = []
@@ -25,29 +24,18 @@ def collect_contexts(dataset, dataset_name):
     return all_contexts
 
 
-def main(dataset_name):
-    print("Loading embedding model...")
-    model = SentenceTransformer("Qwen/Qwen3-Embedding-0.6B",
-                                model_kwargs={"attn_implementation": "flash_attention_2",
-                                              "device_map": "auto",
-                                              "dtype": "auto"},
-                                tokenizer_kwargs={"padding_side": "left"}
-                                )
-    tokenizer = model.tokenizer
-    print("Embedding model loaded...")
-
-    base_path = Path(f"../../sampled_data/{dataset_name}")
-    dataset = pd.read_json(base_path / "sampled_ds.json")
+def main():
+    print("Loading tokenizer...")
+    tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen3-Embedding-0.6B")
 
     print("Collecting all contexts...")
-    all_contexts = collect_contexts(dataset, dataset_name)
+    all_contexts = []
+    for dataset_name in ["2wikimultihopqa", "hotpotqa", "musique"]:
+        dataset = pd.read_json(f"../../sampled_data/{dataset_name}/sampled_ds.json")
+        all_contexts.extend(collect_contexts(dataset, dataset_name))
 
-    token_dist = Counter([len(x) for x in tokenizer(all_contexts)['input_ids']])
-    print(token_dist)
-
+    avg_tokens = pd.Series([len(x) for x in tokenizer(all_contexts)['input_ids']]).mean()
+    print(avg_tokens)
 
 if __name__ == "__main__":
-    parser = ArgumentParser()
-    parser.add_argument("--dataset", choices=["2wikimultihopqa", "hotpotqa", "musique"])
-    args = parser.parse_args()
-    main(dataset_name=args.dataset)
+    main()
