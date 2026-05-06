@@ -1,5 +1,3 @@
-from collections import Counter
-
 import pandas as pd
 from transformers import AutoTokenizer
 
@@ -35,7 +33,7 @@ def main():
         all_contexts.extend(collect_contexts(dataset, dataset_name))
 
     avg_tokens = pd.Series([len(x) for x in tokenizer(all_contexts)['input_ids']]).mean()
-    print(avg_tokens)
+    print(f"Average tokens: {round(avg_tokens, 2)}")
 
 if __name__ == "__main__":
     main()
