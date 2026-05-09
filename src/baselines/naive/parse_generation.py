@@ -28,7 +28,7 @@ def main(dataset: str):
     print(f"Number of no_answers: {num_no_answer}...")
 
     streamed_responses['final_ans'] = final_ans
-    final_ds = pd.concat([streamed_responses, main_dataset])[['question', 'answer', 'final_ans']]
+    final_ds = main_dataset.merge(streamed_responses, on=['question'])[['question', 'answer', 'final_ans']]
 
     print('Saving final dataset...')
     final_ds.to_json(f"{dataset}_final_responses.jsonl", lines=True, orient='records', index=False)
