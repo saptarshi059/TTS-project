@@ -71,7 +71,7 @@ def main(model_name:str, dataset:str, batch_size: int) -> None:
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--model_name", type=str, default="Qwen/Qwen2.5-7B-Instruct")
-    parser.add_argument("--dataset", type=str, default="2wikimultihopqa")
+    parser.add_argument("--dataset_name", type=str, default="2wikimultihopqa")
     parser.add_argument("--batch_size", type=int, default=32)
     args = parser.parse_args()
     main(model_name=args.model_name, dataset=args.dataset, batch_size=args.batch_size)
