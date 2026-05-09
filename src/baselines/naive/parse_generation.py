@@ -18,9 +18,9 @@ def main(dataset: str):
     num_no_answer = 0
     for row in streamed_responses.itertuples():
         split_ans = row.generation.split(NAIVE_BASELINE)[1].strip()
-        match_obj = re.search(r"\\+boxed\{([\s\S]*?)\}", split_ans, re.DOTALL | re.IGNORECASE)
+        match_obj = re.search(r'<final_answer>(.*?)</final_answer>', split_ans, re.DOTALL | re.IGNORECASE)
         if match_obj:
-            final_ans.append(match_obj.group(1).replace("\\", "").strip())
+            final_ans.append(match_obj.group(1).strip())
         else:
             num_no_answer += 1
             final_ans.append("No answer")
