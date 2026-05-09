@@ -1,5 +1,8 @@
-NAIVE_BASELINE = """You are a question answering assistant. You are given a question and context related to the question.
-Based on the provided context, answer the question. Always wrap your final answer inside <final_answer> [answer] </final_answer> tags."""
+NAIVE_BASELINE = """Answer the following question:
+You can use the following documents to help you answer the question.
+Documents: {context}
+IMPORTANT: You should provide your final answer in the format \\boxed{{YOUR_ANSWER}}.
+For example, Question: What is the capital of France? Answer: \\boxed{{Paris}}."""
 
 SYSTEM_1 = """You are a precise answering engine. Your task is to provide the direct answer to a question without any explanation.
 

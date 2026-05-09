@@ -30,7 +30,7 @@ class NaiveDataset(Dataset):
         question = sample.question
         supporting_facts = "\n".join(doc for doc in sample['retrieved_docs'])
         messages = [{"role": "system", "content": NAIVE_BASELINE},
-                    {"role": "user", "content": f"RELATED CONTEXT:\n{supporting_facts}\nQUESTION: {question}"}]
+                    {"role": "user", "content": f"Documents:\n{supporting_facts}\nQUESTION: {question}"}]
         formatted_text = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
         return {"text": formatted_text, "question": question}
 
