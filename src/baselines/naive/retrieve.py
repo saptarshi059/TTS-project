@@ -1,47 +1,53 @@
-from sentence_transformers.util import semantic_search
-from sentence_transformers import SentenceTransformer
-from datasets import load_dataset
+import os
 from argparse import ArgumentParser
 from pathlib import Path
+
+import faiss
+import pandas as pd
+from datasets import load_dataset
+from sentence_transformers import SentenceTransformer
 from tqdm import tqdm
-import torch
-import os
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 def main(dataset_name: str, batch_size: int) -> None:
-    base_path = Path(f"../../../data/{dataset_name}")
-
-    # Loading Graph associated with the dataset
-    with open(base_path / "kg.txt", "r") as f:
-        kg = f.read().split("\n")
+    base_path = Path(f"../../../sampled_data/{dataset_name}")
 
     # Loading test questions for the dataset
-    dataset = load_dataset("json", data_files=str(base_path / "test.json"))["train"]
-    all_questions = dataset["question"]
+    dataset = pd.read_json(base_path)
+    all_questions = dataset["question"].to_list()
 
+    print(f"Loading FAISS index for {dataset}...")
+    index_path = base_path / f"{dataset}_index.index"
+    dataset_index = faiss.read_index(str(index_path))
+
+    print(f"Loading documents for {dataset} index...")
+    doc_path = base_path / f"{dataset}-chunks.jsonl"
+    dataset_docs = load_dataset('json', data_files=str(doc_path), split='train')
+
+    print("Loading embedding model...")
     # Loading embedding model
-    model = SentenceTransformer(model_name_or_path="Qwen/Qwen3-Embedding-8B",
-                                model_kwargs={"attn_implementation": "flash_attention_2",
-                                              "dtype": torch.float16}
+    model = SentenceTransformer(model_name_or_path="Qwen/Qwen3-Embedding-0.6B",
+                                model_kwargs={"attn_implementation": "flash_attention_2", "device_map": "auto",
+                                              "dtype": "auto"},
+                                tokenizer_kwargs={"padding_side": "left"}
                                 )
 
     print("Creating embeddings .....")
     embedding_options = {"show_progress_bar": True, "convert_to_tensor": True, "batch_size": batch_size}
+    query_embeddings = model.encode(all_questions, prompt_name="query", **embedding_options)
 
-    kg_triple_embeddings = model.encode(kg, **embedding_options)
-    query_embeddings = model.encode(all_questions, **embedding_options)
+    print("Performing semantic search...")
+    _, doc_ids = dataset_index.search(query_embeddings, 5)
 
-    hits = semantic_search(query_embeddings, kg_triple_embeddings, top_k=10)
+    retrieved_docs = []
+    for hit_list in tqdm(doc_ids):
+        retrieved_docs.append([dataset_docs[x['corpus_id']] for x in hit_list])
 
-    retrieved_triples = []
-    for hit_list in tqdm(hits):
-        retrieved_triples.append([kg[x['corpus_id']] for x in hit_list])
-
-    dataset = dataset.add_column("retrieved_triples", retrieved_triples)
+    dataset["retrieved_docs"] = retrieved_docs
 
     print("Saving dataset with retrieved triples...")
-    dataset.save_to_disk(base_path / f"{dataset_name}_with_retrieved_triples_from_naive_baseline")
+    dataset.to_json(f"{dataset_name}_with_retrieved_triples_from_naive_baseline.json")
 
 
 if __name__ == "__main__":

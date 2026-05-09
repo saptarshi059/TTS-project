@@ -1,6 +1,8 @@
-NAIVE_BASELINE = ("Answer the given question using the provided knowledge graph triples. "
-                  "Please keep your response concise. If no answer exists, please return ''. "
-                  "Format your response as\nAnswer: <answer text>")
+NAIVE_BASELINE = """You are a question answering assistant. You are given a question and context related to the question.
+Think about everything step-by-step, by considering all of the information. Provide a clear, structured explanation of 
+your logic, and conclude by stating the final answer clearly.
+
+Always wrap your final answer inside <final_answer> [answer] </final_answer> tags."""
 
 SYSTEM_1 = """You are a precise answering engine. Your task is to provide the direct answer to a question without any explanation.
 

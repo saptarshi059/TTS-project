@@ -1,10 +1,13 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer, set_seed
-from torch.utils.data import Dataset, DataLoader
-from datasets import tqdm, load_from_disk
-from argparse import ArgumentParser
-from pathlib import Path
-import os, torch
+import os
 import sys
+from argparse import ArgumentParser
+
+import pandas as pd
+import torch
+from datasets import tqdm
+from torch.utils.data import Dataset, DataLoader
+from transformers import AutoModelForCausalLM, AutoTokenizer, set_seed
+
 sys.path.append("../../utils/")
 
 from all_system_prompts import NAIVE_BASELINE
@@ -18,16 +21,15 @@ class NaiveDataset(Dataset):
         self.device = device
 
         self.samples = []
-        for row in tqdm(dataset):
-            supporting_facts = "\n".join(triple for triple in row['retrieved_triples'])
+        for row in tqdm(dataset.itertuples()):
+            supporting_facts = "\n".join(doc for doc in row['retrieved_docs'])
             self.samples.append([{"role": "system", "content": NAIVE_BASELINE},
-                                 {"role": "user", "content": f"SUPPORTING FACTS:\n{supporting_facts}\n\nQUESTION: {row['question']}"}])
+                                 {"role": "user", "content": f"RELATED CONTEXT:\n{supporting_facts}\n\nQUESTION: {row['question']}"}])
 
         self.tokenized_samples = tokenizer.apply_chat_template(
             self.samples,
             tokenize=False,
             add_generation_prompt=True,
-            enable_thinking=False  # Switches between thinking and non-thinking modes. Default is True.
         )
 
         self.model_inputs = self.tokenizer(self.tokenized_samples, padding=True, return_tensors="pt")
@@ -45,15 +47,13 @@ class NaiveDataset(Dataset):
 def main(model_name:str, dataset:str, batch_size: int) -> None:
     set_seed(42)
 
-    base_path = Path(f"../../../data/")
-
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_name, padding_side='left')
     model = AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path=model_name,
                                                  dtype="auto",
                                                  attn_implementation="flash_attention_2",
                                                  device_map="auto")
 
-    main_dataset = load_from_disk(base_path / f"{dataset}/{dataset}_with_retrieved_triples_from_naive_baseline")
+    main_dataset = pd.read_json(f"{dataset}_with_retrieved_triples_from_naive_baseline.json")
     torch_dataset = NaiveDataset(tokenizer=tokenizer, dataset=main_dataset, device=model.device)
     torch_dataset_dataloader = DataLoader(torch_dataset, batch_size=batch_size, shuffle=False)
 
@@ -64,13 +64,13 @@ def main(model_name:str, dataset:str, batch_size: int) -> None:
             generated_ids = model.generate(**batch, max_new_tokens=300, do_sample=False)
             raw_responses.extend(tokenizer.batch_decode(generated_ids, skip_special_tokens=True))
 
-    main_dataset = main_dataset.add_column("raw_responses", raw_responses)
-    main_dataset.save_to_disk(base_path / f"{dataset}/{dataset}_with_raw_responses_from_naive_baseline")
+    main_dataset["raw_responses"] = raw_responses
+    main_dataset.to_json(f"{dataset}_with_raw_responses_from_naive_baseline.json")
 
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("--model_name", type=str, default="Qwen/Qwen3-8B")
+    parser.add_argument("--model_name", type=str, default="Qwen/Qwen2.5-7B-Instruct")
     parser.add_argument("--dataset", type=str, default="2wikimultihopqa")
     parser.add_argument("--batch_size", type=int, default=32)
     args = parser.parse_args()
