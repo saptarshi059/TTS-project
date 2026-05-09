@@ -20,7 +20,7 @@ class GenerationDataset(Dataset):
 
     def __getitem__(self, idx):
         sample = self.dataset.iloc[idx]
-        question = sample[idx]
+        question = sample['question']
         gold_answer = sample['answer']
         messages = [{"role": "system", "content": SYSTEM_1},
                     {"role": "user", "content": f"<input>\n"
