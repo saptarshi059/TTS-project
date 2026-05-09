@@ -10,7 +10,7 @@ from tqdm import tqdm
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
-def main(dataset_name: str, batch_size: int) -> None:
+def main(dataset_name: str) -> None:
     base_path = Path(f"../../../sampled_data/{dataset_name}")
 
     # Loading test questions for the dataset
@@ -34,8 +34,7 @@ def main(dataset_name: str, batch_size: int) -> None:
                                 )
 
     print("Creating embeddings .....")
-    embedding_options = {"show_progress_bar": True, "batch_size": batch_size}
-    query_embeddings = model.encode(all_questions, prompt_name="query", **embedding_options)
+    query_embeddings = model.encode(all_questions, prompt_name="query", show_progress_bar=True)
 
     print("Performing semantic search...")
     _, doc_ids = dataset_index.search(query_embeddings, 5)
@@ -53,7 +52,6 @@ def main(dataset_name: str, batch_size: int) -> None:
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("-d", "--dataset_name", type=str, required=True)
-    parser.add_argument("-b", "--batch_size", type=int, default=100)
     args = parser.parse_args()
 
-    main(dataset_name=args.dataset_name, batch_size=args.batch_size)
+    main(dataset_name=args.dataset_name)

@@ -13,30 +13,34 @@ from all_system_prompts import SYSTEM_1
 class GenerationDataset(Dataset):
     def __init__(self, tokenizer, dataset):
         self.tokenizer = tokenizer
-        self.questions = dataset['question'].to_list()
+        self.dataset = dataset
 
     def __len__(self):
-        return len(self.questions)
+        return len(self.dataset)
 
     def __getitem__(self, idx):
-        question = self.questions[idx]
+        sample = self.dataset[idx]
+        question = sample[idx]
+        gold_answer = sample['answer']
         messages = [{"role": "system", "content": SYSTEM_1},
                     {"role": "user", "content": f"<input>\n"
                                                 f"Question: {question}\n"
                                                 f"</input>"}]
         formatted_text = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
 
-        return {"text": formatted_text, "question": question}
+        return {"text": formatted_text, "question": question, "gold_answer": gold_answer}
 
 
 def custom_collate_fn(batch, tokenizer, device):
     texts = [item["text"] for item in batch]
     questions = [item["question"] for item in batch]
+    gold_answers = [item["gold_answer"] for item in batch]
 
     model_inputs = tokenizer(texts, padding=True, return_tensors="pt").to(device)
 
     return {
         "question": questions,
+        "gold_answer": gold_answers,
         "input_ids": model_inputs["input_ids"],
         "attention_mask": model_inputs["attention_mask"]
     }
@@ -91,6 +95,7 @@ def main(model_name:str, dataset:str, batch_size: int) -> None:
     with Path(op_dir / "streamed_responses.jsonl").open("a") as file:
         for batch in tqdm(torch_dataset_dataloader):
             batch_questions = batch.pop('question')
+            batch_answers = batch.pop('gold_answer')
 
             with torch.no_grad():
                 # 1. Ask for scores and the full output dict
@@ -124,9 +129,10 @@ def main(model_name:str, dataset:str, batch_size: int) -> None:
                 confidences = token_log_probs.mean(dim=-1).exp().tolist() # .exp() converts Log-Prob to Prob
                 decoded_generation = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)
 
-            for ques, generation, conf in zip(batch_questions, decoded_generation, confidences):
+            for ques, gold_ans, generation, conf in zip(batch_questions, batch_answers, decoded_generation, confidences):
                 write_obj = {
                     'question': ques,
+                    'gold_answer': gold_ans,
                     'generation': generation,
                     'avg_log_prob': conf,
                 }
