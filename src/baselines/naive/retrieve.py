@@ -14,7 +14,7 @@ def main(dataset_name: str, batch_size: int) -> None:
     base_path = Path(f"../../../sampled_data/{dataset_name}")
 
     # Loading test questions for the dataset
-    dataset = pd.read_json(base_path)
+    dataset = pd.read_json(base_path / "sampled_ds.json")
     all_questions = dataset["question"].to_list()
 
     print(f"Loading FAISS index for {dataset}...")
