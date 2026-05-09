@@ -42,7 +42,8 @@ def main(dataset_name: str, batch_size: int) -> None:
 
     retrieved_docs = []
     for hit_list in tqdm(doc_ids):
-        retrieved_docs.append([dataset_docs[x['corpus_id']] for x in hit_list])
+        retrieved_ids = [x['corpus_id'] for x in hit_list]
+        retrieved_docs.append([doc['contents'] for doc in dataset_docs.select(retrieved_ids)])
 
     dataset["retrieved_docs"] = retrieved_docs
 
