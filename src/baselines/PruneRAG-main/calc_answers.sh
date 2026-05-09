@@ -11,7 +11,3 @@ python ../../utils/answer_scorer.py --prediction_dataset_path "outputs/hotpotqa_
 echo "Musique scores..."
 python ../../utils/answer_scorer.py --prediction_dataset_path "outputs/musique_parsed.jsonl" \
 --predicted_answer_field "final_answer" --ground_truth_field "answer"
-
-echo "FRAMES scores..."
-python ../../utils/answer_scorer.py --prediction_dataset_path "outputs/frames_parsed.jsonl" \
---predicted_answer_field "final_answer" --ground_truth_field "answer"
