@@ -17,12 +17,12 @@ def main(dataset_name: str, batch_size: int) -> None:
     dataset = pd.read_json(base_path / "sampled_ds.json")
     all_questions = dataset["question"].to_list()
 
-    print(f"Loading FAISS index for {dataset}...")
-    index_path = base_path / f"{dataset}_index.index"
+    print(f"Loading FAISS index for {dataset_name}...")
+    index_path = base_path / f"{dataset_name}_index.index"
     dataset_index = faiss.read_index(str(index_path))
 
-    print(f"Loading documents for {dataset} index...")
-    doc_path = base_path / f"{dataset}-chunks.jsonl"
+    print(f"Loading documents for {dataset_name} index...")
+    doc_path = base_path / f"{dataset_name}-chunks.jsonl"
     dataset_docs = load_dataset('json', data_files=str(doc_path), split='train')
 
     print("Loading embedding model...")
