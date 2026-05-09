@@ -1,6 +1,5 @@
 NAIVE_BASELINE = """Answer the following question:
 You can use the following documents to help you answer the question.
-Documents: {context}
 IMPORTANT: You should provide your final answer in the format \\boxed{{YOUR_ANSWER}}.
 For example, Question: What is the capital of France? Answer: \\boxed{{Paris}}."""
 
