@@ -11,7 +11,7 @@ for DS in "${DATASETS[@]}"; do
     done
 
     python parse_generations.py --dataset "$DS"
-    python ../../../utils/answer_scorer.py --prediction_dataset_path "../../../../framework_output/${DS}/system2/final_response/final_responses.jsonl" --predicted_answer_field "final_ans" --ground_truth_field "answer"
+    python ../../../utils/answer_scorer.py --prediction_dataset_path "../../../../framework_output/${DS}/system2/final_response/final_responses.jsonl" --predicted_answer_field "final_ans" --ground_truth_field "gold_answer"
 
     echo "Finished processing $DS successfully."
     echo "-----------------------------------"

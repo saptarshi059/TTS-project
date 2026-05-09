@@ -20,7 +20,6 @@ def main(dataset: str, generation_mode:str):
         print("System 1 generations empty...")
 
     streamed_responses = pd.read_json(base_path / "system2/final_response/streamed_responses.jsonl", lines=True)
-    main_dataset = pd.read_json(base_path / "system2/retrieval_results/with_retrieved_docs.jsonl", lines=True)[['question', 'gold_answer', 'system_1_guess']]
 
     print('Parsing generations...')
     final_ans = []
@@ -37,11 +36,10 @@ def main(dataset: str, generation_mode:str):
 
     print(f"Number of no_answers: {num_no_answer}...")
 
-    streamed_responses['final_ans'] = final_ans
-
     print('Saving final dataset...')
-    main_dataset = main_dataset.merge(streamed_responses, on=['question'])
-    main_dataset.to_json(base_path / "system2/final_response/final_responses.jsonl", lines=True, orient='records', index=False)
+    streamed_responses['final_ans'] = final_ans
+    streamed_responses.to_json(base_path / "system2/final_response/final_responses.jsonl", lines=True,
+                               orient='records', index=False)
 
 
 if __name__ == "__main__":
