@@ -19,7 +19,7 @@ class GenerationDataset(Dataset):
         return len(self.dataset)
 
     def __getitem__(self, idx):
-        sample = self.dataset[idx]
+        sample = self.dataset.iloc[idx]
         question = sample[idx]
         gold_answer = sample['answer']
         messages = [{"role": "system", "content": SYSTEM_1},
@@ -57,7 +57,7 @@ def main(model_name:str, dataset:str, batch_size: int) -> None:
                                                  attn_implementation="flash_attention_2",
                                                  device_map="auto")
 
-    ds = pd.read_json(f"../../../sampled_data/{dataset}/sampled_ds.json")[['question', 'answer']]
+    ds = pd.read_json(f"../../../sampled_data/{dataset}/sampled_ds.json")
 
     op_dir = Path(f"../../../framework_output/{dataset}/system1/")
     op_dir.mkdir(parents=True, exist_ok=True)
