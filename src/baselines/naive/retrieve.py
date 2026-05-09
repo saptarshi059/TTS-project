@@ -34,7 +34,7 @@ def main(dataset_name: str, batch_size: int) -> None:
                                 )
 
     print("Creating embeddings .....")
-    embedding_options = {"show_progress_bar": True, "convert_to_tensor": True, "batch_size": batch_size}
+    embedding_options = {"show_progress_bar": True, "batch_size": batch_size}
     query_embeddings = model.encode(all_questions, prompt_name="query", **embedding_options)
 
     print("Performing semantic search...")
