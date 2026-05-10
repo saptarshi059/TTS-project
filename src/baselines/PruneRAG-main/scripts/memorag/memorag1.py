@@ -78,7 +78,7 @@ class Model:
             model=self.model_name_or_path,
             tensor_parallel_size=torch.cuda.device_count(),
             gpu_memory_utilization=0.9,
-            max_model_len=40960,
+            #max_model_len=40960,
             max_logprobs=100,
             seed = 3047)
 
