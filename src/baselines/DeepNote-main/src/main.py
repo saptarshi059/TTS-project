@@ -322,14 +322,16 @@ if __name__ == "__main__":
         keystr = "{}".format(key) + (" " * (30 - len(key)))
         logger.info("%s -->   %s", keystr, val)
     dataset_name = args.dataset
-    vector_path = f"../data/corpus/{dataset_name}/{dataset_name}.index"
+
+    vector_path = f"../../../sampled_data/{dataset_name}/{dataset_name}_index.index"
+    vector = faiss.read_index(vector_path)
+
+    with open(f"../../../sampled_data/{dataset_name}/{dataset_name}-chunks.jsonl", encoding="utf-8") as f:
+        raw_data = json.load(f)
 
     emb_model = SentenceTransformer(
         config["model"]["qwen3-0.6b"], device=args.device
     )
-    with open(f"../data/corpus/{args.dataset}/chunk.json", encoding="utf-8") as f:
-        raw_data = json.load(f)
-    vector = faiss.read_index(vector_path)
 
     def retrieve(_, query, topk):
         feature = emb_model.encode([query], prompt_name='query')
