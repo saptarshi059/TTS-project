@@ -46,7 +46,7 @@ class QueryResult(BaseModel):
     score: Optional[float] = None  # 分数可能不存在于某些场景
 
 class QueryResponse(BaseModel):
-    result: List[List[QueryResult]]
+    results: List[List[QueryResult]]
 
 class RetrievalClient:
     def __init__(self, base_url: str = 'http://localhost:8000', max_retries: int = 3):

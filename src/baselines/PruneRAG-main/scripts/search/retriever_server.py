@@ -434,18 +434,14 @@ async def retrieve_endpoint(request: QueryRequest):
             # If scores are returned, combine them with results
             combined = []
             for doc, score in zip(single_result, scores[i]):
-                print("DOC FIELDS:", doc.keys())
-                combined.append({
-                    "document": {"id": doc["your_id_field"], "contents": doc["your_text_field"]},
-                    "score": score
-                })
+                combined.append({"document": doc, "score": score})
             resp.append(combined)
         else:
             resp.append(single_result)
 
     print(f"RETRIEVER: Completed in {time.time() - start:.2f}s")
 
-    return {"result": resp}
+    return {"results": resp}
 
 
 if __name__ == "__main__":
