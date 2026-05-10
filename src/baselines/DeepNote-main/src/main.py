@@ -334,10 +334,10 @@ if __name__ == "__main__":
         logger.info("%s -->   %s", keystr, val)
     dataset_name = args.dataset
 
-    vector_path = f"../../../sampled_data/{dataset_name}/{dataset_name}_index.index"
+    vector_path = f"../../../../sampled_data/{dataset_name}/{dataset_name}_index.index"
     vector = faiss.read_index(vector_path)
 
-    with open(f"../../../sampled_data/{dataset_name}/{dataset_name}-chunks.jsonl", encoding="utf-8") as f:
+    with open(f"../../../../sampled_data/{dataset_name}/{dataset_name}-chunks.jsonl", encoding="utf-8") as f:
         raw_data = json.load(f)
 
     emb_model = SentenceTransformer(
@@ -351,7 +351,7 @@ if __name__ == "__main__":
 
     formatted_time = datetime.datetime.now().strftime("%Y%m%d-%H:%M:%S")
 
-    qa_data = pd.read_json(f'../../../sampled_data/{dataset_name}/sampled_ds.json').to_dict('records')
+    qa_data = pd.read_json(f'../../../../sampled_data/{dataset_name}/sampled_ds.json').to_dict('records')
 
     retrieve_method = args.retrieve_method
 
