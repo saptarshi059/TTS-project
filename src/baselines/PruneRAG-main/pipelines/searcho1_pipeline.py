@@ -72,7 +72,7 @@ def parse_args():
         '--dataset_name',
         type=str,
         required=True,
-        choices=['gpqa', 'math500', 'aime', 'amc', 'livecode', 'nq', 'triviaqa', 'hotpotqa', '2wiki', 'musique', 'bamboogle','example','popqa','fever'],
+        #choices=['gpqa', 'math500', 'aime', 'amc', 'livecode', 'nq', 'triviaqa', 'hotpotqa', '2wiki', 'musique', 'bamboogle','example','popqa','fever'],
         help="数据集名称"
     )
 
@@ -246,7 +246,7 @@ class Generator:
             self.tokenizer.pad_token = self.tokenizer.eos_token
 
         self.retrieval_client = RetrievalClient(base_url=config.retrieval_url)
-        self.dataset_loader = DatasetLoader(self.config.data_path)
+        self.dataset_loader = DatasetLoader(self.config.dataset_name)
 
         self.MAX_SEARCH_LIMIT = self.config.max_search_limit
         self.MAX_TURN = self.config.max_turn
@@ -268,24 +268,10 @@ class Generator:
         
         input_list = []
         for item in filtered_data:
-            question = item['Question']
+            question = item['question']
 
-            if dataset_name in ['nq', 'triviaqa', 'hotpotqa', 'musique', 'bamboogle', '2wiki', 'gpqa']:
-                if dataset_name in ['nq', 'triviaqa']:
-                    instruction = get_singleqa_search_o1_instruction(MAX_SEARCH_LIMIT)
-                elif dataset_name in ['hotpotqa', 'musique', 'bamboogle', '2wiki']:
-                    instruction = get_multiqa_search_o1_instruction(MAX_SEARCH_LIMIT)
-                elif dataset_name in ['gpqa']:
-                    instruction = get_gpqa_search_o1_instruction(MAX_SEARCH_LIMIT)
-                if 'qwq' in model_path.lower():
-                    user_prompt = get_task_instruction_openqa(question, model_name='qwq')
-                else:
-                    user_prompt = get_task_instruction_openqa(question)
-
-            else:
-                instruction = get_multiqa_search_o1_instruction(MAX_SEARCH_LIMIT)
-                user_prompt = get_task_instruction_openqa(question, model_name='qwq')
-                # user_prompt = ""  # Default to empty if dataset not matched
+            instruction = get_multiqa_search_o1_instruction(MAX_SEARCH_LIMIT)
+            user_prompt = get_task_instruction_openqa(question)
 
             prompt = [{"role": "user", "content": instruction + user_prompt}]
             prompt = self.tokenizer.apply_chat_template(prompt, tokenize=False, add_generation_prompt=True)
@@ -337,7 +323,7 @@ class Generator:
     def parameters_adjust(self, dataset_name):
 
         global MAX_SEARCH_LIMIT, MAX_TURN
-        if dataset_name in ['nq', 'triviaqa', 'hotpotqa', 'musique', 'bamboogle', '2wiki', 'medmcqa', 'pubhealth']:
+        if dataset_name in ['nq', 'triviaqa', 'hotpotqa', 'musique', 'bamboogle', '2wikimultihopqa', 'medmcqa', 'pubhealth']:
             MAX_SEARCH_LIMIT = 7
             if dataset_name in ['hotpotqa', 'musique', 'bamboogle', '2wiki']:
                 MAX_SEARCH_LIMIT = 7
@@ -686,7 +672,7 @@ if __name__ == "__main__":
 
     config = Config(
     model_path=args.model_path,
-    data_path=args.data_path,
+    #data_path=args.data_path,
     retriever_name=args.retriever_name,
     retrieval_url=args.retrieval_url,
     dataset_name=args.dataset_name,

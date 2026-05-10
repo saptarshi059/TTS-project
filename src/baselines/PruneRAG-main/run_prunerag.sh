@@ -35,7 +35,7 @@ cleanup() {
 trap cleanup EXIT
 
 # --- Start Retriever ---
-echo "[1/3] Starting retriever server on GPU 5..."
+echo "[1/3] Starting retriever server on GPU ${RETRIEVER_GPU}..."
 CUDA_VISIBLE_DEVICES=$RETRIEVER_GPU python scripts/search/retriever_server.py \
     --index_path "${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}_index.index" \
     --corpus_path "${BASE_DATA_DIR}/${DATASET_NAME}/${DATASET_NAME}-chunks.jsonl" \
@@ -80,12 +80,14 @@ echo -e "\n[SUCCESS] Retriever is UP."
 #    --log_dir "./logs"
 
 # The 'cleanup' function will now run automatically here because the script is exiting.
-CUDA_VISIBLE_DEVICES=$PIPELINE_GPUS python -m pipelines.memorag_pipeline \
+CUDA_VISIBLE_DEVICES=$PIPELINE_GPUS python -m pipelines.searcho1_pipeline \
     --model_path $MODEL_PATH \
     --retriever_name "qwen0.6b" \
-    --retrieval_url $RETRIEVER_URL \
-    --dataset_name $DATASET_NAME \
+    --retrieval_url ${RETRIEVER_URL} \
+    --dataset_name ${DATASET_NAME} \
     --split "test" \
-    --topk 1 \
+    --topk 5 \
+    --max_search_limit 7 \
+    --max_turn 7 \
     --output_dir "./outputs" \
     --log_dir "./logs"
