@@ -489,7 +489,7 @@ class Generator:
         self.parameters_adjust(self.config.dataset_name)
 
 
-        data,data_path = self.dataset_loader.load_dataset(self.config.dataset_name, self.config.split)
+        data,data_path = self.dataset_loader.load_dataset()
         input_list, active_sequences = self.prepare_prompts(data,self.config.dataset_name, self.config.model_path, self.MAX_SEARCH_LIMIT, subset_num=-1)
 
 
