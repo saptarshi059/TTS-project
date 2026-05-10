@@ -490,7 +490,7 @@ class Generator:
 
 
         data,data_path = self.dataset_loader.load_dataset()
-        input_list, active_sequences = self.prepare_prompts(data[:3],self.config.dataset_name, self.config.model_path, self.MAX_SEARCH_LIMIT, subset_num=-1)
+        input_list, active_sequences = self.prepare_prompts(data,self.config.dataset_name, self.config.model_path, self.MAX_SEARCH_LIMIT, subset_num=-1)
 
 
         batch_output_records = []
@@ -647,11 +647,11 @@ class Generator:
 
                     # Extract the content inside \boxed{}
                     a_match = re.search(r"\\boxed\{(.*?)\}", out_text)
-                    answer = a_match.group(1).strip() if a_match else None
+                    answer = a_match.group(1).strip() if a_match else ""
 
                     data_row = {
                         "question": question,
-                        "answer": answer
+                        "final_answer": answer
                     }
                     f.write(json.dumps(data_row, ensure_ascii=False) + '\n')
 
