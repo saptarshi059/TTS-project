@@ -86,6 +86,6 @@ CUDA_VISIBLE_DEVICES=$PIPELINE_GPUS python -m pipelines.memorag_pipeline \
     --retrieval_url $RETRIEVER_URL \
     --dataset_name $DATASET_NAME \
     --split "test" \
-    --topk 5 \
+    --topk 1 \
     --output_dir "./outputs" \
     --log_dir "./logs"
