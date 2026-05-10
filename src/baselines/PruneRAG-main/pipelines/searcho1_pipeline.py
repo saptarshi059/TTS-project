@@ -233,8 +233,8 @@ class Generator:
             model=config.model_path,
             # pipeline_parallel_size = torch.cuda.device_count(),
             tensor_parallel_size=torch.cuda.device_count(),
-            gpu_memory_utilization=0.90,
-            max_model_len=40960,
+            gpu_memory_utilization=0.60,
+            max_model_len=getattr(config, 'max_model_len', 8192),
             seed=config.seed)
         
         self.tokenizer = AutoTokenizer.from_pretrained(
