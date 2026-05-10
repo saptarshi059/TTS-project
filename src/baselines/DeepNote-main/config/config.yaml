@@ -4,7 +4,7 @@ model:
   llama-3.1-8b-instruct: "meta-llama/Llama-3.1-8B-Instruct"
   llama-3.1-8b-instruct-dpo: ""
   llama-3.1-70b-instruct: "meta-llama/Llama-3.1-70B-Instruct"
-  qwen2.5-7b-instruct: "/gpuhome/sks6765/.cache/huggingface/hub/models--Qwen--Qwen2.5-7B-Instruct/snapshots/a09a35458c702b33eeacc393d103063234e8bc28"
+  qwen2.5-7b-instruct: "Qwen/Qwen2.5-7B-Instruct"
   qwen2.5-7b-instruct-dpo: ""
   qwen3-0.6b: "Qwen/Qwen3-Embedding-0.6B"
   bge-base-en-v1.5: "BAAI/bge-base-en-v1.5"

@@ -1,3 +1,7 @@
+import os
+os.environ["MKL_THREADING_LAYER"] = "GNU"
+import numpy
+
 import argparse
 import datetime
 import json
