@@ -273,7 +273,7 @@ class Generator:
 
         data,data_path = self.dataset_loader.load_dataset()
 
-        queries = [item['question'] for item in data][:3]
+        queries = [item['question'] for item in data]
 
         root_nodes = [ContextTreeNode(query, self.root_node) for query in queries]
         node_queue = root_nodes.copy()
