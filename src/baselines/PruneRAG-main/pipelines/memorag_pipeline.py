@@ -122,7 +122,7 @@ def parse_args():
     parser.add_argument(
         '--max_tokens',
         type=int,
-        default=10240,
+        default=512,
         help="生成的最大token数"
     )
     parser.add_argument(
@@ -167,7 +167,7 @@ class Config:
                  split: str = "test",
                  topk: int = 10,
                  max_context_length: int = 4096,
-                 max_tokens: int = 10240,
+                 max_tokens: int = 512,
                  temperature: float = 0.7,
                  top_k: int = 20,
                  top_p: float = 0.8,
@@ -233,7 +233,7 @@ class Generator:
 
 
         if 'qwen' in self.config.model_name:
-            self.config.max_tokens = 4096 # qwen3-8b的最大token数为4096
+            self.config.max_tokens = 512 # qwen3-8b的最大token数为4096
 
         elif 'llama' in self.config.model_name:
             self.config.max_tokens = 4096 # llama3-8b的最大token数为4096

@@ -79,7 +79,7 @@ class Model:
             tensor_parallel_size=torch.cuda.device_count(),
             gpu_memory_utilization=0.5,
             #max_model_len=40960,
-            max_logprobs=100,
+            max_logprobs=5,
             seed = 3047)
 
             logger.info(f"VLLM model loaded from {model_name_or_path}")
