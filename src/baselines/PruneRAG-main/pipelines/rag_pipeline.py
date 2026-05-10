@@ -330,9 +330,30 @@ class Generator:
             except Exception as e:
                 logger.warning(f"查询树节点记录失败: {e}")
 
-        print('jkaskhdlh', results)
-        exit()
+        def process_and_dump_jsonl(all_results, filename="extracted_qa.jsonl"):
+            """
+            Extracts the LAST question from the input (to skip examples)
+            and the boxed answer from the output.
+            """
+            with open(filename, 'w', encoding='utf-8') as f:
+                for res_dict in all_results:
+                    question = res_dict['query']
 
+                    # Extract the content inside \boxed{}
+                    a_match = re.search(r"\\boxed\{(.*?)\}", res_dict['final_answer'])
+                    answer = a_match.group(1).replace('\\','').strip() if a_match else ""
+
+                    data_row = {
+                        "question": question,
+                        "final_answer": answer
+                    }
+                    f.write(json.dumps(data_row, ensure_ascii=False) + '\n')
+
+            return filename
+
+        process_and_dump_jsonl(results, f"outputs/{self.config.dataset_name}_outputs.jsonl")
+        print('finished...')
+        exit()
 
         # 计算总耗时
         # total_time = (datetime.now() - self.start_time).total_seconds()
