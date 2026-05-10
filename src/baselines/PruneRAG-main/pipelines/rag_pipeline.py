@@ -54,7 +54,7 @@ def parse_args():
         '--dataset_name',
         type=str,
         required=True,
-        choices=['gpqa', 'math500', 'aime', 'amc', 'livecode', 'nq', 'triviaqa', 'hotpotqa', '2wiki', 'musique', 'bamboogle','example','popqa','fever'],
+        #choices=['gpqa', 'math500', 'aime', 'amc', 'livecode', 'nq', 'triviaqa', 'hotpotqa', '2wiki', 'musique', 'bamboogle','example','popqa','fever'],
         help="数据集名称"
     )
 
@@ -190,8 +190,8 @@ class Generator:
         self.llm = LLM(
             model=config.model_path,
             tensor_parallel_size=torch.cuda.device_count(),
-            gpu_memory_utilization=0.90,
-            max_model_len=40960,
+            gpu_memory_utilization=0.85,
+            max_model_len=getattr(config, 'max_model_len', 8192),
             seed = config.seed)
 
         self.tokenizer = AutoTokenizer.from_pretrained(
@@ -204,7 +204,7 @@ class Generator:
 
 
         self.retrieval_client = RetrievalClient(base_url=config.retrieval_url)
-        self.dataset_loader = DatasetLoader(self.config.data_path)
+        self.dataset_loader = DatasetLoader(self.config.dataset_name)
 
 
         self.prompt_template = get_rag_instruction()
@@ -271,9 +271,9 @@ class Generator:
 
     def generate(self, **sampling_params) -> List[str]:
 
-        data,data_path = self.dataset_loader.load_dataset(self.config.dataset_name, self.config.split)
+        data,data_path = self.dataset_loader.load_dataset()
 
-        queries = [item['Question'] for item in data]
+        queries = [item['question'] for item in data][:3]
 
         root_nodes = [ContextTreeNode(query, self.root_node) for query in queries]
         node_queue = root_nodes.copy()
@@ -330,7 +330,10 @@ class Generator:
             except Exception as e:
                 logger.warning(f"查询树节点记录失败: {e}")
 
-    
+        print('jkaskhdlh', results)
+        exit()
+
+
         # 计算总耗时
         # total_time = (datetime.now() - self.start_time).total_seconds()
             
@@ -408,32 +411,18 @@ if __name__ == "__main__":
     print("Starting rag pipeline...\n Time:", datetime.now())
 
     setup_seed(3407)
-    # args = parse_args()
-    # # 测试用例
-    # config = Config(
-    #     model_path=args.model_path,
-    #     data_path=args.data_path,
-    #     retriever_name=args.retriever_name,
-    #     retrieval_url=args.retrieval_url,
-    #     dataset_name=args.dataset_name,
-    #     split=args.split,
-    #     topk=args.topk,
-    #     output_dir=args.output_dir,
-    #     log_dir=args.log_dir
-    # )
-
+    args = parse_args()
     config = Config(
-        model_path="./models/llama-3.1-8b-instruct",
-        data_path="./config/dataset_paths.json",
-        retriever_name="bge",
-        retrieval_url="http://localhost:8000",
-        dataset_name="2wiki",
-        split="test",
-        topk=5,
-        output_dir="./outputs",
-        log_dir="./logs"
-    )
-
+        model_path=args.model_path,
+    #   data_path=args.data_path,
+        retriever_name=args.retriever_name,
+        retrieval_url=args.retrieval_url,
+        dataset_name=args.dataset_name,
+        split=args.split,
+        topk=args.topk,
+        output_dir=args.output_dir,
+        log_dir=args.log_dir
+     )
 
     generator = Generator(config)
 
