@@ -633,7 +633,34 @@ class Generator:
         retrieval_info = [seq['retrieval_info'] for seq in active_sequences]
         output_list = [seq['output'] for seq in active_sequences]
 
-        print(f'final results: {output_list}, {input_list}')
+        def process_and_dump_jsonl(input_list, output_list, filename="extracted_qa.jsonl"):
+            """
+            Processes two lists of strings, extracts the question and boxed answer,
+            and writes the result to a JSONL file.
+            """
+            with open(filename, 'w', encoding='utf-8') as f:
+                for in_text, out_text in zip(input_list, output_list):
+                    # Extract Question: Content after 'Question:' until '<|im_end|>'
+                    # re.DOTALL allows matching across newlines
+                    q_match = re.search(r"Question:\s*(.*?)\s*<\|im_end\|>", in_text, re.DOTALL)
+                    question = q_match.group(1).strip() if q_match else None
+
+                    # Extract Answer: Content inside \boxed{}
+                    # Captures the first occurrence of a boxed answer
+                    a_match = re.search(r"\\boxed\{(.*?)\}", out_text)
+                    answer = a_match.group(1).strip() if a_match else None
+
+                    # Construct row and write to file
+                    data_row = {
+                        "question": question,
+                        "answer": answer
+                    }
+                    f.write(json.dumps(data_row, ensure_ascii=False) + '\n')
+
+            return filename
+
+        process_and_dump_jsonl(input_list, output_list, f"outputs/{self.config.dataset_name}_outputs.jsonl")
+        print('finished...')
         exit()
 
         # 计算总耗时
