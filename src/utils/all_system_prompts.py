@@ -1,5 +1,6 @@
 NAIVE_BASELINE = """You are a question answering assistant. You are given a question and context related to the question.
-Based on the provided context, answer the question. Always wrap your final answer inside <final_answer> [answer] </final_answer> tags."""
+Using the given context, provide an answer to the question. 
+Always provide your final answer inside <final_answer> [answer] </final_answer> tags."""
 
 SYSTEM_1 = """You are a precise answering engine. Your task is to provide the direct answer to a question without any explanation.
 
