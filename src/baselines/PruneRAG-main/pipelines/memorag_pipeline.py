@@ -212,13 +212,10 @@ class Generator:
 
         self.config = config
 
-        if self.config.retriever_name == "e5":
-            retriever_path = "./models/e5-base-v2"
-        elif self.config.retriever_name == "bge":
-            retriever_path = "./models/bge-large-en-v1.5"
+        retriever_path = "/gpuhome/sks6765/.cache/huggingface/hub/models--Qwen--Qwen3-Embedding-0.6B/snapshots/c54f2e6e80b2d7b7de06f51cec4959f6b3e03418/"
 
         self.pipe = MemoRAG(
-            mem_model_name_or_path="./models/memorag-qwen2-7b-inst",
+            mem_model_name_or_path="/gpuhome/sks6765/.cache/huggingface/hub/models--TommyChien--memorag-qwen2-7b-inst/snapshots/a60e362e7922d9ac0014279dd0ae7a038ff7138e/",
             ret_model_name_or_path=retriever_path,
             gen_model_name_or_path=self.config.model_path,
             )
@@ -226,7 +223,7 @@ class Generator:
 
 
         self.retrieval_client = RetrievalClient(base_url=config.retrieval_url)
-        self.dataset_loader = DatasetLoader(self.config.data_path)
+        self.dataset_loader = DatasetLoader(self.config.dataset_name)
 
 
         self.prompt_template = get_rag_instruction()
@@ -292,7 +289,7 @@ class Generator:
 
     def generate(self, **sampling_params) -> List[str]:
 
-        data,data_path = self.dataset_loader.load_dataset(self.config.dataset_name, self.config.split)
+        data,data_path = self.dataset_loader.load_dataset()
 
         queries = [item['Question'] for item in data]
 
@@ -309,14 +306,6 @@ class Generator:
         
         prompts = [node.query for node in root_nodes]
 
-        #对齐上下文长度
-        with open('./data/QA_Datasets/hotpotqa_pre.json', 'r', encoding='utf-8') as f:
-            redundancy_queries = json.load(f)
-
-        # 提取所有 "Question" 字段
-        redundancy_questions = [item["Question"] for item in redundancy_queries]
-        redundancy_context = self._retrieve_context(10, redundancy_questions)
-
         start_time = datetime.now()
         
 
@@ -324,7 +313,6 @@ class Generator:
         contexts = []
         outputs = []
         for idx, node in enumerate(root_nodes):
-            node.context.extend(redundancy_context.get(idx, []))
             # 提取所有内容
             content_list = [content for _, content in node.context]
 
@@ -450,7 +438,7 @@ if __name__ == "__main__":
     # 测试用例
     config = Config(
         model_path=args.model_path,
-        data_path=args.data_path,
+        #data_path=args.data_path,
         retriever_name=args.retriever_name,
         retrieval_url=args.retrieval_url,
         dataset_name=args.dataset_name,
