@@ -3,7 +3,7 @@ import pandas as pd
 
 
 def main(dataset):
-    original_ds = pd.read_json(f"../../../sampled_data/{dataset}/sampled_ds.json")['question', 'answer']
+    original_ds = pd.read_json(f"../../../sampled_data/{dataset}/sampled_ds.json")[['question', 'answer']]
     generated_ds = pd.read_json(f'outputs/{dataset}_outputs.jsonl', lines=True)
     generated_ds = generated_ds.merge(original_ds)
 
