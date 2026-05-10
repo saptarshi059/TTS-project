@@ -566,7 +566,7 @@ class Generator:
 
                             # Collect parameters for batch processing
                             batch_relevant_info.append(result)
-                            batch_original_questions.append(seq['item']['Question'])
+                            batch_original_questions.append(seq['item']['question'])
                             batch_prev_reasonings.append(truncated_prev_reasoning)
                             batch_search_queries.append(search_query)
                             documents = "\n".join([f"[Doc {i+1}] {res[1]}" for i, res in enumerate(result)])
