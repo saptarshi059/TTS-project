@@ -146,8 +146,7 @@ else:
 def get_context(data):
 
     if retrieve_method == "emb":
-        print(f'HERE: {data}')
-        text = "\n".join(data)
+        text = "\n".join([x['contents'] for x in data])
     else:
         text = ""
         for i in range(len(data)):
