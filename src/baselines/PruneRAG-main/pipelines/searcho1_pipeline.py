@@ -635,22 +635,20 @@ class Generator:
 
         def process_and_dump_jsonl(input_list, output_list, filename="extracted_qa.jsonl"):
             """
-            Processes two lists of strings, extracts the question and boxed answer,
-            and writes the result to a JSONL file.
+            Extracts the LAST question from the input (to skip examples)
+            and the boxed answer from the output.
             """
             with open(filename, 'w', encoding='utf-8') as f:
                 for in_text, out_text in zip(input_list, output_list):
-                    # Extract Question: Content after 'Question:' until '<|im_end|>'
-                    # re.DOTALL allows matching across newlines
-                    q_match = re.search(r"Question:\s*(.*?)\s*<\|im_end\|>", in_text, re.DOTALL)
-                    question = q_match.group(1).strip() if q_match else None
+                    # Use findall to get all questions and pick the last one [-1]
+                    # This skips the 'Lara Croft' example and grabs the real question.
+                    q_matches = re.findall(r"Question:\n(.*?)\n<\|im_end\|>", in_text, re.DOTALL)
+                    question = q_matches[-1].strip() if q_matches else None
 
-                    # Extract Answer: Content inside \boxed{}
-                    # Captures the first occurrence of a boxed answer
+                    # Extract the content inside \boxed{}
                     a_match = re.search(r"\\boxed\{(.*?)\}", out_text)
                     answer = a_match.group(1).strip() if a_match else None
 
-                    # Construct row and write to file
                     data_row = {
                         "question": question,
                         "answer": answer
