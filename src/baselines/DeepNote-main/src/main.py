@@ -146,6 +146,7 @@ else:
 def get_context(data):
 
     if retrieve_method == "emb":
+        print(f'HERE: {data}')
         text = "\n".join(data)
     else:
         text = ""
