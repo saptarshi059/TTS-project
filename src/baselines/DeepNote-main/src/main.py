@@ -377,15 +377,11 @@ if __name__ == "__main__":
     batch_size = args.MaxClients
     logger.info("start predicting ...")
     for i in tqdm(range(last_id, len(qa_data), batch_size)):
-        pool = ThreadPool(processes=args.MaxClients)
-        current_batch = qa_data[i : i + batch_size]
+        current_batch = qa_data[i: i + batch_size]
         tasks = [
             (idx + i, doc_cell, args) for idx, doc_cell in enumerate(current_batch)
         ]
-
-        results = pool.starmap(process_doc_cell, tasks)
-        pool.close()
-        pool.join()
+        results = [process_doc_cell(*task) for task in tasks]
 
         for result in results:
             if result:
