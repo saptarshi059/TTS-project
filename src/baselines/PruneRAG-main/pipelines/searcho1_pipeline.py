@@ -490,7 +490,7 @@ class Generator:
 
 
         data,data_path = self.dataset_loader.load_dataset()
-        input_list, active_sequences = self.prepare_prompts(data[:3],self.config.dataset_name, self.config.model_path, self.MAX_SEARCH_LIMIT, subset_num=-1)
+        input_list, active_sequences = self.prepare_prompts(data,self.config.dataset_name, self.config.model_path, self.MAX_SEARCH_LIMIT, subset_num=-1)
 
 
         batch_output_records = []
@@ -633,7 +633,7 @@ class Generator:
         retrieval_info = [seq['retrieval_info'] for seq in active_sequences]
         output_list = [seq['output'] for seq in active_sequences]
 
-        print(f'final results: {output_list[:5]}')
+        print(f'final results: {output_list}, {input_list}')
         exit()
 
         # 计算总耗时
