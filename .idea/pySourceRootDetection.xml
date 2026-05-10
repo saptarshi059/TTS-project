@@ -4,6 +4,7 @@
     <option name="sourcePathsSet">
       <set>
         <option value="$PROJECT_DIR$/src/baselines/HyperGraphRAG-main" />
+        <option value="$PROJECT_DIR$/src/baselines/PruneRAG-main" />
       </set>
     </option>
   </component>
