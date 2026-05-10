@@ -1,5 +1,12 @@
 import os
 os.environ["MKL_THREADING_LAYER"] = "GNU"
+os.environ["VLLM_WORKER_MULTIPROC_METHOD"] = "spawn"
+os.environ["VLLM_ATTENTION_BACKEND"] = "FLASH_ATTN"
+os.environ["VLLM_USE_V1"] = "0"
+os.environ["NCCL_IGNORE_DISABLED_P2P"] = "1"
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+os.environ["OPENBLAS_NUM_THREADS"] = "1"
 import numpy
 
 import argparse
