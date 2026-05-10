@@ -490,7 +490,7 @@ class Generator:
 
 
         data,data_path = self.dataset_loader.load_dataset()
-        input_list, active_sequences = self.prepare_prompts(data,self.config.dataset_name, self.config.model_path, self.MAX_SEARCH_LIMIT, subset_num=-1)
+        input_list, active_sequences = self.prepare_prompts(data[:3],self.config.dataset_name, self.config.model_path, self.MAX_SEARCH_LIMIT, subset_num=-1)
 
 
         batch_output_records = []
@@ -633,50 +633,7 @@ class Generator:
         retrieval_info = [seq['retrieval_info'] for seq in active_sequences]
         output_list = [seq['output'] for seq in active_sequences]
 
-        def save_to_jsonl(all_outputs, filename="results.jsonl"):
-            def clean_latex_text(text):
-                text = re.sub(r'\\+text\{', '', text)
-                text = text.replace(r'\ ', ' ')
-                text = text.replace('}', '').replace('\\', '')
-                return text.strip()
-
-            with open(filename, "a", encoding="utf-8") as f:
-                for request_output in all_outputs:
-                    prompt = request_output.prompt
-
-                    # 1. Grab the question from the prompt footer
-                    question_match = re.search(r"### Question:\n(.*?)\n\n### Answer:", prompt, re.DOTALL)
-                    question = question_match.group(1).strip() if question_match else "Unknown"
-
-                    # 2. Grab the full model response
-                    try:
-                        raw_response = request_output.outputs[0].text.strip()
-                    except (IndexError, AttributeError):
-                        raw_response = ""
-
-                    boxed_match = re.search(r"\\boxed\{(.*?)}", raw_response)
-
-                    # Try to get the boxed content
-                    boxed_content = boxed_match.group(1).strip() if boxed_match else None
-
-                    # Decide what to clean: the boxed content OR the full response if no box exists
-                    text_to_clean = boxed_content if boxed_content is not None else raw_response
-
-                    # Clean it
-                    final_answer = clean_latex_text(text_to_clean)
-
-                    # 4. Package it up
-                    data = {
-                        "request_id": request_output.request_id,
-                        "question": question,
-                        "final_answer": final_answer if final_answer != "" else raw_response
-                    }
-
-                    f.write(json.dumps(data) + "\n")
-
-
-        save_to_jsonl(output_list, f"outputs/{self.config.dataset_name}_outputs.jsonl")
-        print("Saving results...")
+        print(f'final results: {output_list[:5]}')
         exit()
 
         # 计算总耗时
