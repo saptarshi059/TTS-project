@@ -91,13 +91,3 @@ echo -e "\n[SUCCESS] Retriever is UP."
 #    --max_turn 7 \
 #    --output_dir "./outputs" \
 #    --log_dir "./logs"
-
-CUDA_VISIBLE_DEVICES=$PIPELINE_GPUS python -m pipelines.rag_pipeline \
-    --model_path $MODEL_PATH \
-    --retriever_name "qwen0.6b" \
-    --retrieval_url ${RETRIEVER_URL} \
-    --dataset_name ${DATASET_NAME} \
-    --split "test" \
-    --topk 5 \
-    --output_dir "./outputs" \
-    --log_dir "./logs"
