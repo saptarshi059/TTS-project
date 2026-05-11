@@ -223,14 +223,15 @@ def retrieve_note(doc_id, query, answer, top_k=2):
 
     while step < args.max_step:
         all_refs = {
-            ref
+            ref["id"]  # or ref["contents"] if there's no id field
             for d in ref_log
-            for ref in (
-                d["refs"]
-                if retrieve_method == "emb"
-                else [d["title"] + d["paragraph_text"] for d in d["refs"]]
-            )
+            for ref in d["refs"]
+        } if retrieve_method == "emb" else {
+            d["title"] + d["paragraph_text"]
+            for d in ref_log
+            for d in d["refs"]
         }
+
         if len(all_refs) > args.max_top_k:
             break
         max_ref = (
@@ -248,7 +249,7 @@ def retrieve_note(doc_id, query, answer, top_k=2):
         )
         if max_ref > 0:
             refs = (
-                [d for d in refs if d not in all_refs][:max_ref]
+                [d for d in refs if d["id"] not in all_refs][:max_ref]  # use id for comparison
                 if retrieve_method == "emb"
                 else [
                     d for d in refs if d["title"] + d["paragraph_text"] not in all_refs
