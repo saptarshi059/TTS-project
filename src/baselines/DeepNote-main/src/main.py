@@ -391,7 +391,7 @@ if __name__ == "__main__":
                     fout.write(json.dumps(result, ensure_ascii=False) + "\n")
 
 
-    print('Finished...')
+    print(f'Finished {dataset_name}...')
 
     '''logger.info("start evaluating ...")
 
