@@ -19,5 +19,5 @@ for ds, fp in file_paths.items():
     base = pd.read_json(fp[0])
     pred = pd.read_json(fp[1])
     merged = pd.merge(base, pred, on='question', how='left')
-    merged.to_json(f'output/2wikimultihopqa/merged_df.jsonl', lines=True, orient='records', index=False)
+    merged.to_json(f'output/{ds}/merged_df.jsonl', lines=True, orient='records', index=False)
 
