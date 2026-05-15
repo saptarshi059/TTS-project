@@ -1,8 +1,0 @@
-checkpoints/
-result*/
-trainer_output/
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.vscode/

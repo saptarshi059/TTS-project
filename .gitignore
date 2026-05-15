@@ -1,5 +1,6 @@
 all_data/
-src/baselines/agent-distillation/*_responses
+Unused baselines/agent-distillation/*_responses
 our paper related/
 experiment_runs/
 frames_related(unused)/
+Unused baselines/
