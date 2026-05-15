@@ -13,7 +13,7 @@ def main(prediction_dataset_path: str, predicted_answer_field: str, ground_truth
         prediction_dataset = load_dataset('json', data_files=prediction_dataset_path, split='train')
         for idx, row in tqdm(enumerate(prediction_dataset)):
             raw_pred = row[predicted_answer_field]
-            if (raw_pred is None) or (raw_pred == "No Answer") or (row[ground_truth_field] is None):
+            if (raw_pred is None) or (raw_pred == "No Answer"):
                 pred = ""
             else:
                 pred = row[predicted_answer_field]
