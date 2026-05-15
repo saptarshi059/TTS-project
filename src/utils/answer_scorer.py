@@ -28,7 +28,9 @@ def main(prediction_dataset_path: str, predicted_answer_field: str, ground_truth
             else:
                 pred = getattr(row, predicted_answer_field)
             predictions.append({'prediction_text': pred, 'id': str(idx), 'no_answer_probability': 0.})
-            references.append({'answers': {'answer_start': [0], 'text': [getattr(row, ground_truth_field)]}, 'id': str(idx)})
+
+            gold = "" if getattr(row, ground_truth_field) is None else getattr(row, ground_truth_field)
+            references.append({'answers': {'answer_start': [0], 'text': [gold]}, 'id': str(idx)})
 
     results = squad_metric.compute(predictions=predictions, references=references)
     print(f"EM: {results['exact']:.2f} | F1: {results['f1']:.2f}")
