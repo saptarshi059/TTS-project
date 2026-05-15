@@ -16,7 +16,8 @@ two_wiki_reasoning_flat = [x[0]['reasoning'] for x in two_wiki_reasoning]
 hp_ds_reasoning_flat = [x[0]['reasoning'] for x in hp_ds_reasoning]
 mus_ds_reasoning_flat = [x[0]['reasoning'] for x in mus_ds_reasoning]
 
-all_reasoning = two_wiki_reasoning_flat + hp_ds_reasoning_flat + mus_ds_reasoning_flat
+tokenizer = AutoTokenizer.from_pretrained('Qwen/Qwen2.5-7B-Instruct')
+all_reasoning = tokenizer(two_wiki_reasoning_flat + hp_ds_reasoning_flat + mus_ds_reasoning_flat)
 
 average_tokens = np.mean([len(ids) for ids in all_reasoning['input_ids']])
 
