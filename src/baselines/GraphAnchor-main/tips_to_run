@@ -26,3 +26,9 @@ Also, I had to add this [https://huggingface.co/Qwen/Qwen2.5-7B-Instruct#process
   }
 
 to get it to work. I need to remove this for my experiments because I don't need vLLM.
+
+## Note on their code....
+Their code is kinda crap - their method is unable to process all of the questions (roughly is able to get through half
+of the samples!). I initially had used their evaluation script, but that didn't sit well with me because each of the
+other methods were evaluated with my answer_scorer.py script. So, I merged their output with the respective dataframes.
+This gave a fairer picture.
