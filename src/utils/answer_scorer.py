@@ -17,8 +17,15 @@ def main(prediction_dataset_path: str, predicted_answer_field: str, ground_truth
                 pred = ""
             else:
                 pred = row[predicted_answer_field]
+
+            if row[ground_truth_field] is None:
+                gold = "N.A"
+            else:
+                gold = row[ground_truth_field]
+
+
             predictions.append({'prediction_text': pred, 'id': str(idx), 'no_answer_probability': 0.})
-            references.append({'answers': {'answer_start': [0], 'text': [row[ground_truth_field]]}, 'id': str(idx)})
+            references.append({'answers': {'answer_start': [0], 'text': [gold]}, 'id': str(idx)})
     except:
         prediction_dataset = pd.read_json(prediction_dataset_path, lines=True)
         for idx, row in tqdm(enumerate(prediction_dataset.itertuples())):
