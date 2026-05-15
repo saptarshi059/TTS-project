@@ -11,6 +11,7 @@ mus_ds_reasoning = pd.read_json('output/musique/emb/GraphAnchor/qwen2.5-7b-instr
                                 '__max_fail_step-2-20260216-21:53:39.jsonl',
                                 lines=True).dropna(subset='reasoning_log')['reasoning_log'].tolist()
 
+print(len(two_wiki_reasoning), len(hp_ds_reasoning), len(mus_ds_reasoning))
 
 
 
