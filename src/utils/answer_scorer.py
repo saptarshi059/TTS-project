@@ -14,7 +14,7 @@ def main(prediction_dataset_path: str, predicted_answer_field: str, ground_truth
         for idx, row in tqdm(enumerate(prediction_dataset)):
             raw_pred = row[predicted_answer_field]
             if (raw_pred is None) or (raw_pred == "No Answer") or (row[ground_truth_field] is None):
-                continue
+                pred = ""
             else:
                 pred = row[predicted_answer_field]
             predictions.append({'prediction_text': pred, 'id': str(idx), 'no_answer_probability': 0.})
