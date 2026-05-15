@@ -2,15 +2,12 @@ import pandas as pd
 
 file_paths = {
     '2wikimultihopqa': ['../../../sampled_data/2wikimultihopqa/sampled_ds.json',
-                        'output/2wikimultihopqa/emb/GraphAnchor/qwen2.5-7b-instruct/'
-                        'topk-5__max_step-3__max_fail_step-2-20260216-20:23:52.jsonl'],
+                        'output/2wikimultihopqa/emb/GraphAnchor/qwen2.5-7b-instruct/topk-5__max_step-3__max_fail_step-2-20260216-20:23:52.jsonl'],
     'hotpotqa': ['../../../sampled_data/hotpotqa/sampled_ds.json',
-                 'output/hotpotqa/emb/GraphAnchor/qwen2.5-7b-instruct/topk-5__max_step-3__'
-                 'max_fail_step-2-20260216-21:08:32.jsonl',
+                 'output/hotpotqa/emb/GraphAnchor/qwen2.5-7b-instruct/topk-5__max_step-3__max_fail_step-2-20260216-21:08:32.jsonl',
                  ],
     'musique': ['../../../sampled_data/musique/sampled_ds.json',
-                'output/musique/emb/GraphAnchor/qwen2.5-7b-instruct/topk-5__max_step-3'
-                '__max_fail_step-2-20260216-21:53:39.jsonl'
+                'output/musique/emb/GraphAnchor/qwen2.5-7b-instruct/topk-5__max_step-3__max_fail_step-2-20260216-21:53:39.jsonl'
                 ]
 }
 
