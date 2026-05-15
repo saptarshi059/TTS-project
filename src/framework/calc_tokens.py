@@ -16,9 +16,9 @@ wiki_triples_flat = [item for sublist in wiki_triples for item in sublist]
 wiki_responses = pd.read_json('../../experiment_runs/main_framework_run/2wikimultihopqa/system2/final_response/streamed_responses.jsonl', lines=True)['generation'].tolist()
 wiki_responses_cleaned = [extract_excluding_answer(x) for x in wiki_responses]
 
-hopotqa_triples = pd.read_json('../../experiment_runs/main_framework_run/hopotqa/system2/triple_extraction/parsed_responses.jsonl', lines=True)['generated_triples'].tolist()
+hopotqa_triples = pd.read_json('../../experiment_runs/main_framework_run/hotpotqa/system2/triple_extraction/parsed_responses.jsonl', lines=True)['generated_triples'].tolist()
 hopotqa_triples_flat = [item for sublist in hopotqa_triples for item in sublist]
-hopotqa_responses = pd.read_json('../../experiment_runs/main_framework_run/hopotqa/system2/final_response/streamed_responses.jsonl', lines=True)['generation'].tolist()
+hopotqa_responses = pd.read_json('../../experiment_runs/main_framework_run/hotpotqa/system2/final_response/streamed_responses.jsonl', lines=True)['generation'].tolist()
 hopotqa_responses_cleaned = [extract_excluding_answer(x) for x in hopotqa_responses]
 
 musique_triples = pd.read_json('../../experiment_runs/main_framework_run/musique/system2/triple_extraction/parsed_responses.jsonl', lines=True)['generated_triples'].tolist()
