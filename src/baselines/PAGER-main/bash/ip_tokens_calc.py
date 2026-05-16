@@ -38,10 +38,9 @@ for ds in datasets:
         """
     for row in ds_page.itertuples():
         if row.subquestion_list == []:
-            continue
             # Despite these questions having no docs, we still have to fire them. Thus, we consider their prompt text.
-            #all_texts.append(gen_prompt_template.format(question=row.question, sub_question='',
-            #                                            docs_text='', page=row.init_page))
+            all_texts.append(gen_prompt_template.format(question=row.question, sub_question='',
+                                                        docs_text='', page=row.init_page))
         else:
             for idx, subq in enumerate(row.subquestion_list):
                 all_texts.extend(row.doc_list[idx])
