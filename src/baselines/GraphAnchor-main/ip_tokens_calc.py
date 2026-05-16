@@ -17,7 +17,8 @@ def collect_contexts(df):
     temp = []
     for row in df.itertuples():
         if isinstance(row.retrieve_ref_log, list):
-            temp.extend([x['contents'] for x in row.retrieve_ref_log[0]['retrieve_refs']])
+            for x in row.retrieve_ref_log:
+                temp.extend([y['contents'] for y in x['retrieve_refs']])
     return temp
 
 all_texts.extend(collect_contexts(two_wiki_reasoning))
