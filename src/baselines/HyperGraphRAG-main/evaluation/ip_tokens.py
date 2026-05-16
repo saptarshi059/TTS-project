@@ -8,7 +8,7 @@ all_texts = []
 for ds in datasets:
     ds_df = pd.read_json(f'results/HyperGraphRAG/{ds}/test_generation.json')
     for row in ds_df.itertuples():
-        all_texts.extend(row.knowledge)
+        all_texts.append(row.knowledge)
 
 tokenizer = AutoTokenizer.from_pretrained('Qwen/Qwen2.5-7B-Instruct')
 all_reasoning = tokenizer(all_texts)
