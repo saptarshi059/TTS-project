@@ -6,7 +6,7 @@ datasets = ['2wikimultihopqa', 'hotpotqa', 'musique']
 
 all_texts = []
 for ds in datasets:
-    ds_df = pd.read_json(f"../../../../framework_output/{ds}/system2/retrieval_results/with_retrieved_docs.jsonl", lines=True)
+    ds_df = pd.read_json(f"../../framework_output/{ds}/system2/retrieval_results/with_retrieved_docs.jsonl", lines=True)
     for row in ds_df.itertuples():
         all_texts.extend(row.retrieved_docs)
 
