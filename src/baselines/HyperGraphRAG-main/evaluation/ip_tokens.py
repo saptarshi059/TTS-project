@@ -6,7 +6,7 @@ datasets = ['2wikimultihopqa', 'hotpotqa', 'musique']
 
 all_texts = []
 for ds in datasets:
-    ds_df = pd.read_json(f'results/HyperGraphRAG/2wikimultihopqa/{ds}/test_generation.json')
+    ds_df = pd.read_json(f'results/HyperGraphRAG/{ds}/test_generation.json')
     for row in ds_df.itertuples():
         all_texts.extend(row.knowledge)
 
