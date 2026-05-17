@@ -10,6 +10,12 @@
       <excludeFolder url="file://$MODULE_DIR$/src/baselines/agent-distillation/my_implementation/frames_responses" />
       <excludeFolder url="file://$MODULE_DIR$/src/baselines/agent-distillation/my_implementation/hotpotqa_responses" />
       <excludeFolder url="file://$MODULE_DIR$/src/baselines/agent-distillation/my_implementation/musique_responses" />
+      <excludeFolder url="file://$MODULE_DIR$/Unused baselines/GraphRAG-R1-main" />
+      <excludeFolder url="file://$MODULE_DIR$/Unused baselines/R1-Searcher-main" />
+      <excludeFolder url="file://$MODULE_DIR$/experiment_runs" />
+      <excludeFolder url="file://$MODULE_DIR$/frames_related(unused)" />
+      <excludeFolder url="file://$MODULE_DIR$/our paper related/first_draft_emnlp" />
+      <excludeFolder url="file://$MODULE_DIR$/src/baselines/PruneRAG-main/scripts/lcb_runner/pyext/pyext-0.7/pyext.egg-info" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.12 (HT_project_venv)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
