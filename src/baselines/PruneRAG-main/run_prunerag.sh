@@ -65,19 +65,19 @@ done
 echo -e "\n[SUCCESS] Retriever is UP."
 
 # --- Run Pipeline ---
-#echo "[3/3] Launching tree pipeline..."
-#CUDA_VISIBLE_DEVICES=$PIPELINE_GPUS python -m pipelines.tree_pipeline \
-#    --model_path "$MODEL_PATH" \
-#    --retriever_name "qwen0.6b" \
-#    --retrieval_url $RETRIEVER_URL \
-#    --dataset_name "$DATASET_NAME" \
-#    --split "test" \
-#    --topk 5 \
-#    --max_depth 3 \
-#    --all_decom_depth 0 \
-#    --threshold 0.95 \
-#    --output_dir "./outputs" \
-#    --log_dir "./logs"
+echo "[3/3] Launching tree pipeline..."
+CUDA_VISIBLE_DEVICES=$PIPELINE_GPUS python -m pipelines.tree_pipeline \
+    --model_path "$MODEL_PATH" \
+    --retriever_name "qwen0.6b" \
+    --retrieval_url $RETRIEVER_URL \
+    --dataset_name "$DATASET_NAME" \
+    --split "test" \
+    --topk 5 \
+    --max_depth 3 \
+    --all_decom_depth 0 \
+    --threshold 0.95 \
+    --output_dir "./outputs" \
+    --log_dir "./logs"
 
 # The 'cleanup' function will now run automatically here because the script is exiting.
 #CUDA_VISIBLE_DEVICES=$PIPELINE_GPUS python -m pipelines.searcho1_pipeline \
