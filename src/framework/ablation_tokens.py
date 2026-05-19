@@ -2,7 +2,7 @@ import pandas as pd
 from transformers import AutoTokenizer
 import numpy as np
 import sys
-sys.path.append("../../utils/")
+sys.path.append("../utils/")
 from all_system_prompts import SYSTEM_2, TRIPLE_GEN
 
 datasets = ['2wikimultihopqa', 'hotpotqa', 'musique']
