@@ -5,10 +5,11 @@ import sys
 sys.path.append("../utils/")
 from all_system_prompts import SYSTEM_2, TRIPLE_GEN
 
+tokenizer = AutoTokenizer.from_pretrained('Qwen/Qwen2.5-7B-Instruct')
 datasets = ['2wikimultihopqa', 'hotpotqa', 'musique']
 
-all_texts = []
 for ds in datasets:
+    all_texts = []
     comp = pd.read_json(f'../../experiment_runs/thresholding_run/{ds}/system1/system_1_complete.jsonl', lines=True)
     full = pd.read_json(f'../../experiment_runs/main_framework_run/{ds}/system2/retrieval_results/with_retrieved_docs.jsonl', lines=True)
     merged = pd.merge(comp, full, how='left')
@@ -32,10 +33,8 @@ for ds in datasets:
                                   f"Retrieved Context: {retrieved_evidences}\n"
                                   f"</input>")
 
-tokenizer = AutoTokenizer.from_pretrained('Qwen/Qwen2.5-7B-Instruct')
-all_reasoning = tokenizer(all_texts)
 
-average_tokens = np.mean([len(ids) for ids in all_reasoning['input_ids']])
-
-print(f"Average tokens per sequence: {average_tokens}")
+    all_reasoning = tokenizer(all_texts)
+    average_tokens = np.mean([len(ids) for ids in all_reasoning['input_ids']])
+    print(f"Average saved tokens for {ds}: {average_tokens}")
 
