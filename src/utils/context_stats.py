@@ -33,8 +33,10 @@ def main():
         dataset = pd.read_json(f"../../sampled_data/{dataset_name}/sampled_ds.json")
         all_contexts.extend(collect_contexts(dataset, dataset_name))
 
-        avg_tokens = pd.Series([len(x) for x in tokenizer(all_contexts)['input_ids']]).mean()
-        print(f"Average tokens for {dataset_name}: {round(avg_tokens, 2)}")
+        context_lens = pd.Series([len(x) for x in tokenizer(all_contexts)['input_ids']])
+        min_size, max_size, avg_tokens = context_lens.min(), context_lens.max(), context_lens.mean()
+        print(f"Min, Max, Average tokens for {dataset_name}: {round(min_size, 2)}, {round(max_size, 2)},"
+              f" {round(avg_tokens, 2)}")
 
 if __name__ == "__main__":
     main()
