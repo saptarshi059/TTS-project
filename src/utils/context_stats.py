@@ -26,14 +26,15 @@ def main():
     print("Loading tokenizer...")
     tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen3-Embedding-0.6B")
 
-    print("Collecting all contexts...")
-    all_contexts = []
     for dataset_name in ["2wikimultihopqa", "hotpotqa", "musique"]:
+        print(f"Collecting all contexts for {dataset_name}...")
+        all_contexts = []
+
         dataset = pd.read_json(f"../../sampled_data/{dataset_name}/sampled_ds.json")
         all_contexts.extend(collect_contexts(dataset, dataset_name))
 
-    avg_tokens = pd.Series([len(x) for x in tokenizer(all_contexts)['input_ids']]).mean()
-    print(f"Average tokens: {round(avg_tokens, 2)}")
+        avg_tokens = pd.Series([len(x) for x in tokenizer(all_contexts)['input_ids']]).mean()
+        print(f"Average tokens for {dataset_name}: {round(avg_tokens, 2)}")
 
 if __name__ == "__main__":
     main()
