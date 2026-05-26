@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DATASETS=("2wikimultihopqa" "hotpotqa" "musique")
+DATASETS=("2wikimultihopqa")
 
 for ds in "${DATASETS[@]}";do
   echo "-------------Running system-1 for ${ds}-------------"
