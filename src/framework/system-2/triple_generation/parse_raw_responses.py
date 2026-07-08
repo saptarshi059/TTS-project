@@ -20,8 +20,12 @@ def main(dataset: str):
                      f"Question: {row.question}\n"
                      f"Answer: {row.system_1_guess}\n"
                      f"</input>")
-        cleaned_string = row.raw_responses.split(TRIPLE_GEN)[1].strip().split(ip_string)[1].strip()
-        generated_triples.append(re.findall(r"<triple>(.*?)</triple>", cleaned_string, re.IGNORECASE | re.DOTALL))
+        try:
+            # for llama
+            cleaned_string = row.raw_responses.split(TRIPLE_GEN)[1].strip().split(ip_string)[1].strip()
+            generated_triples.append(re.findall(r"<triple>(.*?)</triple>", cleaned_string, re.IGNORECASE | re.DOTALL))
+        except:
+            generated_triples.append(ip_string)
 
     print("Saving cleaned responses...")
     ds['generated_triples'] = generated_triples
