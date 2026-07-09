@@ -5,7 +5,7 @@ DATASETS=("2wikimultihopqa" "musique" "hotpotqa")
 for DS in "${DATASETS[@]}"; do
     echo "Starting processing for dataset: $DS"
 
-    until python generate_with_all_evidence.py --dataset "$DS" --batch_size 8 --model_name "Qwen/Qwen3-14B"; do
+    until python generate_with_all_evidence.py --dataset "$DS" --batch_size 8 --model_name "Qwen/Qwen2.5-14B-Instruct"; do
         echo "Script crashed for $DS with exit code $?. Restarting..." >&2
         sleep 2
     done
