@@ -1,4 +1,4 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer, set_seed
+from transformers import AutoModelForCausalLM, AutoTokenizer, set_seed, DataCollatorWithPadding
 from torch.utils.data import Dataset, DataLoader
 from pathlib import Path
 from tqdm import tqdm
@@ -28,7 +28,7 @@ class GenerationDataset(Dataset):
                                                 f"</input>"}]
 
         formatted_text = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-        model_inputs = tokenizer(formatted_text, padding=True, return_tensors="pt")
+        model_inputs = tokenizer(formatted_text, return_tensors="pt")
 
         return model_inputs
 
@@ -51,7 +51,8 @@ if __name__ == "__main__":
 
     print(f"Wrapping predictions dataframe with torch...")
     torch_dataset = GenerationDataset(tokenizer=tokenizer, dataset=combined_outputs_df)
-    torch_dataset_dataloader = DataLoader(torch_dataset, batch_size=8, shuffle=False)
+    torch_dataset_dataloader = DataLoader(torch_dataset, batch_size=8, shuffle=False,
+                                          collate_fn=DataCollatorWithPadding(tokenizer))
 
     for batch in torch_dataset_dataloader:
         print(batch)
