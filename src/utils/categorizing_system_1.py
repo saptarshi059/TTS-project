@@ -28,7 +28,7 @@ class GenerationDataset(Dataset):
                                                 f"</input>"}]
 
         formatted_text = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-        model_inputs = tokenizer(formatted_text, return_tensors="pt")
+        model_inputs = tokenizer(formatted_text, padding=True, return_tensors="pt")
 
         return model_inputs
 
