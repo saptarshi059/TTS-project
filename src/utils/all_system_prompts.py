@@ -72,3 +72,5 @@ Think about everything step-by-step, by considering all of the information.
 Provide a clear, structured explanation of your logic, and conclude by stating the final answer clearly.
 
 Always wrap your final answer inside <final_answer> [answer] </final_answer> tags."""
+
+CATEGORIZATION_PROMPT = """"""
