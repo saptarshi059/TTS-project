@@ -56,7 +56,7 @@ if __name__ == "__main__":
     with Path("streamed_responses.jsonl").open("a") as file:
         for batch in tqdm(torch_dataset_dataloader):
             with torch.no_grad():
-                outputs = model.generate(**batch, max_new_tokens=50)
+                outputs = model.generate(**{k: v.to(model.device) for k, v in batch.items()}, max_new_tokens=50)
                 # Get actual prompt lengths (accounting for padding)
                 prompt_lengths = batch['attention_mask'].sum(dim=1)
 
