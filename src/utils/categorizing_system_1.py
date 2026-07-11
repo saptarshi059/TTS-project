@@ -53,3 +53,7 @@ if __name__ == "__main__":
     torch_dataset = GenerationDataset(tokenizer=tokenizer, dataset=combined_outputs_df)
     torch_dataset_dataloader = DataLoader(torch_dataset, batch_size=8, shuffle=False)
 
+    for batch in torch_dataset_dataloader:
+        print(batch)
+        break
+
