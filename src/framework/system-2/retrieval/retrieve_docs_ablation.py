@@ -34,7 +34,7 @@ def main(dataset: str):
 
     init_answers = []
     for row in starting_ds.itertuples():
-        init_answers.extend(row.system_1_guess)
+        init_answers.append(row.system_1_guess)
 
     print("Embedding initial answers for retrieval...")
     embedded_answers = model.encode(init_answers, prompt_name="query", show_progress_bar=True)
