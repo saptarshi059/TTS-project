@@ -1,16 +1,21 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer, set_seed
-from torch.utils.data import Dataset, DataLoader
+import sys
 from argparse import ArgumentParser
 from functools import partial
 from pathlib import Path
+
+import pandas as pd
+import torch
+from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
+from transformers import AutoModelForCausalLM, AutoTokenizer, set_seed
 
-import os, torch, json, sys, pandas as pd
-sys.path.append("../../utils/")
+sys.path.append("../../../utils/")
 
-from all_system_prompts import SYSTEM_1
+from all_system_prompts import SYSTEM_2_ABLATION_NO_TRIPLES
+import json
 
-class GenerationDataset(Dataset):
+
+class System2Dataset(Dataset):
     def __init__(self, tokenizer, dataset):
         self.tokenizer = tokenizer
         self.dataset = dataset
@@ -20,34 +25,42 @@ class GenerationDataset(Dataset):
 
     def __getitem__(self, idx):
         sample = self.dataset.iloc[idx]
-        question = sample['question']
-        gold_answer = sample['answer']
-        messages = [{"role": "system", "content": SYSTEM_1},
+        question = sample.question
+        gold_answer = sample.gold_answer
+        s1_guess = sample['system_1_guess']
+
+        retrieved_evidences = "\n\n".join(dict.fromkeys(sample.retrieved_docs))  # dedup, stable order
+
+        messages = [{"role": "system", "content": SYSTEM_2_ABLATION_NO_TRIPLES},
                     {"role": "user", "content": f"<input>\n"
                                                 f"Question: {question}\n"
+                                                f"Initial Guess: {sample.system_1_guess}\n"
+                                                f"Retrieved Context: {retrieved_evidences}\n"
                                                 f"</input>"}]
         formatted_text = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
 
-        return {"text": formatted_text, "question": question, "gold_answer": gold_answer}
+        return {"text": formatted_text, "question": question, "gold_answer": gold_answer, "system_1_guess": s1_guess}
 
 
 def custom_collate_fn(batch, tokenizer, device):
     texts = [item["text"] for item in batch]
     questions = [item["question"] for item in batch]
     gold_answers = [item["gold_answer"] for item in batch]
+    s1_guesses = [item["system_1_guess"] for item in batch]
 
     model_inputs = tokenizer(texts, padding=True, return_tensors="pt").to(device)
 
     return {
         "question": questions,
         "gold_answer": gold_answers,
+        "s1_guesses": s1_guesses,
         "input_ids": model_inputs["input_ids"],
         "attention_mask": model_inputs["attention_mask"]
     }
 
 
 def main(model_name:str, dataset:str, batch_size: int) -> None:
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    #os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
     set_seed(42)
 
@@ -61,9 +74,11 @@ def main(model_name:str, dataset:str, batch_size: int) -> None:
                                                  attn_implementation="flash_attention_2",
                                                  device_map="auto")
 
-    ds = pd.read_json(f"../../../sampled_data/{dataset}/sampled_ds.json")
+    base_path = Path(f"../../../../framework_output/{dataset}/system2")
 
-    op_dir = Path(f"../../../framework_output/{dataset}/system1/")
+    ds = pd.read_json(base_path / "retrieval_results/with_retrieved_docs.jsonl", lines=True)
+
+    op_dir = base_path / "final_response"
     op_dir.mkdir(parents=True, exist_ok=True)
 
     partial_op_file = op_dir / "streamed_responses.jsonl"
@@ -86,61 +101,31 @@ def main(model_name:str, dataset:str, batch_size: int) -> None:
         print("No existing progress found. Starting fresh.")
 
     print(f"Wrapping {dataset} with torch...")
-    torch_dataset = GenerationDataset(tokenizer=tokenizer, dataset=ds)
-
-    print(f"{'-'*10}FORMATTED DATASET SAMPLE{'-'*10}\n{torch_dataset[0]['text']}\n{'-'*10}")
+    torch_dataset = System2Dataset(tokenizer=tokenizer, dataset=ds)
 
     # Create a version of the function that already knows the tokenizer
     collate_with_tokenizer = partial(custom_collate_fn, tokenizer=tokenizer, device=model.device)
     torch_dataset_dataloader = DataLoader(torch_dataset, batch_size=batch_size, shuffle=False,
                                           collate_fn=collate_with_tokenizer)
 
-    print(f"{'-'*10}Running SYSTEM-1 with {model_name} on {dataset}{'-'*10}")
+
+    print(f"{'-'*10}Running System-2: MAIN GENERATION with {model_name} on {dataset}{'-'*10}")
     with Path(op_dir / "streamed_responses.jsonl").open("a") as file:
         for batch in tqdm(torch_dataset_dataloader):
             batch_questions = batch.pop('question')
-            batch_answers = batch.pop('gold_answer')
-
+            batch_gold_ans = batch.pop('gold_answer')
+            batch_s1_guess = batch.pop('s1_guesses')
             with torch.no_grad():
-                # 1. Ask for scores and the full output dict
-                outputs = model.generate(
-                    **batch,
-                    max_new_tokens=20,
-                    do_sample=False,
-                    num_beams=1,
-                    return_dict_in_generate=True,
-                    output_scores=True
-                )
-
-                generated_ids = outputs.sequences
-                # 2. Extract scores (logits). This is a tuple of length = max_new_tokens
-                # Each element is a tensor of shape (batch_size, vocab_size)
-                logits = torch.stack(outputs.scores, dim=1)
-
-                # 3. Calculate confidence (e.g., Mean Log Probability)
-                # We use log_softmax to get normalized probabilities
-                log_probs = torch.nn.functional.log_softmax(logits, dim=-1)
-
-                # Gather the log-probs of the actual tokens generated
-                # We shift generated_ids because scores start from the first generated token
-                token_log_probs = torch.gather(
-                    log_probs,
-                    2,
-                    generated_ids[:, -logits.shape[1]:].unsqueeze(-1)
-                ).squeeze(-1)
-
-                # Average log prob per sequence as a simple confidence metric
-                confidences = token_log_probs.mean(dim=-1).exp().tolist() # .exp() converts Log-Prob to Prob
+                generated_ids = model.generate(**batch, max_new_tokens=1000, do_sample=False, num_beams=1)
                 decoded_generation = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)
 
-            for ques, gold_ans, generation, conf in zip(batch_questions, batch_answers, decoded_generation, confidences):
-                write_obj = {
-                    'question': ques,
-                    'gold_answer': gold_ans,
-                    'generation': generation,
-                    'avg_log_prob': conf,
-                }
-                file.write(json.dumps(write_obj) + '\n')
+                for ques, gold, s1_g, generation in zip(batch_questions, batch_gold_ans, batch_s1_guess, decoded_generation):
+                    write_obj = {'question': ques,
+                                 'gold_answer':gold,
+                                 'system_1_guess': s1_g,
+                                 'generation': generation}
+                    json_string = json.dumps(write_obj)
+                    file.write(json_string + '\n')
 
 
 if __name__ == "__main__":

@@ -5,7 +5,7 @@ import re
 import sys
 sys.path.append("../../../utils/")
 
-from all_system_prompts import SYSTEM_2, SYSTEM_2_ABLATION
+from all_system_prompts import SYSTEM_2, SYSTEM_2_ABLATION, SYSTEM_2_ABLATION_NO_TRIPLES
 
 
 def main(dataset: str, generation_mode:str):
@@ -24,7 +24,7 @@ def main(dataset: str, generation_mode:str):
     print('Parsing generations...')
     final_ans = []
     num_no_answer = 0
-    system_prompt = SYSTEM_2 if generation_mode == 'normal' else SYSTEM_2_ABLATION
+    system_prompt = SYSTEM_2 if generation_mode == 'normal' else SYSTEM_2_ABLATION_NO_TRIPLES # just change this to whatever ablation you run
     for row in streamed_responses.itertuples():
         split_ans = row.generation.split(system_prompt)[1].strip()
         match_obj = re.search(r'<final_answer>(.*?)</final_answer>', split_ans, re.DOTALL | re.IGNORECASE)
