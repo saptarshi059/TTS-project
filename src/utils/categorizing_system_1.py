@@ -17,18 +17,15 @@ class GenerationDataset(Dataset):
 
     def __getitem__(self, idx):
         sample = self.dataset.iloc[idx]
-        question = sample['question']
-        gold_answer = sample['answer']
-        system_1_guess = sample['system_1_guess']
         messages = [{"role": "system", "content": CATEGORIZATION_PROMPT},
                     {"role": "user", "content": f"<input>\n"
-                                                f"Question: {question}\n"
-                                                f"Gold Answer: {gold_answer}\n"
-                                                f"Predicted Answer: {system_1_guess}\n"
+                                                f"Question: {sample['question']}\n"
+                                                f"Gold Answer: {sample['answer']}\n"
+                                                f"Predicted Answer: {sample['system_1_guess']}\n"
                                                 f"</input>"}]
 
         formatted_text = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-        model_inputs = tokenizer(formatted_text, padding=True, return_tensors="pt")
+        model_inputs = self.tokenizer(formatted_text)
 
         return model_inputs
 
