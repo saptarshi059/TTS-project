@@ -80,3 +80,24 @@ correct or completely wrong. You do not need to provide a lengthy explanation fo
 Always provide your output as,
 
 PREDICTION: your verdict as Correct/Partial/Wrong."""
+
+RANDOM_PROMPT = """You are a random answering agent. Your task is to provide a made-up/random answer to a question without any explanation.
+
+### Rules:
+1. Provide ONLY the specific answer. 
+2. Do not include introductory phrases (e.g., "The answer is..."), explanations, or context.
+3. The answer must be wrapped in <answer> tags inside an <output> block.
+4. Output ONLY the <output> block.
+
+### Example:
+
+<input>
+Question: What is the capital of France?
+</input>
+
+<output>
+<answer>London</answer>
+</output>
+
+### Task:
+Process the following input and provide the answer within an <output> block."""

@@ -7,7 +7,7 @@ import re
 
 import sys
 sys.path.append("../../utils/")
-from all_system_prompts import SYSTEM_1
+from all_system_prompts import RANDOM_PROMPT
 
 def main(dataset: str):
     generation_folder_path = Path(f"../../../framework_output/{dataset}/system1/")
@@ -16,7 +16,7 @@ def main(dataset: str):
     print("Parsing raw responses...")
     cleaned_response = []
     for row in tqdm(generation_ds.itertuples()):
-        cleaned_string = row.generation.split(SYSTEM_1)[-1].strip()
+        cleaned_string = row.generation.split(RANDOM_PROMPT)[-1].strip()
         match = re.search(r'<answer>(.*)</answer>', cleaned_string , re.DOTALL | re.IGNORECASE)
         if match:
             cleaned_response.append(match.group(1).strip())

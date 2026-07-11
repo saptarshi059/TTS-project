@@ -8,7 +8,7 @@ from tqdm import tqdm
 import os, torch, json, sys, pandas as pd
 sys.path.append("../../utils/")
 
-from all_system_prompts import SYSTEM_1
+from all_system_prompts import RANDOM_PROMPT
 
 class GenerationDataset(Dataset):
     def __init__(self, tokenizer, dataset):
@@ -22,7 +22,7 @@ class GenerationDataset(Dataset):
         sample = self.dataset.iloc[idx]
         question = sample['question']
         gold_answer = sample['answer']
-        messages = [{"role": "system", "content": SYSTEM_1},
+        messages = [{"role": "system", "content": RANDOM_PROMPT},
                     {"role": "user", "content": f"<input>\n"
                                                 f"Question: {question}\n"
                                                 f"</input>"}]
