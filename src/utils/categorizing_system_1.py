@@ -1,11 +1,10 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer, set_seed, DataCollatorWithPadding
+from all_system_prompts import CATEGORIZATION_PROMPT
 from torch.utils.data import Dataset, DataLoader
+import torch, json, pandas as pd
 from pathlib import Path
 from tqdm import tqdm
 
-import torch, pandas as pd
-
-from all_system_prompts import CATEGORIZATION_PROMPT
 
 class GenerationDataset(Dataset):
     def __init__(self, tokenizer, dataset):
@@ -24,7 +23,10 @@ class GenerationDataset(Dataset):
                                                 f"Predicted Answer: {sample['system_1_guess']}\n"
                                                 f"</input>"}]
 
-        formatted_text = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+        formatted_text = self.tokenizer.apply_chat_template(messages,
+                                                            tokenize=False,
+                                                            add_generation_prompt=True,
+                                                            enable_thinking=False)
         model_inputs = self.tokenizer(formatted_text)
 
         return model_inputs
@@ -41,17 +43,32 @@ if __name__ == "__main__":
     set_seed(42)
     judge = "Qwen/Qwen3-32B"
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=judge, padding_side='left')
-    '''model = AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path=judge,
+    model = AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path=judge,
                                                  dtype="auto",
                                                  attn_implementation="flash_attention_2",
-                                                 device_map="auto")'''
+                                                 device_map="auto")
 
     print(f"Wrapping predictions dataframe with torch...")
     torch_dataset = GenerationDataset(tokenizer=tokenizer, dataset=combined_outputs_df)
     torch_dataset_dataloader = DataLoader(torch_dataset, batch_size=8, shuffle=False,
                                           collate_fn=DataCollatorWithPadding(tokenizer))
 
-    for batch in torch_dataset_dataloader:
-        print(batch)
-        break
+    with Path("streamed_responses.jsonl").open("a") as file:
+        for batch in tqdm(torch_dataset_dataloader):
+            with torch.no_grad():
+                outputs = model.generate(**batch, max_new_tokens=50)
+                # Get actual prompt lengths (accounting for padding)
+                prompt_lengths = batch['attention_mask'].sum(dim=1)
 
+                # Extract only generated tokens for each sample in the batch
+                generated_ids = [
+                    outputs[i, prompt_lengths[i]:]
+                    for i in range(outputs.shape[0])
+                ]
+
+                # batch_decode handles list of tensors fine
+                decoded_generations = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)
+
+            for idx, generation in enumerate(decoded_generations):
+                write_obj = {'id': idx, 'generation': generation}
+                file.write(json.dumps(write_obj) + '\n')

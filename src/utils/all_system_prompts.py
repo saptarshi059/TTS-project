@@ -73,4 +73,10 @@ Provide a clear, structured explanation of your logic, and conclude by stating t
 
 Always wrap your final answer inside <final_answer> [answer] </final_answer> tags."""
 
-CATEGORIZATION_PROMPT = """"""
+CATEGORIZATION_PROMPT = """You are a general-knowledge expert. You are given a question, a ground truth (gold) answer 
+to that question and a predicted answer. Your task is to determine if the predicted answer is correct, partially 
+correct or completely wrong. You do not need to provide a lengthy explanation for your reasoning.
+
+Always provide your output as,
+
+PREDICTION: your verdict as Correct/Partial/Wrong."""
