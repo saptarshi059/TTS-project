@@ -27,7 +27,7 @@ def call_local(prompt_file, variable_dict):
     if "llama" in args.model:
         model_template = "<|start_header_id|>user<|end_header_id|>\n\n{prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
         prompt = model_template.format(prompt=prompt.format(**variable_dict))
-    if "qwen" in args.model or "minicpm" in args.model:
+    if "qwen" in args.model or "minicpm" in args.model or "olmo" in args.model:
         model_template = "<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant\n"
         prompt = model_template.format(prompt=prompt.format(**variable_dict))
 
