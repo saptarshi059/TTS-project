@@ -52,6 +52,9 @@ def main(model_name:str, dataset:str, batch_size: int) -> None:
     set_seed(42)
 
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_name, padding_side='left')
+    if "llama" in model_name:
+        tokenizer.pad_token = tokenizer.eos_token
+
     model = AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path=model_name,
                                                  dtype="auto",
                                                  attn_implementation="flash_attention_2",
