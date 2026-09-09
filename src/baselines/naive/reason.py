@@ -15,7 +15,7 @@ sys.path.append("../../utils/")
 
 from all_system_prompts import NAIVE_BASELINE
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+#os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 class NaiveDataset(Dataset):
     def __init__(self, tokenizer, dataset):
