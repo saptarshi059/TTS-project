@@ -292,10 +292,6 @@ if __name__ == "__main__":
     parser.add_argument(
         "--model",
         type=str,
-        choices=[
-            "llama3.1-8b-instruct",
-            "qwen2.5-7b-instruct",
-        ],
         default="qwen2.5-7b-instruct",
         help="Model to use",
     )
