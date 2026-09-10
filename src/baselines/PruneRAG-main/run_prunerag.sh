@@ -20,7 +20,7 @@ ulimit -n 65535
 BASE_DATA_DIR="../../../sampled_data"
 DATASET_NAME=$1
 RETRIEVER_LOG="./logs/retriever_${DATASET_NAME}.log"
-MODEL_PATH="/gpuhome/sks6765/.cache/huggingface/hub/models--Qwen--Qwen2.5-7B-Instruct/snapshots/a09a35458c702b33eeacc393d103063234e8bc28"
+MODEL_PATH="/gpu02home/sks6765/.cache/huggingface/hub/models--allenai--Olmo-3-7B-Instruct/snapshots/6e5971d9eba42665f5bd5a0fcf047f299ce1dccc"
 RETRIEVER_URL="http://localhost:8005"
 
 mkdir -p "./logs" "./outputs"
