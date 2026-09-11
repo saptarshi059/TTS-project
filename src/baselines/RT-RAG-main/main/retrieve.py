@@ -32,7 +32,7 @@ def generate_response(messages, max_tokens=2000, temperature=0., top_p=1.0, top_
     try:
       
         params = {
-            "model": "Qwen/Qwen2.5-7B-Instruct",
+            "model": "meta-llama/Llama-3.1-8B-Instruct",
             "messages": messages,
             "max_tokens": max_tokens,
             "temperature": temperature,
