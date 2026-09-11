@@ -6,10 +6,10 @@ export MKL_NUM_THREADS=1
 export OPENBLAS_NUM_THREADS=1
 export VLLM_ATTENTION_BACKEND=FLASH_ATTN
 export NCCL_IGNORE_DISABLED_P2P=1
-export VLLM_USE_V1=0
+#export VLLM_USE_V1=0
 
 # Configuration
-LLM_MODEL="Qwen/Qwen2.5-7B-Instruct"  # Change to your preferred LLM
+LLM_MODEL="meta-llama/Llama-3.1-8B-Instruct"  # Change to your preferred LLM
 EMBED_MODEL="Qwen/Qwen3-Embedding-0.6B"
 export LLM_PORT=14321
 export EMBED_PORT=11432
