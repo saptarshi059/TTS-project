@@ -3,7 +3,7 @@
 # --- Environment & Setup ---
 export VLLM_WORKER_MULTIPROC_METHOD=spawn
 export VLLM_ATTENTION_BACKEND=FLASH_ATTN
-export VLLM_USE_V1=0
+#export VLLM_USE_V1=0
 export NCCL_IGNORE_DISABLED_P2P=1
 export OMP_NUM_THREADS=1
 ulimit -n 65535
@@ -42,7 +42,7 @@ wait_for_server() {
 
 # --- 1. Start Embedding Server (GPU 4) ---
 # Running as a service because the Retriever script needs an API to talk to.
-CUDA_VISIBLE_DEVICES=4 python -m vllm.entrypoints.openai.api_server \
+CUDA_VISIBLE_DEVICES=0 python -m vllm.entrypoints.openai.api_server \
     --served-model-name qwen3-emb \
     --model "Qwen/Qwen3-Embedding-0.6B" \
     --trust-remote-code \
@@ -53,7 +53,7 @@ CUDA_VISIBLE_DEVICES=4 python -m vllm.entrypoints.openai.api_server \
 wait_for_server "http://localhost:$EMBEDDING_PORT/v1/models" "vLLM Embedding" "qwen3-emb"
 
 # --- 2. Start Retriever Server (GPU 5) ---
-CUDA_VISIBLE_DEVICES=5 python ../src/retriever/ret_serve.py \
+CUDA_VISIBLE_DEVICES=1 python ../src/retriever/ret_serve.py \
     --faiss_index_path "${INDEX_PATH}" \
     --corpus_jsonl_path "${CORPUS_PATH}" \
     --emb_url "http://localhost:${EMBEDDING_PORT}/v1" \
@@ -66,7 +66,7 @@ wait_for_server "http://localhost:$RETRIEVER_PORT/health" "Retriever Service" "\
 
 # Construct Page (GPUs 2, 3)
 CUDA_VISIBLE_DEVICES=2,3 python ../src/construct_page.py \
-    --model_name "Qwen/Qwen2.5-7B-Instruct" \
+    --model_name "allenai/Olmo-3-7B-Instruct" \
     --retrieval_url "http://localhost:${RETRIEVER_PORT}" \
     --input_file "output_data/new_outline_${DATASET_NAME}.jsonl" \
     --out_file "output_data/new_outline_${DATASET_NAME}_page.jsonl" \
