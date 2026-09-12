@@ -225,7 +225,7 @@ def main():
         tensor_parallel_size=len(args.gpu_ids.split(",")),
         trust_remote_code=True,
         seed=args.seed,
-        gpu_memory_utilization=0.4
+        gpu_memory_utilization=0.3
     )
     tokenizer = AutoTokenizer.from_pretrained(
         args.model_name,
