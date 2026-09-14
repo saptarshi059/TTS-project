@@ -22,7 +22,7 @@ cleanup() {
 trap cleanup SIGINT SIGTERM
 
 # Infer Answers (GPUs 0, 1)
-CUDA_VISIBLE_DEVICES=0,1 python ../src/infer_page.py \
+CUDA_VISIBLE_DEVICES=5,7 python ../src/infer_page.py \
     --model "allenai/Olmo-3-7B-Instruct" \
     --input_file "output_data/new_outline_${DATASET_NAME}_page.jsonl" \
     --output_file "output_data/${DATASET_NAME}_responses.jsonl" \
