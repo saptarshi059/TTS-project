@@ -42,7 +42,7 @@ wait_for_server() {
 
 # --- 1. Start Embedding Server (GPU 4) ---
 # Running as a service because the Retriever script needs an API to talk to.
-CUDA_VISIBLE_DEVICES=5 python -m vllm.entrypoints.openai.api_server \
+CUDA_VISIBLE_DEVICES=0 python -m vllm.entrypoints.openai.api_server \
     --served-model-name qwen3-emb \
     --model "Qwen/Qwen3-Embedding-0.6B" \
     --trust-remote-code \
