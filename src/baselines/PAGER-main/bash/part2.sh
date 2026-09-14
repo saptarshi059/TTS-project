@@ -70,7 +70,7 @@ CUDA_VISIBLE_DEVICES=5,6,7 python ../src/construct_page.py \
     --retrieval_url "http://localhost:${RETRIEVER_PORT}" \
     --input_file "output_data/new_outline_${DATASET_NAME}.jsonl" \
     --out_file "output_data/new_outline_${DATASET_NAME}_page.jsonl" \
-    --max_iters 1 --batch_size 1 --seed 66 --resume
+    --max_iters 1 --batch_size 1 --seed 66 --resume --gpu_ids 5,6,7
 
 # --- Final Cleanup ---
 echo "🎉 Pipeline finished successfully. Cleaning up..."
