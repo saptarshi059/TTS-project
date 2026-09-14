@@ -48,7 +48,7 @@ CUDA_VISIBLE_DEVICES=0 python -m vllm.entrypoints.openai.api_server \
     --trust-remote-code \
     --port $EMBEDDING_PORT \
     --runner pooling \
-    --gpu-memory-utilization 0.55 &
+    --gpu-memory-utilization 0.2 &
 
 wait_for_server "http://localhost:$EMBEDDING_PORT/v1/models" "vLLM Embedding" "qwen3-emb"
 
