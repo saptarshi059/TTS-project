@@ -53,7 +53,7 @@ CUDA_VISIBLE_DEVICES=0 python -m vllm.entrypoints.openai.api_server \
 wait_for_server "http://localhost:$EMBEDDING_PORT/v1/models" "vLLM Embedding" "qwen3-emb"
 
 # --- 2. Start Retriever Server (GPU 5) ---
-CUDA_VISIBLE_DEVICES=5 python ../src/retriever/ret_serve.py \
+CUDA_VISIBLE_DEVICES=2 python ../src/retriever/ret_serve.py \
     --faiss_index_path "${INDEX_PATH}" \
     --corpus_jsonl_path "${CORPUS_PATH}" \
     --emb_url "http://localhost:${EMBEDDING_PORT}/v1" \
@@ -65,7 +65,7 @@ CUDA_VISIBLE_DEVICES=5 python ../src/retriever/ret_serve.py \
 wait_for_server "http://localhost:$RETRIEVER_PORT/health" "Retriever Service" "\"status\":\"ok\""
 
 # Construct Page (GPUs 2, 3)
-CUDA_VISIBLE_DEVICES=6,7 python ../src/construct_page.py \
+CUDA_VISIBLE_DEVICES=5,6,7 python ../src/construct_page.py \
     --model_name "allenai/Olmo-3-7B-Instruct" \
     --retrieval_url "http://localhost:${RETRIEVER_PORT}" \
     --input_file "output_data/new_outline_${DATASET_NAME}.jsonl" \
