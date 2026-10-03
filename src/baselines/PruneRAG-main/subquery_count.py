@@ -24,7 +24,6 @@ def get_unique_children_queries(data, unique_queries=None):
   return len(unique_queries)
 
 all_dicts = []
-
 dataset = ['2wikimultihopqa', 'musique', 'hotpotqa']
 for ds in dataset:
     s = pd.read_json(f'outputs/{ds}_outputs.jsonl', lines=True)
@@ -36,4 +35,8 @@ for ds in dataset:
             dict_string = match.group(1).strip()
             all_dicts.append(ast.literal_eval(dict_string))
 
-print(all_dicts[0])
+all_subqueries = []
+for d in all_dicts:
+    all_subqueries.append(get_unique_children_queries(d))
+
+print(f"Avg. subqueries: {sum(all_subqueries)/1500}")
