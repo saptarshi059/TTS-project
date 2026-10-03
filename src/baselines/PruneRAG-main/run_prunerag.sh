@@ -78,17 +78,19 @@ echo -e "\n[SUCCESS] Retriever is UP."
 #    --threshold 0.95 \
 #    --output_dir "./outputs" \
 #    --log_dir "./logs"
+cleanup()
+
 
 # The 'cleanup' function will now run automatically here because the script is exiting.
-echo "[3/3] Launching search-o1..."
-CUDA_VISIBLE_DEVICES=$PIPELINE_GPUS python -m pipelines.searcho1_pipeline \
-    --model_path $MODEL_PATH \
-    --retriever_name "qwen0.6b" \
-    --retrieval_url ${RETRIEVER_URL} \
-    --dataset_name ${DATASET_NAME} \
-    --split "test" \
-    --topk 5 \
-    --max_search_limit 7 \
-    --max_turn 7 \
-    --output_dir "./outputs" \
-    --log_dir "./logs"
+#echo "[3/3] Launching search-o1..."
+#CUDA_VISIBLE_DEVICES=$PIPELINE_GPUS python -m pipelines.searcho1_pipeline \
+#    --model_path $MODEL_PATH \
+#    --retriever_name "qwen0.6b" \
+#    --retrieval_url ${RETRIEVER_URL} \
+#    --dataset_name ${DATASET_NAME} \
+#    --split "test" \
+#    --topk 5 \
+#    --max_search_limit 7 \
+#    --max_turn 7 \
+#    --output_dir "./outputs" \
+#    --log_dir "./logs"
