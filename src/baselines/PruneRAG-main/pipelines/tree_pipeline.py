@@ -694,7 +694,7 @@ class Generator:
                     data = {
                         "request_id": request_output.request_id,
                         "question": question,
-                        "op": request_output,
+                        "full_prompt": prompt,
                         "final_answer": final_answer if final_answer != "" else raw_response
                     }
 
