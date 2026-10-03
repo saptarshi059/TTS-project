@@ -30,12 +30,10 @@ for ds in dataset:
     s = pd.read_json(f'outputs/{ds}_outputs.jsonl', lines=True)
     s = s.dropna()
     for row in s.itertuples():
-        match = re.search(r'### Inference Tree:\s*(.*)', row.full_prompt, re.DOTALL)
+        match = re.search(r'### Inference Tree:\s*(\{.*?\})\s*\n\nPlease answer', row.full_prompt, re.DOTALL)
 
         if match:
             dict_string = match.group(1).strip()
             all_dicts.append(ast.literal_eval(dict_string))
-        break
-    break
 
 print(all_dicts[0])
