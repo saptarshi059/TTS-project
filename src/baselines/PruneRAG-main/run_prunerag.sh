@@ -76,8 +76,8 @@ CUDA_VISIBLE_DEVICES=$PIPELINE_GPUS python -m pipelines.tree_pipeline \
     --max_depth 3 \
     --all_decom_depth 0 \
     --threshold 0.95 \
-    --output_dir "./prunerag_outputs" \
-    --log_dir "./prunerag_logs"
+    --output_dir "./outputs" \
+    --log_dir "./logs"
 cleanup()
 
 
