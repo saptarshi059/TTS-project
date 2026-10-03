@@ -39,4 +39,4 @@ all_subqueries = []
 for d in all_dicts:
     all_subqueries.append(get_unique_children_queries(d))
 
-print(f"Avg. subqueries: {sum(all_subqueries)/1500}")
+print(f"Total subqueries: {sum(all_subqueries)}")
