@@ -665,6 +665,8 @@ class Generator:
 
             with open(filename, "a", encoding="utf-8") as f:
                 for request_output in all_outputs:
+                    print(request_output)
+
                     prompt = request_output.prompt
 
                     # 1. Grab the question from the prompt footer
