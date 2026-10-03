@@ -700,7 +700,7 @@ class Generator:
 
         save_to_jsonl(outputs, f"outputs/{self.config.dataset_name}_outputs.jsonl")
         print("Saving results...")
-
+        exit()
 
         retrieval_info = self.collect_contexts_per_level(root_nodes)
         output_list = []
