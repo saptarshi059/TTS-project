@@ -90,7 +90,7 @@ CUDA_VISIBLE_DEVICES=$PIPELINE_GPUS python -m pipelines.searcho1_pipeline \
     --dataset_name ${DATASET_NAME} \
     --split "test" \
     --topk 5 \
-    --max_search_limit 7 \
-    --max_turn 7 \
+    --max_search_limit 1 \
+    --max_turn 1 \
     --output_dir "./outputs" \
     --log_dir "./logs"
