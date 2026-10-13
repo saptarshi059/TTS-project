@@ -58,7 +58,7 @@ CUDA_VISIBLE_DEVICES=2 python ../src/retriever/ret_serve.py \
     --corpus_jsonl_path "${CORPUS_PATH}" \
     --emb_url "http://localhost:${EMBEDDING_PORT}/v1" \
     --emb_model qwen3-emb \
-    --gpu_ids 0 \
+    --gpu_ids 2 \
     --use_gpu True \
     --port $RETRIEVER_PORT &
 
