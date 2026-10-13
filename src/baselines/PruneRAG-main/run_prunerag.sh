@@ -78,7 +78,7 @@ echo -e "\n[SUCCESS] Retriever is UP."
 #    --threshold 0.95 \
 #    --output_dir "./outputs" \
 #    --log_dir "./logs"
-cleanup()
+#cleanup()
 
 
 # The 'cleanup' function will now run automatically here because the script is exiting.
