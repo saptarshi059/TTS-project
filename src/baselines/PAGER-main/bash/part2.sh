@@ -66,7 +66,7 @@ wait_for_server "http://localhost:$RETRIEVER_PORT/health" "Retriever Service" "\
 
 # Construct Page (GPUs 2, 3)
 CUDA_VISIBLE_DEVICES=6,7 python ../src/construct_page.py \
-    --model_name "allenai/Olmo-3-7B-Instruct" \
+    --model_name "meta-llama/Llama-3.1-8B-Instruct" \
     --retrieval_url "http://localhost:${RETRIEVER_PORT}" \
     --input_file "output_data/new_outline_${DATASET_NAME}.jsonl" \
     --out_file "output_data/new_outline_${DATASET_NAME}_page.jsonl" \

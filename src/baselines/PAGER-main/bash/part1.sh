@@ -67,7 +67,7 @@ wait_for_server "http://localhost:$RETRIEVER_PORT/health" "Retriever Service" "\
 
 # Construct Outline (GPUs 2, 3)
 CUDA_VISIBLE_DEVICES=5,6 python ../src/construct_outline.py \
-    --model_name "allenai/Olmo-3-7B-Instruct" \
+    --model_name "meta-llama/Llama-3.1-8B-Instruct" \
     --input_file "${DATA_PATH}" \
     --out_file "output_data/outline_${DATASET_NAME}.jsonl" \
     --max_iters 10 --batch_size 32 --seed 66 --resume --gpu_ids 5,6
