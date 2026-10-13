@@ -43,7 +43,7 @@ wait_for_server() {
 
 # --- 1. Start Embedding Server (GPU 4) ---
 # Running as a service because the Retriever script needs an API to talk to.
-CUDA_VISIBLE_DEVICES=0 python -m vllm.entrypoints.openai.api_server \
+CUDA_VISIBLE_DEVICES=1 python -m vllm.entrypoints.openai.api_server \
     --served-model-name qwen3-emb \
     --model "Qwen/Qwen3-Embedding-0.6B" \
     --trust-remote-code \
@@ -54,23 +54,23 @@ CUDA_VISIBLE_DEVICES=0 python -m vllm.entrypoints.openai.api_server \
 wait_for_server "http://localhost:$EMBEDDING_PORT/v1/models" "vLLM Embedding" "qwen3-emb"
 
 # --- 2. Start Retriever Server (GPU 5) ---
-CUDA_VISIBLE_DEVICES=1 python ../src/retriever/ret_serve.py \
+CUDA_VISIBLE_DEVICES=2 python ../src/retriever/ret_serve.py \
     --faiss_index_path "${INDEX_PATH}" \
     --corpus_jsonl_path "${CORPUS_PATH}" \
     --emb_url "http://localhost:${EMBEDDING_PORT}/v1" \
     --emb_model qwen3-emb \
-    --gpu_ids 0 \
+    --gpu_ids 2 \
     --use_gpu True \
     --port $RETRIEVER_PORT &
 
 wait_for_server "http://localhost:$RETRIEVER_PORT/health" "Retriever Service" "\"status\":\"ok\""
 
 # Construct Outline (GPUs 2, 3)
-CUDA_VISIBLE_DEVICES=2,3 python ../src/construct_outline.py \
+CUDA_VISIBLE_DEVICES=5,6 python ../src/construct_outline.py \
     --model_name "allenai/Olmo-3-7B-Instruct" \
     --input_file "${DATA_PATH}" \
     --out_file "output_data/outline_${DATASET_NAME}.jsonl" \
-    --max_iters 10 --batch_size 32 --seed 66 --resume
+    --max_iters 10 --batch_size 32 --seed 66 --resume --gpu_ids 5,6
 
 # Extract Outline (CPU Task)
 python ../src/extract_outline.py \
