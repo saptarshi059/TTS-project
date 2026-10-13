@@ -94,4 +94,3 @@ CUDA_VISIBLE_DEVICES=$PIPELINE_GPUS python -m pipelines.searcho1_pipeline \
     --max_turn 7 \
     --output_dir "./outputs" \
     --log_dir "./logs"
-cleanup()

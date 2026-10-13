@@ -642,6 +642,7 @@ class Generator:
                 for in_text, out_text in zip(input_list, output_list):
                     # Use findall to get all questions and pick the last one [-1]
                     # This skips the 'Lara Croft' example and grabs the real question.
+                    print(in_text)
                     q_matches = re.findall(r"Question:\n(.*?)\n<\|im_end\|>", in_text, re.DOTALL)
                     question = q_matches[-1].strip() if q_matches else None
 
